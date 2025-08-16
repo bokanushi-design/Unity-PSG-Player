@@ -1,0 +1,29 @@
+namespace uPSG
+{
+    public enum SEQ_CMD
+    {
+        SET_TEMPO,
+        TUNE,
+        VOLUME,
+        PROGRAM_CHANGE,
+        SHORT_NOISE,
+        NOTE_ON,
+        NOTE_TIE,
+        GATE_STEP_RATE,
+        REST,
+        REPEAT_START,
+        REPEAT_END,
+        ENV_ON,
+        ENV_PARAM_START,
+        ENV_PARAM,
+        ENV_PARAM_END,
+        SWEEP,
+        LFO_SET,
+        LFO_DELAY,
+        LFO_SPEED,
+        LFO_DEAPTH,
+        LFO_PARAM_END,
+        LOOP_POINT,
+        END_OF_SEQ,
+    }
+}

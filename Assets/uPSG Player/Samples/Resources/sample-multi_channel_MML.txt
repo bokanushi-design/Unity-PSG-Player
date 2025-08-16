@@ -1,0 +1,85 @@
+ABCD t114
+
+A @2v10G99
+M1{0,50,80}
+M2{0,80,80}
+B @3v10G99
+C @4v15G95
+D @5v10G99
+
+BD V1{10,,9,,,8,,,7,,,6,,,5,,,4,,,3,,,2,,,1,,,0}
+V2{10,,9,,8,,7,,6,,5,,4,,3,,2,,1,,0}
+V3{10,9,8,7,6,5,4,3,2,1,0}
+
+A M1o4l8 b-2.&v8b-4 v10b2&b>d-4. <b-2.&v8b-4 v10b2&b>d-4.
+B V1o5l8 rd-g-a-b-4r4 rdg-a-b4r4 rd-g-a-b-4r4 rdg-a-b4r4
+C o3l4 g-.g-8g-r g-.g-8g-r g-.g-8g-r g-.g-8g-r
+D V2o4l4 r2.g r2.g r2.g r2.g
+
+A o4 b-4>d-4a-4fg- r4.g-fe-d-e- r<b-a-g-rg-fg- >d-2.&v8d-4
+B o5 g-d-g-b-fd-fa- e-<b->e-g-d-<a->d-g- c<a->ce-c<a->ce- d-2d-c4.
+C o3 l2g-f e-d- ce- l4d-.d-8d-r
+D o4 r2.g r2.g r2.g r2.g
+
+A o5 l4e-.d-.c- f.e-.d- f.e-.d g-.f.e-
+B o5 c-<g->c-d-e-4r4 d-<a->d-e-f4r4 d<a->de-f4r4 e-<b->e-fg-4r4
+C o3 l4c-2.c d-1 <b-2.>d e-1
+D o4 r2.g r2.g r2.g r2.g
+
+ABCD t132
+
+A o5 l8f+2r@3<ab>c+ d2dc+4d <b2rbg+b >e4d4c+4<b4
+B o4 l8@2V3df+a<b->dfa<b-> df+a<b->dfa<b-> eg+b>e<eg+b>e< eg+b>e<eg+b>e<
+C o3 l8ddrdd<a>df+ ddrdd<a>df+ eeree<b>eg+ eeree<b>eg+
+D o4 V2l8G10eeeeeeG99g4 G10eeeeeeG99g4 G10eeeeeeG99g4 G10eeeeeeG99g4
+
+ABCD t152
+
+A o5 c4rcc<b4>c <a4raab4>c d1
+B o4 fa>cf<fa>cf< fa>cf<fa>cf r1
+C o3 ffrffcfa ffrffcfa >l12S-200gggeeeeeeeee
+D o4 G10eeeeeeG99g4 G10eeeeeeG99g4 G10eeeeeeG99g4
+
+ABCD t75
+
+A o6M0@0v8S-10b1S0
+B o7@0v8S-10e1S0
+C o5S-10f1S0
+D r1
+
+ABCD t181
+
+A o5l16M0 [@0G99c8ccc8ccl8cdr<b-& b-4&M2b-8&b-2M0b- a-a-16a-16a-frfrg& g4.ga-b-r4
+B o4l16 [@0G99g8ggg8ggl8ggrf& f2..g e-e-16e-16e-drdre& e4.ee-fr4
+C o4l16 [c8ccc8ccc8ccc8cc c8ccc8ccc8ccc8cc c8ccc8ccc8ccc8cc c8ccc8ccc8ccc8cc
+D o4l16V2 [G20e8eeG90aG20eee e8eeG90aG20eee e8eeG90aG20eee e8eeG90aG20eee
+G20e8eeG90aG20eee e8eeG90aG20eee e8eeG90aG20eee e8eeG90aG20eee
+
+A o5l16 c8ccc8ccl8cdr<b-& b-4.&M2b-2M0b- a-4a-b-rb-r>c& M2c2M0 @2G50o6l16gfe-fe-dd-c]2
+B o4l16 g8ggg8ggl8ggrf& f2..g e-4e-frfrg& g2 @2G50T443o6l16v6rgfe-fe-dd-T440]2
+C o4l16 c8ccc8ccc8ccc8cc c8ccc8ccc8ccc8cc c8ccc8ccc8ccc8cc c8ccc8ccc8<g8a8>c8]2
+D o4l16V2 G20e8eeG90aG20eee e8eeG90aG20eee e8eeG90aG20eee e8eeG90aG20eee
+G20e8eeG90aG20eee e8eeG90aG20eee e8eeG90aG20eee e8eeG90aG20eee]2
+
+A @1G99o5l8 cc<g4>ec<g>g& gfedec4r <b-b-af>d4<b-g l16b-b-f>d<b->fdb-f8<b-4r8
+B @1G99o4l8 v8gr>v6T443c<ge>ec<g >g4fed<v8T440g4r frv6T443b-af>d& d<b-gl16b-b-f>d<b->fdb-<v8T440f4r8
+C o3l8e.r16S-200o5cr<cc>cr <cc>c<crS0o3eo5S-200cc
+o3S0d.r16S-200o5cr<cc>cr <cc>c<crS0o3do5S-200cc
+D o4l16V2 [G20e8eeG90aG20eee]8
+
+A o4l16a8a>c<aec8a>c<aec8a>c g+ag+ag+aecr8<a4. l12ce-a-e-a->c<a->ce-ce-a- l8<a-a-a-a-rb-4.
+B o4l16e8v6T443ra>c<aec8a>c<aec8a>c g+ag+ag+aecr<v8T440e4. l12e-a>c<a->ce-ce-a-e-a->c l8<<e-e-e-e-rf4.
+C o3S0c.r16S-200o5cr<cc>cr <cc>c<crS0o3co5S-200cc
+o3S0c.r16S-200o5cr<cc>c4 l16ccc8<b-b-b8aaa8>cc<ba
+D o4l16V2 [G20e8eeG90aG20eee]8
+
+A o5l16M0 @0G99c8ccc8ccl8cdr<b-& b-4&M2b-8&b-2M0b- a-a-16a-16a-frfrg& g4.ga-b-r4
+B o4l16 @0G99g8ggg8ggl8ggrf& f2..g e-e-16e-16e-drdre& e4.ee-fr4
+C o4l16 S0c8ccc8ccc8ccc8cc c8ccc8ccc8ccc8cc c8ccc8ccc8ccc8cc c8ccc8ccc8ccc8cc
+D o4l16V2 [G20e8eeG90aG20eee e8eeG90aG20eee e8eeG90aG20eee e8eeG90aG20eee]2
+
+A o5l16 c8ccc8ccl8cdr<b-& b-4.&b-2r gga>c<rga>c<rga>crga>cr
+B o4l16 g8ggg8ggl8ggrf& f2..r eefgrefgrefgr>efgr
+C o4l16 c8ccc8ccc8ccc8cc c8ccc8ccc8ccc8cc l8ccdercdercdercder
+D o4l16V2 G20e8eeG90aG20eee e8eeG90aG20eee e8eeG90aG20eee e8eeG90aG20eee
+G20l8eeee reee reee reee

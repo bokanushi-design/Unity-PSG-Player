@@ -1,0 +1,50 @@
+ABCD t200G80
+
+A @2v10o5l8 eerercer gr4.<gr4.
+B @2v8o4l8 f+f+rf+rf+f+r br4.r2
+C @4v15o3l8G80 ddrdrddr gr4.<gr4.
+D @5v9o4l8 G60gG20f+f+G60grG20f+G60gr gr4gG20f+G10f+f+f+
+
+A L[o5cr4<gr4er rarbra+ar G60g6>e6g6G80arfg rercd<br4]2
+B L[er4cr4<gr r>crdrc+cr G60c6g6b6G80>cr<ab rgrefdr4]2
+C L[o3gr4er4cr rfrgrf+fr e6>c6e6frde rcr<abgr4]2
+D L[G20>d<rf+12r12f+12G60grG20f+12r12f+12]8
+
+A [o5r4gf+fd+re r<g+a>cr<a>cd r4gf+fd+re r>crccr4.
+o5r4gf+fd+re r<g+a>cr<a>cd r4e-r4dr4 cr4.r2]2
+B [o5r4ed+d<br>c r<efgrcef r4>ed+d<br>c rfrffr4.
+o5r4ed+d<br>c r<efgrcef r4a-r4fr4 er4.r2]2
+C [o3cr4gr4>cr <fr4>ccr<fr cr4er4g>c r>grggr<<gr
+o3cr4gr4>cr <fr4>ccr<fr cra-r4b-r4 >c4r<ggrcr]2
+D [G20>d<rf+12r12f+12G60grG20f+12r12f+12]16
+
+A o5ccrcrcdr ecr<agr4. >ccrcrcde r1
+o5ccrcrcdr ecr<agr4. >eerercer gr4.<gr4.
+B o4a-a-ra-ra-a-r gerecr4. a-a-ra-ra-b-g r1
+o4a-a-ra-ra-a-r gerecr4. f+f+rf+rf+f+r br4.r2
+C o2a-r4>e-r4a-r gr4cr4<gr a-r4e-r4a-r gr4cr4<gr
+o2a-r4>e-r4a-r gr4cr4<gr >ddrdrddr gr4.<gr4.
+D [G60grG20f+G60grG20f+G60gr gr4grG20f+f+f+]3
+G60gG20f+f+G60grG20f+G60gr gr4gG20f+G10f+f+f+
+
+A [o5cr4<gr4er rarbra+ar G60g6>e6g6G80arfg rercd<br4]2
+B [er4cr4<gr r>crdrc+cr G60c6g6b6G80>cr<ab rgrefdr4]2
+C [o3gr4er4cr rfrgrf+fr e6>c6e6frde rcr<abgr4]2
+D [G20>d<rf+12r12f+12G60grG20f+12r12f+12]8
+
+A [o5ecr<gr4g+r a>frf<ar4. G60b6>a6a6a6g6f6G80 ecr<agr4.
+o5ecr<gr4g+r a>frf<ar4. b>frfG60f6e6d6G80 cr2..]2
+B [o5c<grer4er f>crc<fr4. G60g6>f6f6f6e6d6G80 c<arfer4.
+o5c<grer4er f>crc<fr4. g>drdG60d6c6<b6G80 gerecr4.]2
+C [o3cr4f+gr>cr <frfr>cc<fr dr4fgrbr grgr>cc<gr
+o3cr4f+gr>cr <frfr>cc<fr ggrgg6a6b6 >cr<grcr4.]2
+D [G20f+r4f+G60grG20f+r]16
+
+A o5ccrcrcdr ecr<agr4. >ccrcrcde r1
+o5ccrcrcdr ecr<agr4. >eerercer gr4.<gr4.
+B o4a-a-ra-ra-a-r gerecr4. a-a-ra-ra-b-g r1
+o4a-a-ra-ra-a-r gerecr4. f+f+rf+rf+f+r br4.r2
+C o2a-r4>e-r4a-r gr4cr4<gr a-r4e-r4a-r gr4cr4<gr
+o2a-r4>e-r4a-r gr4cr4<gr >ddrdrddr gr4.<gr4.
+D [G60grG20f+G60grG20f+G60gr gr4grG20f+f+f+]3
+G60gG20f+f+G60grG20f+G60gr gr4gG20f+G10f+f+f+
