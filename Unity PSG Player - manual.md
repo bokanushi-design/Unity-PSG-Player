@@ -247,7 +247,7 @@ mmlStringのMML文字列をMML Decoderに渡してシーケンスデータに変
 ----
 #### PlayDecoded()
 ``` c#:PSGPlayer.cs
-ublic void PlayDecoded();
+public void PlayDecoded();
 ```
 * パラメーター：なし  
 
