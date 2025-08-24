@@ -171,7 +171,7 @@ public float a4Freq = 440f;
 ----
 #### tickPerNote
 ``` C#:PSGPlayer.cs
-publi int tickPerNote = 960;
+public int tickPerNote = 960;
 ```
 1拍（4分音符）の分解能を設定します。  
 音長はこの分解能に基づいたティック数に変換され、実際の音の長さ（秒）はテンポとこの分解能から計算されます。  
