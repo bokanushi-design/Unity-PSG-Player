@@ -108,6 +108,7 @@ PSG Playerでは生成するAudioClipのサンプルレートを設定できま�
   - [sampleRate](#samplerate)
   - [audioClipSizeMilliSec](#audioclipsizemillisec)
   - [a4Freq](#a4freq)
+  - [tickPerNote](#tickpernote)
   - [programChange](#programchange)
   - [seqListIndex](#seqlistindex)
   - [seqList](#seqlist)
@@ -166,6 +167,18 @@ public float a4Freq = 440f;
 音階の基準となるオクターブ4のラ（o4a）の音の周波数を設定します。  
 デフォルトは440Hzです。  
 この変数はMMLのコマンドで変更することができます。  
+
+----
+#### tickPerNote
+``` C#:PSGPlayer.cs
+publi int tickPerNote = 960;
+```
+1拍（4分音符）の分解能を設定します。  
+音長はこの分解能に基づいたティック数に変換され、実際の音の長さ（秒）はテンポとこの分解能から計算されます。  
+
+(例：8分音符は480ティックとなり、テンポ120の場合音の長さは  
+60[sec] / 120[notePerMin] * 480[tick] / 960[tickPerNote] = 0.25[sec]  
+で0.25秒となります。)  
 
 ----
 #### programChange
@@ -247,7 +260,7 @@ mmlStringのMML文字列をMML Decoderに渡してシーケンスデータに変
 ----
 #### PlayDecoded()
 ``` c#:PSGPlayer.cs
-public void PlayDecoded();
+ublic void PlayDecoded();
 ```
 * パラメーター：なし  
 

@@ -6,21 +6,17 @@ using System;
 public class MMLDecoder : MonoBehaviour
 {
     private List<SeqEvent> seqList;
+    private readonly int[] noteOffsetTable = { 9, 11, 0, 2, 4, 5, 7 }; // a,b,c,d,e,f,g
+    private const int PARAM_OMIT = -2;
 
-    public List<SeqEvent> Decode(string _mmlString, int _ticPerNote)
+    public List<SeqEvent> Decode(string _mmlString, int _tickPerNote)
     {
         seqList = new List<SeqEvent>();
         string mmlString = _mmlString;
-        int ticPerNote = _ticPerNote;
-
-        int mmlTune = 440;
-        int mmlTempo = 120;
-        int mmlPc = 2;
-        int mmlVolume = 15;
-        int mmlOctave = 4;
-        int mmlGate = 100;
-        int baseTics = ticPerNote;
-        int[] noteOffsetTable = { 9, 11, 0, 2, 4, 5, 7 }; // a,b,c,d,e,f,g
+        int tickPerNote = _tickPerNote;
+        int baseTics = tickPerNote;
+        int mmlOctave = ConstValue.DEFAULT_OCTAVE;
+        
         List<int> envParamsList = new();
         bool isCommentLine = false;
         bool isCommentBlock = false;
@@ -66,14 +62,15 @@ public class MMLDecoder : MonoBehaviour
             if (chr == 't')
             {
                 /* tempo */
+                int mmlTempo;
                 var result = MMLGetNum(mmlString, mmlCount + 1);
                 if (result[0] > 0)
                 {
-                    mmlTempo = Mathf.Clamp(result[1], 1, 255);
+                    mmlTempo = Mathf.Clamp(result[1], ConstValue.TEMPO_MIN, ConstValue.TEMPO_MAX);
                 }
                 else
                 {
-                    mmlTempo = 120;
+                    mmlTempo = ConstValue.DEFAULT_TEMPO;
                 }
                 mmlCount += result[0] + 1;
                 seqList.Add(new SeqEvent(SEQ_CMD.SET_TEMPO, mmlTempo, 0));
@@ -83,14 +80,15 @@ public class MMLDecoder : MonoBehaviour
             if (chr == '@')
             {
                 /* program change */
+                int mmlPc;
                 var result = MMLGetNum(mmlString, mmlCount + 1);
                 if (result[0] > 0)
                 {
-                    mmlPc = Mathf.Clamp(result[1], 0, 6);
+                    mmlPc = Mathf.Clamp(result[1], 0, ConstValue.PROGRAM_CHANGE_MAX);
                 }
                 else
                 {
-                    mmlPc = 2;
+                    mmlPc = ConstValue.DEFAULT_PROGRAM_CHANGE;
                 }
                 mmlCount += result[0] + 1;
                 seqList.Add(new SeqEvent(SEQ_CMD.PROGRAM_CHANGE, mmlPc, 0));
@@ -100,14 +98,15 @@ public class MMLDecoder : MonoBehaviour
             if (chr == 'v')
             {
                 /* volume */
+                int mmlVolume;
                 var result = MMLGetNum(mmlString, mmlCount + 1);
                 if (result[0] > 0)
                 {
-                    mmlVolume = Mathf.Clamp(result[1], 0, 15);
+                    mmlVolume = Mathf.Clamp(result[1], 0, ConstValue.SEQ_VOL_MAX);
                 }
                 else
                 {
-                    mmlVolume = 15;
+                    mmlVolume = ConstValue.SEQ_VOL_MAX;
                 }
                 mmlCount += result[0] + 1;
                 seqList.Add(new SeqEvent(SEQ_CMD.VOLUME, mmlVolume, 0));
@@ -120,11 +119,11 @@ public class MMLDecoder : MonoBehaviour
                 var result = MMLGetNum(mmlString, mmlCount + 1);
                 if (result[0] > 0)
                 {
-                    mmlOctave = Mathf.Clamp(result[1], 2, 8);
+                    mmlOctave = Mathf.Clamp(result[1], ConstValue.OCTAVE_MIN, ConstValue.OCTAVE_MAX);
                 }
                 else
                 {
-                    mmlOctave = 4;
+                    mmlOctave = ConstValue.DEFAULT_OCTAVE;
                 }
                 mmlCount += result[0] + 1;
                 continue;
@@ -151,13 +150,13 @@ public class MMLDecoder : MonoBehaviour
             if (chr == 'l')
             {
                 /* length */
-                int mmlLength = 4;
+                int mmlLength = ConstValue.DEFAULT_LENGTH;
                 var result = MMLGetLength(mmlString, mmlCount + 1);
                 if (result[1] > 0)
                 {
-                    mmlLength = Mathf.Clamp(result[1], 1, 128);
+                    mmlLength = Mathf.Clamp(result[1], ConstValue.LENGTH_MIN, ConstValue.LENGTH_MAX);
                 }
-                baseTics = ticPerNote * 4 / mmlLength;
+                baseTics = tickPerNote * 4 / mmlLength;
                 int bDot = baseTics;
                 for (int i = 0; i < result[2]; i++)
                 {
@@ -171,7 +170,7 @@ public class MMLDecoder : MonoBehaviour
             if (chr == 'n')
             {
                 /* note number */
-                int tmpNoteNum = 60;
+                int tmpNoteNum = ConstValue.DEFAULT_NOTE_NUM;
                 int tmpLength = 0;
                 int tmpDots = 0;
                 var resultN = MMLGetNum(mmlString, mmlCount + 1);
@@ -189,7 +188,7 @@ public class MMLDecoder : MonoBehaviour
                         var resultL = MMLGetLength(mmlString, mmlCount + 1);
                         if (resultL[1] > 0)
                         {
-                            tmpLength = Mathf.Clamp(resultL[1], 1, 128);
+                            tmpLength = Mathf.Clamp(resultL[1], ConstValue.LENGTH_MIN, ConstValue.LENGTH_MAX);
                         }
                         tmpDots = resultL[2];
                         mmlCount += resultL[0] + 1;
@@ -206,7 +205,7 @@ public class MMLDecoder : MonoBehaviour
                 int tmpDulation;
                 if (tmpLength > 0)
                 {
-                    tmpDulation = ticPerNote * 4 / tmpLength;
+                    tmpDulation = tickPerNote * 4 / tmpLength;
                 }
                 else
                 {
@@ -225,7 +224,7 @@ public class MMLDecoder : MonoBehaviour
             if (chr >='a' && chr <= 'g')
             {
                 /* note */
-                int tmpNoteNum = noteOffsetTable[chr - 'a'] + (mmlOctave + 1) * 12;
+                int tmpNoteNum = noteOffsetTable[chr - 'a'] + (mmlOctave + 1) * ConstValue.SEMITONES_IN_OCTAVE;
                 int tmpLength = 0;
                 int subCount = 0;
                 char subChr;
@@ -244,7 +243,7 @@ public class MMLDecoder : MonoBehaviour
                 var result = MMLGetLength(mmlString, mmlCount + 1);
                 if (result[1] > 0)
                 {
-                    tmpLength = Mathf.Clamp(result[1], 1, 128);
+                    tmpLength = Mathf.Clamp(result[1], ConstValue.LENGTH_MIN, ConstValue.LENGTH_MAX);
                 }
                 mmlCount += result[0] + 1;
                 if (mmlCount < mmlString.Length)
@@ -259,7 +258,7 @@ public class MMLDecoder : MonoBehaviour
                 int tmpDulation;
                 if (tmpLength > 0)
                 {
-                    tmpDulation = ticPerNote * 4 / tmpLength;
+                    tmpDulation = tickPerNote * 4 / tmpLength;
                 }
                 else
                 {
@@ -282,7 +281,7 @@ public class MMLDecoder : MonoBehaviour
                 int tmpDulation;
                 if (result[1] > 0)
                 {
-                    tmpDulation = ticPerNote * 4 / Math.Clamp(result[1], 1, 128);
+                    tmpDulation = tickPerNote * 4 / Math.Clamp(result[1], ConstValue.LENGTH_MIN, ConstValue.LENGTH_MAX);
                 }
                 else
                 {
@@ -322,7 +321,7 @@ public class MMLDecoder : MonoBehaviour
                 var result = MMLGetNum(mmlString, mmlCount + 1);
                 if (result[0] > 0)
                 {
-                    repeatNum = Mathf.Clamp(result[1], 1, 128);
+                    repeatNum = Mathf.Clamp(result[1], 1, ConstValue.REPEAT_MAX);
                 }
                 seqList.Add(new SeqEvent(SEQ_CMD.REPEAT_END, repeatNum, 0));
                 mmlCount += result[0] + 1;
@@ -340,14 +339,15 @@ public class MMLDecoder : MonoBehaviour
             if (chr == 'T')
             {
                 /* tune (Hz) */
+                int mmlTune;
                 var result = MMLGetNum(mmlString, mmlCount + 1);
                 if (result[0] > 0)
                 {
-                    mmlTune = Mathf.Clamp(result[1], 400, 480);
+                    mmlTune = Mathf.Clamp(result[1], ConstValue.A4_FREQ_MIN, ConstValue.A4_FREQ_MAX);
                 }
                 else
                 {
-                    mmlTune = 440;
+                    mmlTune = ConstValue.DEFAULT_A4_FREQ;
                 }
                 mmlCount += result[0] + 1;
                 seqList.Add(new SeqEvent(SEQ_CMD.TUNE, mmlTune, 0));
@@ -357,10 +357,11 @@ public class MMLDecoder : MonoBehaviour
             if (chr == 'G')
             {
                 /* gate step rate (percent) */
+                int mmlGate;
                 var result = MMLGetNum(mmlString, mmlCount + 1);
                 if (result[0] > 0)
                 {
-                    mmlGate = Mathf.Clamp(result[1], 1, 100);
+                    mmlGate = Mathf.Clamp(result[1], 1, ConstValue.GATE_MAX);
                 }
                 else
                 {
@@ -379,7 +380,7 @@ public class MMLDecoder : MonoBehaviour
                 if (result[1] >= 0)
                 {
                     tmpRate = result[1] * result[2];
-                    tmpRate = Mathf.Clamp(tmpRate, -1200, 1200);
+                    tmpRate = Mathf.Clamp(tmpRate, ConstValue.SWEEP_MIN, ConstValue.SWEEP_MAX);
                 }
                 mmlCount += result[0] + 1;
                 seqList.Add(new SeqEvent(SEQ_CMD.SWEEP, tmpRate, 0));
@@ -411,17 +412,17 @@ public class MMLDecoder : MonoBehaviour
                         if (mmlString[mmlCount] == '}')
                         {
                             seqList.Add(new SeqEvent(SEQ_CMD.ENV_PARAM_START, tmpId, 0));
-                            int envDefaultVol = 15;
+                            int envDefaultVol = ConstValue.SEQ_VOL_MAX;
                             foreach (var param in envParamsList)
                             {
                                 int envVal = param;
-                                if (envVal == -2) { // パラメーターが省略された
+                                if (envVal == PARAM_OMIT) { // パラメーターが省略された
                                     envVal = envDefaultVol;
                                 } else
                                 {
                                     if (envVal >= 0) { envDefaultVol = envVal; }
                                 }
-                                seqList.Add(new SeqEvent(SEQ_CMD.ENV_PARAM, Mathf.Clamp(envVal, -1, 15), 0));
+                                seqList.Add(new SeqEvent(SEQ_CMD.ENV_PARAM, Mathf.Clamp(envVal, -1, ConstValue.SEQ_VOL_MAX), 0));
                             }
                             seqList.Add(new SeqEvent(SEQ_CMD.ENV_PARAM_END, 0, 0));
                         }
@@ -462,9 +463,9 @@ public class MMLDecoder : MonoBehaviour
                                 int _lDeapth = (pResult[2] >= 0) ? pResult[2] : 0;
                                 int _lSpeed = (pResult[3] >= 0) ? pResult[3] : 1;
                                 seqList.Add(new SeqEvent(SEQ_CMD.LFO_SET, tmpId, 0));
-                                seqList.Add(new SeqEvent(SEQ_CMD.LFO_DELAY, Mathf.Clamp(_lDelay, 0, 255), 0));
-                                seqList.Add(new SeqEvent(SEQ_CMD.LFO_DEAPTH, Mathf.Clamp(_lDeapth, 0, 255), 0));
-                                seqList.Add(new SeqEvent(SEQ_CMD.LFO_SPEED, Mathf.Clamp(_lSpeed, 1, 255), 0));
+                                seqList.Add(new SeqEvent(SEQ_CMD.LFO_DELAY, Mathf.Clamp(_lDelay, 0, ConstValue.LFO_MAX), 0));
+                                seqList.Add(new SeqEvent(SEQ_CMD.LFO_DEAPTH, Mathf.Clamp(_lDeapth, 0, ConstValue.LFO_MAX), 0));
+                                seqList.Add(new SeqEvent(SEQ_CMD.LFO_SPEED, Mathf.Clamp(_lSpeed, 1, ConstValue.LFO_MAX), 0));
                                 seqList.Add(new SeqEvent(SEQ_CMD.LFO_PARAM_END, 0, 0));
                             }
                         }
@@ -584,7 +585,7 @@ public class MMLDecoder : MonoBehaviour
                     }
                     else
                     {
-                        if (val < 0) { val = -2; }
+                        if (val < 0) { val = PARAM_OMIT; }
                         paramList.Add(val);
                     }
                     val = -1;
@@ -619,7 +620,6 @@ public class MMLDecoder : MonoBehaviour
         int _length = 0;
         int _dots = 0;
         int subCount = 0;
-        //int subNumCount = 0;
         while (true)
         {
             if (offset + subCount >= _mmlString.Length)
@@ -636,7 +636,6 @@ public class MMLDecoder : MonoBehaviour
                 else
                 {
                     _length = _length * 10 + (subChr - '0');
-                    //subNumCount++;
                 }
             }
             else

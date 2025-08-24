@@ -4,24 +4,41 @@ using uPSG;
 
 public class PSGPlayer : MonoBehaviour
 {
+    /// <summary>
+    /// MML Decoderコンポーネントを指定します
+    /// </summary>
+    [Tooltip("MML Decoderコンポーネントを指定します")]
     [SerializeField] private MMLDecoder mmlDecoder;
+    /// <summary>
+    /// 出力先のAudioSourceを指定します
+    /// </summary>
+    [Tooltip("出力先のAudioSourceを指定します")]
     [SerializeField] private AudioSource audioSource;
     /// <summary>
     /// サンプルレート
     /// </summary>
-    public int sampleRate = 32000;
+    [Tooltip("サンプルレート")]
+    public int sampleRate = ConstValue.DEFAULT_SAMPLE_RATE;
     /// <summary>
     /// AudioClipの長さ（ミリ秒）
     /// </summary>
-    public int audioClipSizeMilliSec = 1000;
+    [Tooltip("AudioClipの長さ(ミリ秒)")]
+    public int audioClipSizeMilliSec = ConstValue.DEFAULT_AUDIO_CLIP_SIZE;
     /// <summary>
     /// オクターブ4のラの音の周波数
     /// </summary>
-    public float a4Freq = 440f;
+    [Tooltip("オクターブ4のラの音の周波数")]
+    public float a4Freq = ConstValue.DEFAULT_A4_FREQ;
+    /// <summary>
+    /// 1拍（4分音符）の分解能
+    /// </summary>
+    [Tooltip("1拍（4分音符）の分解能")]
+    public int tickPerNote = ConstValue.DEFAULT_TICK_PER_NOTE;
     /// <summary>
     /// 音色番号
     /// </summary>
-    public int programChange;
+    [Tooltip("音色番号")]
+    public int programChange = ConstValue.DEFAULT_PROGRAM_CHANGE;
 
     private int audioPosition = 0;
     private int audioPositionSetCount = 0;
@@ -38,7 +55,7 @@ public class PSGPlayer : MonoBehaviour
     private float waveSample;
     private bool waveTie = false;
     private readonly float[] pulseWidth = { 12.5f, 25f, 50f, 75f };
-    private float[] triangleTable = new float[32];
+    private float[] triangleTable = new float[ConstValue.TRIANGLE_TABLE_LENGTH];
     private int ttIndex;
     private int noiseReg;
     private bool noiseShortFreq;
@@ -58,19 +75,24 @@ public class PSGPlayer : MonoBehaviour
     private int seqRepeatCount = -1;
     private bool seqLoop = false;
     private int seqLoopIndex = 0;
-    [SerializeField]
-    private int seqListIndex = 0;
-    [SerializeField]
-    private List<SeqEvent> seqList = new();
-    private int seqTempo = 120;
-    private int ticPerNote = 960;
-    private float gateStepRate = 1f;
+    /// <summary>
+    /// シーケンスデータの再生位置
+    /// </summary>
+    [Tooltip("シーケンスデータの再生位置")]
+    [SerializeField] private int seqListIndex = 0;
+    /// <summary>
+    /// シーケンスデータ
+    /// </summary>
+    [Tooltip("シーケンスデータ")]
+    [SerializeField] private List<SeqEvent> seqList = new();
+    private int seqTempo = ConstValue.DEFAULT_TEMPO;
+    private float gateStepRate = ConstValue.DEFAULT_GATE_STEP_RATE;
     private int sweepPitch = 0;
     private int sweepPitchRate = 0;
     private int sweepDulation;
     private uint sweepNextEventPosition;
-    private readonly int PITCH_MAX = (120 - 69) * 100;
-    private readonly int PITCH_MIN = (12 - 69) * 100;
+    private readonly int PITCH_MAX = (ConstValue.NOTE_NUM_MAX - ConstValue.A4_NOTE_NUM) * 100;
+    private readonly int PITCH_MIN = (ConstValue.NOTE_NUM_MIN - ConstValue.A4_NOTE_NUM) * 100;
     private List<EnvPat> envPatList = new();
     private int envPatIndex = 0;
     private int envPatId = 0;
@@ -98,6 +120,7 @@ public class PSGPlayer : MonoBehaviour
     /// <summary>
     /// 演奏するMMLデータ
     /// </summary>
+    [Tooltip("演奏するMMLデータ")]
     [Multiline] public string mmlString = "";
 
     private void Awake()
@@ -170,7 +193,7 @@ public class PSGPlayer : MonoBehaviour
             return false;
         }
         seqList.Clear();
-        seqList.AddRange(mmlDecoder.Decode(mmlString, ticPerNote)); // MML Decoderでシーケンスデータ（List）に変換
+        seqList.AddRange(mmlDecoder.Decode(mmlString, tickPerNote)); // MML Decoderでシーケンスデータ（List）に変換
         if (seqList.Count == 0) {
             Debug.Log("No sequence data : " + gameObject.name);
             return false;
@@ -203,10 +226,11 @@ public class PSGPlayer : MonoBehaviour
         seqNextGatePosition = 0d;
         seqRepeatCount = -1;
         seqLoop = false;
-        gateStepRate = 1f;
+        seqTempo = ConstValue.DEFAULT_TEMPO;
+        gateStepRate = ConstValue.DEFAULT_GATE_STEP_RATE;
         waveTie = false;
         noiseShort = false;
-        programChange = 2;
+        programChange = ConstValue.DEFAULT_PROGRAM_CHANGE;
         envPatIndex = 0;
         envDulation = sampleRate / 60;
         envPatList.Clear();
@@ -222,7 +246,7 @@ public class PSGPlayer : MonoBehaviour
         lfoCount = 0;
         lfoDulation = sampleRate / 60;
 
-        audioClipSizeMilliSec = Mathf.Clamp(audioClipSizeMilliSec, 20, 1000);
+        audioClipSizeMilliSec = Mathf.Clamp(audioClipSizeMilliSec, ConstValue.AUDIO_CLIP_SIZE_MIN, ConstValue.AUDIO_CLIP_SIZE_MAX);
         // ストリーム再生のAudioClipを生成（生成時にバッファ分のサンプルをOnAudioReadで要求する）
         AudioClip channelClip = AudioClip.Create("PSG Sound", (int)(sampleRate * ((float)audioClipSizeMilliSec / 1000f)), 1, sampleRate, true, OnAudioRead, OnAudioSetPosition);
         audioSource.clip = channelClip;
@@ -321,7 +345,7 @@ public class PSGPlayer : MonoBehaviour
                     /*** ENVELOPE ***/
                     if (wavePositon >= envNextEventPosition && envPatIndex < envPatList.Count)
                     {
-                        waveVolume = envPatList[envPatIndex].envVolList[envVolIndex] / 15f;
+                        waveVolume = envPatList[envPatIndex].envVolList[envVolIndex] / (float)ConstValue.SEQ_VOL_MAX;
                         envVolIndex++;
                         if (envVolIndex >= envPatList[envPatIndex].envVolList.Count)
                         {
@@ -343,7 +367,7 @@ public class PSGPlayer : MonoBehaviour
                     /*** SWEEP ***/
                     if (wavePositon >= sweepNextEventPosition)
                     {
-                        int x = (Mathf.Clamp(noteNumber, 12, 120) - 69) * 100 + sweepPitch;
+                        int x = (Mathf.Clamp(noteNumber, ConstValue.NOTE_NUM_MIN, ConstValue.NOTE_NUM_MAX) - ConstValue.A4_NOTE_NUM) * 100 + sweepPitch;
                         if (x >= PITCH_MAX || x <= PITCH_MIN)
                         {
                             // スイープした周波数が下限か上限に達した場合、音を止める
@@ -353,7 +377,7 @@ public class PSGPlayer : MonoBehaviour
                         else
                         {
                             // 周波数を算出
-                            waveFreq = (float)(a4Freq * System.Math.Pow(2d, x / 1200d));
+                            waveFreq = (float)(a4Freq * System.Math.Pow(2d, x / (double)ConstValue.CENT_IN_OCTAVE));
                             waveLength = sampleRate / waveFreq;
                             sweepPitch += sweepPitchRate;
                         }
@@ -365,8 +389,8 @@ public class PSGPlayer : MonoBehaviour
                     //sweepPitch = 0;
                     if (!isLfoOn)
                     {
-                        int x = (Mathf.Clamp(noteNumber, 12, 120) - 69) * 100 + sweepPitch;
-                        waveFreq = (float)(a4Freq * System.Math.Pow(2d, x / 1200d));
+                        int x = (Mathf.Clamp(noteNumber, ConstValue.NOTE_NUM_MIN, ConstValue.NOTE_NUM_MAX) - ConstValue.A4_NOTE_NUM) * 100 + sweepPitch;
+                        waveFreq = (float)(a4Freq * System.Math.Pow(2d, x / (double)ConstValue.CENT_IN_OCTAVE));
                         waveLength = sampleRate / waveFreq;
                     }
                     sweepNextEventPosition = wavePositon;
@@ -386,8 +410,8 @@ public class PSGPlayer : MonoBehaviour
                         {
                             // ピッチは三角波と同じテーブルにDeapthを掛ける
                             lfoPitch = (triangleTable[lfoCount] * lfoDeapth * 100f / 255f);
-                            int x = (Mathf.Clamp(noteNumber, 12, 120) - 69) * 100 + (int)lfoPitch;
-                            waveFreq = (float)(a4Freq * System.Math.Pow(2d, x / 1200d));
+                            int x = (Mathf.Clamp(noteNumber, ConstValue.NOTE_NUM_MIN, ConstValue.NOTE_NUM_MAX) - ConstValue.A4_NOTE_NUM) * 100 + (int)lfoPitch;
+                            waveFreq = (float)(a4Freq * System.Math.Pow(2d, x / (double)ConstValue.CENT_IN_OCTAVE));
                             waveLength = sampleRate / waveFreq;
                             lfoCount++;
                             if (lfoCount >= triangleTable.Length) { lfoCount -= triangleTable.Length; }
@@ -458,7 +482,7 @@ public class PSGPlayer : MonoBehaviour
                     if (programChange < 5)
                     {
                         // スイープした周波数が下限か上限に達した場合、音を止める
-                        int x = (Mathf.Clamp(noteNumber, 12, 120) - 69) * 100 + sweepPitch;   // ノートナンバー69がA4
+                        int x = (Mathf.Clamp(noteNumber, ConstValue.NOTE_NUM_MIN, ConstValue.NOTE_NUM_MAX) - ConstValue.A4_NOTE_NUM) * 100 + sweepPitch;   // ノートナンバー69がA4
                         if (x >=PITCH_MAX || x <= PITCH_MIN)
                         {
                             waveFreq = 0;
@@ -466,7 +490,7 @@ public class PSGPlayer : MonoBehaviour
                         }
                         else
                         {
-                            waveFreq = (float)(a4Freq * System.Math.Pow(2d, x / 1200d));
+                            waveFreq = (float)(a4Freq * System.Math.Pow(2d, x / (double)ConstValue.CENT_IN_OCTAVE));
                             waveLength = sampleRate / waveFreq;
                         }
                     }
@@ -474,7 +498,7 @@ public class PSGPlayer : MonoBehaviour
                     {
                         // ノイズは0から15までなので、ノートナンバーを16で割った剰余にする
                         waveFreq = a4Freq;
-                        noiseIndex = noteNumber % 16;
+                        noiseIndex = noteNumber % noiseTable.Length;
                     }
                     PrepareSound();
                     break;
@@ -496,7 +520,7 @@ public class PSGPlayer : MonoBehaviour
                     noiseShort = (seqList[seqListIndex].seqParam != 0) ? true : false;
                     break;
                 case SEQ_CMD.VOLUME:
-                    seqVolume = Mathf.Clamp01(seqList[seqListIndex].seqParam / 15f);
+                    seqVolume = Mathf.Clamp01(seqList[seqListIndex].seqParam / (float)ConstValue.SEQ_VOL_MAX);
                     waveVolume = seqVolume;
                     isEnvOn = false;
                     break;
@@ -669,12 +693,12 @@ public class PSGPlayer : MonoBehaviour
                     break;
                 case SEQ_CMD.END_OF_SEQ:
                     eos = true;
-                    seqEndPosition = seqNextEventPosition + sampleRate * 60d / seqTempo * seqList[seqListIndex].seqStep / ticPerNote;
+                    seqEndPosition = seqNextEventPosition + sampleRate * 60d / seqTempo * seqList[seqListIndex].seqStep / tickPerNote;
                     break;
             }
             _duration = seqList[seqListIndex].seqStep;
-            seqNextGatePosition = seqNextEventPosition + sampleRate * 60d / seqTempo * _duration * (tieGate ? 1f : gateStepRate) / ticPerNote;
-            seqNextEventPosition += sampleRate * 60d / seqTempo * _duration / ticPerNote;
+            seqNextGatePosition = seqNextEventPosition + sampleRate * 60d / seqTempo * _duration * (tieGate ? 1f : gateStepRate) / tickPerNote;
+            seqNextEventPosition += sampleRate * 60d / seqTempo * _duration / tickPerNote;
             seqListIndex++;
             if (eos) { break; }
         }
@@ -778,10 +802,10 @@ public class PSGPlayer : MonoBehaviour
         noiseShortFreq = _noiseShort;
         if (!waveTie)
         {
-            noiseReg = 0x8000;
+            noiseReg = ConstValue.NOISE_REG;
             waveNextEventPosition = waveDevide;
         }
-        waveDevide = (double)noiseFreq * (double)sampleRate / 894886.25d;
+        waveDevide = noiseFreq * sampleRate / ConstValue.NES_FREQ;
     }
 
     private void GenerateNoiseSound()

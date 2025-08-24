@@ -21,7 +21,7 @@ B o5 g-d-g-b-fd-fa- e-<b->e-g-d-<a->d-g- c<a->ce-c<a->ce- d-2d-c4.
 C o3 l2g-f e-d- ce- l4d-.d-8d-r
 D o4 r2.g r2.g r2.g r2.g
 
-A o5 l4e-.d-.c- f.e-.d- f.e-.d g-.f.e-
+A o5 l4v10e-.d-.c- f.e-.d- f.e-.d g-.f.e-
 B o5 c-<g->c-d-e-4r4 d-<a->d-e-f4r4 d<a->de-f4r4 e-<b->e-fg-4r4
 C o3 l4c-2.c d-1 <b-2.>d e-1
 D o4 r2.g r2.g r2.g r2.g
@@ -49,7 +49,7 @@ D r1
 
 ABCD t181
 
-A o5l16M0 [@0G99c8ccc8ccl8cdr<b-& b-4&M2b-8&b-2M0b- a-a-16a-16a-frfrg& g4.ga-b-r4
+A o5l16M0v10 [@0G99c8ccc8ccl8cdr<b-& b-4&M2b-8&b-2M0b- a-a-16a-16a-frfrg& g4.ga-b-r4
 B o4l16 [@0G99g8ggg8ggl8ggrf& f2..g e-e-16e-16e-drdre& e4.ee-fr4
 C o4l16 [c8ccc8ccc8ccc8cc c8ccc8ccc8ccc8cc c8ccc8ccc8ccc8cc c8ccc8ccc8ccc8cc
 D o4l16V2 [G20e8eeG90aG20eee e8eeG90aG20eee e8eeG90aG20eee e8eeG90aG20eee
