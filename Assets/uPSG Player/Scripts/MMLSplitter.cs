@@ -4,16 +4,19 @@ using UnityEngine;
 public class MMLSplitter : MonoBehaviour
 {
     /// <summary>
-    /// 各チャンネルのPSG Playerコンポーネント
+    /// PSG Player component for each channel
     /// </summary>
+    [Tooltip("PSG Player component for each channel")]
     [SerializeField] private PSGPlayer[] psgPlayers;
     /// <summary>
-    /// 分割するMMLデータ
+    /// MML data to split
     /// </summary>
+    [Tooltip("MML data to split")]
     public string multiChMMLString;
     /// <summary>
-    /// 分割後のMMLデータ
+    /// MML data after splitting
     /// </summary>
+    [Tooltip("MML data after splitting")]
     private string[] mmlStrings;
 
     private void Awake()
@@ -45,7 +48,7 @@ public class MMLSplitter : MonoBehaviour
     }
 
     /// <summary>
-    /// MMLを分割してPSG Playerに送信する
+    /// Split the MML and send it to the PSG Player
     /// </summary>
     public void SplitMML()
     {
@@ -117,7 +120,7 @@ public class MMLSplitter : MonoBehaviour
     }
 
     /// <summary>
-    /// _multiChMMLStringで指定したMMLを分割してPSG Playerに送信する
+    /// Split the MML specified in the _multiChMMLString and send it to the PSG Player.
     /// </summary>
     /// <param name="_multiChMMLString"></param>
     public void SplitMML(string _multiChMMLString)
@@ -127,7 +130,7 @@ public class MMLSplitter : MonoBehaviour
     }
 
     /// <summary>
-    /// 全てのPSG Playerを同時に再生開始
+    /// Start playing all PSG Player simultaneously
     /// </summary>
     public void PlayAllChannels()
     {
@@ -139,7 +142,7 @@ public class MMLSplitter : MonoBehaviour
     }
 
     /// <summary>
-    /// 全てのPSG Playerでデコード済みのシーケンスを同時に再生開始
+    /// Start simultaneous playback of decoded sequences on all PSG player
     /// </summary>
     public void PlayAllChannelsDecoded()
     {
@@ -151,7 +154,7 @@ public class MMLSplitter : MonoBehaviour
     }
 
     /// <summary>
-    /// 全てのPSG Playerの再生を停止
+    /// Stop all PSG Player playback
     /// </summary>
     public void StopAllChannels()
     {
@@ -163,10 +166,10 @@ public class MMLSplitter : MonoBehaviour
     }
 
     /// <summary>
-    /// 指定したチャンネルをミュートする
+    /// Mute the specified channel
     /// </summary>
-    /// <param name="channel">チャンネルの指定</param>
-    /// <param name="isMute">Trueならミュート</param>
+    /// <param name="channel">Specifying the channel</param>
+    /// <param name="isMute">Set to True to mute</param>
     public void MuteChannel(int channel, bool isMute)
     {
         if (!CheckPlayersReady()) { return; }
@@ -174,9 +177,9 @@ public class MMLSplitter : MonoBehaviour
     }
 
     /// <summary>
-    /// 全てのPSG Playerのサンプルレートを設定する
+    /// Set all PSG player sample rates
     /// </summary>
-    /// <param name="_rate">サンプルレート（Hz）</param>
+    /// <param name="_rate">Sample rate (Hz)</param>
     public void SetAllChannelsSampleRate(int _rate)
     {
         if (!CheckPlayersReady()) { return; }
@@ -187,9 +190,9 @@ public class MMLSplitter : MonoBehaviour
     }
 
     /// <summary>
-    /// 全てのPSG PlayerのAudioClipの長さを設定する
+    /// Set the length of all PSG Player AudioClips
     /// </summary>
-    /// <param name="_msec">AudioClipの長さ（ミリ秒）</param>
+    /// <param name="_msec">AudioClip duration (milliseconds)</param>
     public void SetAllChannelClipSize(int _msec)
     {
         if (!CheckPlayersReady()) { return; }
@@ -200,9 +203,9 @@ public class MMLSplitter : MonoBehaviour
     }
 
     /// <summary>
-    /// いずれかのPSG PlayerのAudioSourceのクリップが再生中か
+    /// Is any PSG Player's AudioSource clip currently playing?
     /// </summary>
-    /// <returns>いずれかが再生中ならTrue</returns>
+    /// <returns>If any are playing, True</returns>
     public bool IsAnyChannelPlaying()
     {
         if (!CheckPlayersReady()) { return false; }

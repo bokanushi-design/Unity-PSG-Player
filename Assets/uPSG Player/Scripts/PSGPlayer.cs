@@ -5,39 +5,39 @@ using uPSG;
 public class PSGPlayer : MonoBehaviour
 {
     /// <summary>
-    /// MML Decoderコンポーネントを指定します
+    /// Specify the MML Decoder component
     /// </summary>
-    [Tooltip("MML Decoderコンポーネントを指定します")]
+    [Tooltip("Specify the MML Decoder component")]
     [SerializeField] private MMLDecoder mmlDecoder;
     /// <summary>
-    /// 出力先のAudioSourceを指定します
+    /// Specifies the destination AudioSource
     /// </summary>
-    [Tooltip("出力先のAudioSourceを指定します")]
+    [Tooltip("Specifies the destination AudioSource")]
     [SerializeField] private AudioSource audioSource;
     /// <summary>
-    /// サンプルレート
+    /// Sample rate
     /// </summary>
-    [Tooltip("サンプルレート")]
+    [Tooltip("Sample rate")]
     public int sampleRate = ConstValue.DEFAULT_SAMPLE_RATE;
     /// <summary>
-    /// AudioClipの長さ（ミリ秒）
+    /// AudioClip duration (milliseconds)
     /// </summary>
-    [Tooltip("AudioClipの長さ(ミリ秒)")]
+    [Tooltip("AudioClip duration (milliseconds)")]
     public int audioClipSizeMilliSec = ConstValue.DEFAULT_AUDIO_CLIP_SIZE;
     /// <summary>
-    /// オクターブ4のラの音の周波数
+    /// Frequency of the A note at the 4th octave
     /// </summary>
-    [Tooltip("オクターブ4のラの音の周波数")]
+    [Tooltip("Frequency of the A note at the 4th octave")]
     public float a4Freq = ConstValue.DEFAULT_A4_FREQ;
     /// <summary>
-    /// 1拍（4分音符）の分解能
+    /// 1 beat (quarter note) resolution
     /// </summary>
-    [Tooltip("1拍（4分音符）の分解能")]
+    [Tooltip("1 beat (quarter note) resolution")]
     public int tickPerNote = ConstValue.DEFAULT_TICK_PER_NOTE;
     /// <summary>
-    /// 音色番号
+    /// Tone number
     /// </summary>
-    [Tooltip("音色番号")]
+    [Tooltip("Tone number")]
     public int programChange = ConstValue.DEFAULT_PROGRAM_CHANGE;
 
     private int audioPosition = 0;
@@ -76,14 +76,14 @@ public class PSGPlayer : MonoBehaviour
     private bool seqLoop = false;
     private int seqLoopIndex = 0;
     /// <summary>
-    /// シーケンスデータの再生位置
+    /// Sequence data playback position
     /// </summary>
-    [Tooltip("シーケンスデータの再生位置")]
+    [Tooltip("Sequence data playback position")]
     [SerializeField] private int seqListIndex = 0;
     /// <summary>
-    /// シーケンスデータ
+    /// Sequence data
     /// </summary>
-    [Tooltip("シーケンスデータ")]
+    [Tooltip("Sequence data")]
     [SerializeField] private List<SeqEvent> seqList = new();
     private int seqTempo = ConstValue.DEFAULT_TEMPO;
     private float gateStepRate = ConstValue.DEFAULT_GATE_STEP_RATE;
@@ -118,9 +118,9 @@ public class PSGPlayer : MonoBehaviour
     private bool seqMute = false;
 
     /// <summary>
-    /// 演奏するMMLデータ
+    /// MML data for playback
     /// </summary>
-    [Tooltip("演奏するMMLデータ")]
+    [Tooltip("MML data for playback")]
     [Multiline] public string mmlString = "";
 
     private void Awake()
@@ -148,7 +148,7 @@ public class PSGPlayer : MonoBehaviour
     {
         if (stopAudio)
         {
-            // コールバックから直接AudioSourceを操作できないので、メインスレッドから停止処理をする
+            // Since you cannot directly manipulate the AudioSource from the callback, stop it from the main thread.
             audioSource.loop = false;
             if (audioSource.timeSamples > seqEndPosition % sampleRate)
             {
@@ -163,7 +163,7 @@ public class PSGPlayer : MonoBehaviour
     }
 
     /// <summary>
-    /// MMLをデコードして再生
+    /// Decode and play MML
     /// </summary>
     public void Play()
     {
@@ -173,9 +173,9 @@ public class PSGPlayer : MonoBehaviour
     }
 
     /// <summary>
-    /// _mmlStringで指定したMMLをデコードして再生
+    /// _Decode and play the MML specified in _mmlString
     /// </summary>
-    /// <param name="_mmlString">MML文字列</param>
+    /// <param name="_mmlString">MML string</param>
     public void Play(string _mmlString)
     {
         mmlString = _mmlString;
@@ -183,9 +183,9 @@ public class PSGPlayer : MonoBehaviour
     }
 
     /// <summary>
-    /// MMLをシーケンスデータにデコード
+    /// Decode MML into sequence data
     /// </summary>
-    /// <returns>デコード成功ならTrue</returns>
+    /// <returns>True if decoding succeeded</returns>
     public bool DecodeMML()
     {
         if (mmlString == "") {
@@ -193,7 +193,7 @@ public class PSGPlayer : MonoBehaviour
             return false;
         }
         seqList.Clear();
-        seqList.AddRange(mmlDecoder.Decode(mmlString, tickPerNote)); // MML Decoderでシーケンスデータ（List）に変換
+        seqList.AddRange(mmlDecoder.Decode(mmlString, tickPerNote)); // Convert to sequence data (List) using MML Decoder
         if (seqList.Count == 0) {
             Debug.Log("No sequence data : " + gameObject.name);
             return false;
@@ -202,7 +202,7 @@ public class PSGPlayer : MonoBehaviour
     }
 
     /// <summary>
-    /// デコード済のシーケンスデータを再生
+    /// Playback of decoded sequence data
     /// </summary>
     public void PlayDecoded()
     {
@@ -247,7 +247,7 @@ public class PSGPlayer : MonoBehaviour
         lfoDulation = sampleRate / 60;
 
         audioClipSizeMilliSec = Mathf.Clamp(audioClipSizeMilliSec, ConstValue.AUDIO_CLIP_SIZE_MIN, ConstValue.AUDIO_CLIP_SIZE_MAX);
-        // ストリーム再生のAudioClipを生成（生成時にバッファ分のサンプルをOnAudioReadで要求する）
+        // Generate an AudioClip for stream playback (requests samples for the buffer via OnAudioRead during generation)
         AudioClip channelClip = AudioClip.Create("PSG Sound", (int)(sampleRate * ((float)audioClipSizeMilliSec / 1000f)), 1, sampleRate, true, OnAudioRead, OnAudioSetPosition);
         audioSource.clip = channelClip;
         audioSource.loop = true;
@@ -260,7 +260,7 @@ public class PSGPlayer : MonoBehaviour
     }
 
     /// <summary>
-    /// 再生を停止
+    /// Stop playback
     /// </summary>
     public void Stop()
     {
@@ -272,18 +272,18 @@ public class PSGPlayer : MonoBehaviour
     }
 
     /// <summary>
-    /// AudioSourceのクリップが再生されているか
+    /// Is the AudioSource clip playing?
     /// </summary>
-    /// <returns>再生中はTrue</returns>
+    /// <returns>True while playing</returns>
     public bool IsPlaying()
     {
         return audioSource.isPlaying;
     }
 
     /// <summary>
-    /// 再生中の音量をミュートして音を消す
+    /// Mute the volume of the currently playing audio to silence it.
     /// </summary>
-    /// <param name="isOn">Trueでミュート有効</param>
+    /// <param name="isOn">True enables mute</param>
     public void Mute(bool isOn)
     {
         audioMute = isOn;
@@ -293,34 +293,34 @@ public class PSGPlayer : MonoBehaviour
 
     private void OnAudioRead(float[] data)
     {
-        // 再生時にAudioClipから、サンプルデータのブロックを生成するために、断続的に呼び出される
-        GenerateSound(data.Length); // サンプルデータ生成
+        // During playback, it is intermittently called to generate blocks of sample data from the AudioClip.
+        GenerateSound(data.Length); // Generating sample data
         for (int i=0; i<data.Length; i++)
         {
-            // キューからバッファに読み込む
+            // Read from queue to buffer
             data[i] = (waveQueue.Count > 0) ? waveQueue.Dequeue() : 0;
         }
     }
 
     private void OnAudioSetPosition(int newPosition)
     {
-        // クリップがループしたり再生位置を変更したりするときに呼び出される
+        // Called when the clip loops or changes the playback position.
         audioPosition = newPosition;
         if (seqListIndex < 0)
         {
-            // AudioSourceはメインスレッドでしか操作できないので、stopAudioフラグを立てる
+            // Since AudioSource can only be manipulated on the main thread, set the stopAudio true.
             stopAudio = seqEndPosition < audioPositionSetCount * (int)(sampleRate * ((float)audioClipSizeMilliSec / 1000f));
         }
         if (audioPosition == 0)
         {
-            // クリップがループした瞬間
+            // The moment the clip looped
             audioPositionSetCount++;
         }
     }
 
     private void GenerateSound(int bufferSize)
     {
-        // 音のサンプルデータを順次生成
+        // Generate sound sample data sequentially
         float _sample;
         for (int i = 0; i < bufferSize; i++)
         {
@@ -332,7 +332,7 @@ public class PSGPlayer : MonoBehaviour
 
             if (seqPosition >= System.Math.Round(seqNextEventPosition, 0, System.MidpointRounding.AwayFromZero))
             {
-                // シーケンス処理
+                // Sequence processing
                 GetSeqEvent();
             }
 
@@ -370,13 +370,13 @@ public class PSGPlayer : MonoBehaviour
                         int x = (Mathf.Clamp(noteNumber, ConstValue.NOTE_NUM_MIN, ConstValue.NOTE_NUM_MAX) - ConstValue.A4_NOTE_NUM) * 100 + sweepPitch;
                         if (x >= PITCH_MAX || x <= PITCH_MIN)
                         {
-                            // スイープした周波数が下限か上限に達した場合、音を止める
+                            // When the swept frequency reaches the lower or upper limit, stop the sound.
                             waveFreq = 0;
                             waveLength = sampleRate / a4Freq;
                         }
                         else
                         {
-                            // 周波数を算出
+                            // Calculate the frequency
                             waveFreq = (float)(a4Freq * System.Math.Pow(2d, x / (double)ConstValue.CENT_IN_OCTAVE));
                             waveLength = sampleRate / waveFreq;
                             sweepPitch += sweepPitchRate;
@@ -403,19 +403,19 @@ public class PSGPlayer : MonoBehaviour
                     {
                         if (wavePositon < lfoDulation * lfoDelay / 2)
                         {
-                            // Delayで設定した分LFOをかけない
+                            // Do not apply the LFO for the duration set in lfoDelay.
                             lfoNextEventPosition = (uint)(lfoDulation * lfoDelay / 2);
                         }
                         else
                         {
-                            // ピッチは三角波と同じテーブルにDeapthを掛ける
+                            // The pitch is calculated by multiplying the triangle wave table value by lfoDepth.
                             lfoPitch = (triangleTable[lfoCount] * lfoDeapth * 100f / 255f);
                             int x = (Mathf.Clamp(noteNumber, ConstValue.NOTE_NUM_MIN, ConstValue.NOTE_NUM_MAX) - ConstValue.A4_NOTE_NUM) * 100 + (int)lfoPitch;
                             waveFreq = (float)(a4Freq * System.Math.Pow(2d, x / (double)ConstValue.CENT_IN_OCTAVE));
                             waveLength = sampleRate / waveFreq;
                             lfoCount++;
                             if (lfoCount >= triangleTable.Length) { lfoCount -= triangleTable.Length; }
-                            // Speedで設定した間隔で処理する
+                            // Process at the interval set by lfoSpeed
                             lfoNextEventPosition += (uint)(sampleRate / (lfoSpeed * 2));
                         }
                     }
@@ -425,12 +425,12 @@ public class PSGPlayer : MonoBehaviour
             if (waveFreq == 0 || seqMute)
             {
                 /*** REST ***/
-                // 周波数0を無音とする
+                // Treat frequency 0 as silent
                 _sample = 0;
             }
             else
             {
-                // 周波数と音量からサンプルを生成
+                // Generate samples from frequency and volume
                 if (programChange < 4)
                 {
                     GenerateSquareSound();
@@ -453,7 +453,7 @@ public class PSGPlayer : MonoBehaviour
 
     private void GetSeqEvent()
     {
-        // シーケンスデータ処理
+        // Sequence data processing
         if (seqListIndex < 0) { return; }
         if ((seqListIndex == seqLoopIndex) && seqLoop)
         {
@@ -465,7 +465,7 @@ public class PSGPlayer : MonoBehaviour
         int _duration = 0;
         while(_duration == 0)
         {
-            // Dulationが0のコマンドを全て処理する
+            // Process all commands with Dulation 0
             switch (seqList[seqListIndex].seqCmd)
             {
                 case SEQ_CMD.SET_TEMPO:
@@ -475,14 +475,14 @@ public class PSGPlayer : MonoBehaviour
                     noteNumber = seqList[seqListIndex].seqParam;
                     if (noteNumber < 0)
                     {
-                        // 負のノートナンバーの場合はタイ（&）で繋げる音なので、ゲートを100%にする
+                        // For negative note numbers, since they are tied notes, set the gate to 100%.
                         tieGate = true;
                         noteNumber = -noteNumber;
                     }
                     if (programChange < 5)
                     {
-                        // スイープした周波数が下限か上限に達した場合、音を止める
-                        int x = (Mathf.Clamp(noteNumber, ConstValue.NOTE_NUM_MIN, ConstValue.NOTE_NUM_MAX) - ConstValue.A4_NOTE_NUM) * 100 + sweepPitch;   // ノートナンバー69がA4
+                        // When the swept frequency reaches the lower or upper limit, stop the sound.
+                        int x = (Mathf.Clamp(noteNumber, ConstValue.NOTE_NUM_MIN, ConstValue.NOTE_NUM_MAX) - ConstValue.A4_NOTE_NUM) * 100 + sweepPitch;   // Noten umber 69 is A4
                         if (x >=PITCH_MAX || x <= PITCH_MIN)
                         {
                             waveFreq = 0;
@@ -496,7 +496,7 @@ public class PSGPlayer : MonoBehaviour
                     }
                     else
                     {
-                        // ノイズは0から15までなので、ノートナンバーを16で割った剰余にする
+                        // The pitch of noise ranges from 0 to 15, so set the note number to the remainder when divided by 16.
                         waveFreq = a4Freq;
                         noiseIndex = noteNumber % noiseTable.Length;
                     }
@@ -525,28 +525,28 @@ public class PSGPlayer : MonoBehaviour
                     isEnvOn = false;
                     break;
                 case SEQ_CMD.REPEAT_START:
-                    // リピートの開始位置を保存
+                    // Remember the repeat start position
                     seqRepeatIndex = seqListIndex;
                     break;
                 case SEQ_CMD.REPEAT_END:
                     if (seqRepeatCount < 0)
                     {
-                        // カウンターが-1（リピートしてない）ならリピート回数を保存
+                        // If the counter is -1 (not repeating), remember the repeat count.
                         seqRepeatCount = seqList[seqListIndex].seqParam - 1;
                     }
                     else
                     {
-                        // カウンターが0以上なら1減らす
+                        // If the counter is 0 or greater, subtract 1.
                         seqRepeatCount--;
                     }
                     if (seqRepeatCount > 0)
                     {
-                        // カウンターが1以上ならリピート開始位置に戻す
+                        // If the counter is 1 or greater, return to the repeat start position.
                         seqListIndex = seqRepeatIndex;
                     }
                     else
                     {
-                        // カウンターが0になったら-1にする（リピート終了）
+                        // When the counter reaches 0, set it to -1 (repeat ends)
                         seqRepeatCount = -1;
                     }
                     break;
@@ -564,7 +564,7 @@ public class PSGPlayer : MonoBehaviour
                     envPatIndex = -1;
                     for (int i=0; i<envPatList.Count; i++)
                     {
-                        // エンベロープ番号が登録されてるか
+                        // Is the envelope number registered?
                         if (envPatList[i].envId == envPatId)
                         {
                             envPatIndex = i;
@@ -573,7 +573,7 @@ public class PSGPlayer : MonoBehaviour
                     }
                     if (envPatIndex < 0)
                     {
-                        // 登録されてなければOFF
+                        // OFF if not registered.
                         isEnvOn = false;
                     }
                     else
@@ -585,7 +585,7 @@ public class PSGPlayer : MonoBehaviour
                     }
                     break;
                 case SEQ_CMD.ENV_PARAM_START:
-                    // エンベロープ設定の準備
+                    // Preparing Envelope Settings
                     envPatId = seqList[seqListIndex].seqParam;
                     envParamList.Clear();
                     envLoopIndex = -1;
@@ -593,7 +593,7 @@ public class PSGPlayer : MonoBehaviour
                 case SEQ_CMD.ENV_PARAM:
                     if (seqList[seqListIndex].seqParam < 0)
                     {
-                        // -1の場所がループポイント
+                        // The location at -1 is the loop point.
                         envLoopIndex = envParamList.Count;
                     }
                     else
@@ -606,14 +606,14 @@ public class PSGPlayer : MonoBehaviour
                     if (envParamList.Count < 1) { break; }
                     if (envLoopIndex < 0 || envLoopIndex >= envParamList.Count)
                     {
-                        // ループポイントが設定されてなければ最後のパラメータをループ
+                        // If no loop point is set, loop the last parameter.
                         envLoopIndex = envParamList.Count - 1;
                     }
                     for (int i = 0; i < envPatList.Count; i++)
                     {
                         if (envPatList[i].envId == envPatId)
                         {
-                            // エンベロープ番号が登録されてれば削除
+                            // If an envelope number is registered, delete it.
                             envPatList.RemoveAt(i);
                             break;
                         }
@@ -626,7 +626,7 @@ public class PSGPlayer : MonoBehaviour
                     lfoPatId = seqList[seqListIndex].seqParam;
                     if (lfoPatId <= 0)
                     {
-                        // LFO番号が0以下ならLFOを無効にする
+                        // If the LFO number is 0 or less, disable the LFO.
                         lfoPatId = 0;
                         isLfoOn = false;
                         break;
@@ -634,7 +634,7 @@ public class PSGPlayer : MonoBehaviour
                     lfoPatIndex = -1;
                     for (int i = 0; i < lfoPatList.Count; i++)
                     {
-                        // LFOリストにLFO番号が登録されてるか確認
+                        // Check if the LFO number is registered in the LFO list
                         if (lfoPatList[i].lfoId == lfoPatId)
                         {
                             lfoPatIndex = i;
@@ -643,7 +643,7 @@ public class PSGPlayer : MonoBehaviour
                     }
                     if (lfoPatIndex < 0)
                     {
-                        // 登録されてなければLFO無効
+                        // If not registered, disable LFO.
                         isLfoOn = false;
                     }
                     else
@@ -674,7 +674,7 @@ public class PSGPlayer : MonoBehaviour
                     lfoPatIndex = -1;
                     for (int i = 0; i < lfoPatList.Count; i++)
                     {
-                        // LFO番号が登録されてれば削除
+                        // If the LFO number is registered, delete it.
                         if (lfoPatList[i].lfoId == lfoPatId)
                         {
                             lfoPatList.RemoveAt(i);
@@ -704,7 +704,7 @@ public class PSGPlayer : MonoBehaviour
         }
         if (seqListIndex >= seqList.Count)
         {
-            // シーケンス終了後の処理
+            // Processing after sequence completion
             if (seqLoop)
             {
                 seqListIndex = seqLoopIndex;
@@ -719,7 +719,7 @@ public class PSGPlayer : MonoBehaviour
 
     private void PrepareSound()
     {
-        // 発音の前処理
+        // Preprocessing for sound generation
         if (!audioMute && seqMute) { seqMute = false; }
 
         if (programChange < 4)
@@ -786,12 +786,16 @@ public class PSGPlayer : MonoBehaviour
         waveDevide = waveLength / triangleTable.Length;
         if (wavePositon > System.Math.Round(waveNextEventPosition, 0, System.MidpointRounding.AwayFromZero))
         {
-            ttIndex++;
-            if (ttIndex >= triangleTable.Length)
+            do
             {
-                ttIndex = 0;
-            }
-            waveNextEventPosition += waveDevide;
+                ttIndex++;
+                if (ttIndex >= triangleTable.Length)
+                {
+                    ttIndex = 0;
+                }
+                waveNextEventPosition += waveDevide;
+
+            } while (wavePositon >= waveNextEventPosition);
         }
         waveSample = triangleTable[ttIndex];
     }
@@ -832,14 +836,14 @@ public class PSGPlayer : MonoBehaviour
 
     private void GenerateTriangleTable()
     {
-        // 4bit分解能の三角波テーブル
+        // 4-bit resolution triangle wave table
         float tVal = 0f;
         bool tRise = true;
         for (int i=0; i<triangleTable.Length; i++)
         {
             if (tRise)
             {
-                // 上行
+                // Ascending
                 tVal += 1f / 8f;
                 if (tVal >= 1f)
                 {
@@ -849,7 +853,7 @@ public class PSGPlayer : MonoBehaviour
             }
             else
             {
-                // 下行
+                // Descending
                 tVal -= 1f / 8f;
                 if (tVal <= -1)
                 {

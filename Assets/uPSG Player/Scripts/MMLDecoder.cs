@@ -416,7 +416,8 @@ public class MMLDecoder : MonoBehaviour
                             foreach (var param in envParamsList)
                             {
                                 int envVal = param;
-                                if (envVal == PARAM_OMIT) { // パラメーターが省略された
+                                if (envVal == PARAM_OMIT)
+                                { // The parameter was omitted.
                                     envVal = envDefaultVol;
                                 } else
                                 {
