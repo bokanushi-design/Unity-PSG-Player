@@ -13,7 +13,6 @@ Unity上でレトロゲーム機などのPSG（Programmable Sound Generator）�
 PSG Playerはモノフォニック（単音）で発音します。  
 ファミコンの4音（DPCMを除く）などを再現するには、PSG Playerを複数設置して同時に再生することで対応します。  
 
-
 ## クイックガイド
 
 ### 基本的な使い方
@@ -28,7 +27,6 @@ PSG Playerはモノフォニック（単音）で発音します。
 MMLについては「[MMLリファレンス](Unity%20PSG%20Player%20-%20MML%20reference.md)」を参照してください。  
 ![fig03](./img/fig03.png)
 
-
 ### マルチチャンネルの使い方
 
 1. 必要なチャンネル数に合わせてPSG Playerプレハブを置きます。  
@@ -41,7 +39,6 @@ MMLについては「[MMLリファレンス](Unity%20PSG%20Player%20-%20MML%20re
 4. MMLSplitterの[multiChMMLString](#multichmmlstring)変数にMMLを入れて、[SplitMML()](#splitmml)で各チャンネルにMMLを分配し、[PlayAllChannels()](#playallchannels)で再生されます。  
 ![fig06](./img/fig06.png)
 
-
 ## 構成
 
 Unity PSG Playerは、
@@ -51,9 +48,11 @@ Unity PSG Playerは、
 * MMLを分割する「**MML Splitter**」
 
 で構成されています。  
+
+![composition](./img/composition.png)
+
 単音で使用する場合はMML Splitterは必要ありません。  
 また、PSG Playerで生成した音を鳴らすためにAudioSourceコンポーネントが必要になります。  
-
 
 ## 概要
 
@@ -75,7 +74,6 @@ PSG Playerで効果音を再現するには、効果音専用のPSG Playerを別
 
 なお、マルチチャンネルでPSG Playerを使う場合、AudioMixerを利用すると音量の調整などがしやすくなります。  
 
-
 ## サンプルレートについて
 
 PSG Playerでは生成するAudioClipのサンプルレートを設定できます。  
@@ -89,7 +87,7 @@ PSG Playerでは生成するAudioClipのサンプルレートを設定できま�
 |:----|:----|
 | 矩形波 | 2サンプル |
 | 25%(75%)パルス波 | 4サンプル |
-| 12.5%パルス波	| 8サンプル |
+| 12.5%パルス波 | 8サンプル |
 | 三角波 | 32サンプル |
 
 問題なく出せる音の周波数は、サンプルレートを上記のサンプル数で割った値となるので、特に三角波は最高音程が低くなります。  
@@ -97,35 +95,38 @@ PSG Playerでは生成するAudioClipのサンプルレートを設定できま�
 ※あくまでも期待通りの音程が出せる上限であり、高音になると音色は崩れていきます。  
 ※ノイズは独特な処理をしているので、サンプルレートが低いと高音で音量が下がります。  
 
-
 ## PSG Playerスクリプトリファレンス
 
 ### 変数・Public関数一覧
 
-- [変数](#変数)
-  - [mmlDecoder](#mmldecoder)
-  - [audioSource](#audiosource)
-  - [sampleRate](#samplerate)
-  - [audioClipSizeMilliSec](#audioclipsizemillisec)
-  - [a4Freq](#a4freq)
-  - [tickPerNote](#tickpernote)
-  - [programChange](#programchange)
-  - [seqListIndex](#seqlistindex)
-  - [seqList](#seqlist)
-  - [mmlString](#mmlstring)
-- [Public関数](#public関数)
-  - [Play()](#play)
-  - [Play(string \_mmlString)](#playstring-_mmlstring)
-  - [DecodeMML()](#decodemml)
-  - [PlayDecoded()](#playdecoded)
-  - [Stop()](#stop)
-  - [IsPlaying()](#isplaying)
-  - [Mute](#mute)
+* [変数](#変数)
+  * [mmlDecoder](#mmldecoder)
+  * [audioSource](#audiosource)
+  * [sampleRate](#samplerate)
+  * [audioClipSizeMilliSec](#audioclipsizemillisec)
+  * [a4Freq](#a4freq)
+  * [tickPerNote](#tickpernote)
+  * [programChange](#programchange)
+  * [seqListIndex](#seqlistindex)
+  * [seqList](#seqlist)
+  * [mmlString](#mmlstring)
+* [Public関数](#public関数)
+  * [Play()](#play)
+  * [Play(string \_mmlString)](#playstring-_mmlstring)
+  * [DecodeMML()](#decodemml)
+  * [PlayDecoded()](#playdecoded)
+  * [Stop()](#stop)
+  * [IsPlaying()](#isplaying)
+  * [Mute](#mute)
 
 ----
+
 ### 変数
+
 ----
+
 #### mmlDecoder
+
 ``` c#:PSGPlayer.cs
 [SerializeField] private MMLDecoder mmlDecoder;
 ```
@@ -133,7 +134,9 @@ PSG Playerでは生成するAudioClipのサンプルレートを設定できま�
 MMLをシーケンスデータに変換するMML Decoderコンポーネントを登録します。  
 
 ----
+
 #### audioSource
+
 ``` c#:PSGPlayer.cs
 [SerializeField] private AudioSource audioSource;
 ```
@@ -141,7 +144,9 @@ MMLをシーケンスデータに変換するMML Decoderコンポーネントを
 生成したAudioClipを渡すAudioSourceを登録します。  
 
 ----
+
 #### sampleRate
+
 ``` c#:PSGPlayer.cs
 public int sampleRate = 32000;
 ```
@@ -150,7 +155,9 @@ AudioClipのサンプルレートを設定します。
 デフォルトは32000Hz（32kHz）です。  
 
 ----
+
 #### audioClipSizeMilliSec
+
 ``` c#:PSGPlayer.cs
 public int audioClipSizeMilliSec = 1000;
 ```
@@ -159,7 +166,9 @@ AudioClipの長さを設定します。
 デフォルトは1000msec（1秒）です。  
 
 ----
+
 #### a4Freq
+
 ``` c#:PSGPlayer.cs
 public float a4Freq = 440f;
 ```
@@ -169,10 +178,13 @@ public float a4Freq = 440f;
 この変数はMMLのコマンドで変更することができます。  
 
 ----
+
 #### tickPerNote
+
 ``` C#:PSGPlayer.cs
 public int tickPerNote = 960;
 ```
+
 1拍（4分音符）の分解能を設定します。  
 音長はこの分解能に基づいたティック数に変換され、実際の音の長さ（秒）はテンポとこの分解能から計算されます。  
 
@@ -181,7 +193,9 @@ public int tickPerNote = 960;
 で0.25秒となります。)  
 
 ----
+
 #### programChange
+
 ``` c#:PSGPlayer.cs
 public int programChange;
 ```
@@ -201,7 +215,9 @@ public int programChange;
 この変数はMMLのコマンドで変更することができます。
 
 ----
+
 #### seqListIndex
+
 ``` c#:PSGPlayer.cs
 [SerializeField] private int seqListIndex = 0;
 ```
@@ -210,7 +226,9 @@ public int programChange;
 主にデバッグ用途で表示します。  
 
 ----
+
 #### seqList
+
 ``` c#:PSGPlayer.cs
 [SerializeField] private List<SeqEvent> seqList = new();
 ```
@@ -219,7 +237,9 @@ public int programChange;
 主にデバッグ用途で表示します。  
 
 ----
+
 #### mmlString
+
 ``` c#:PSGPlayer.cs
 [Multiline] public string mmlString = "";
 ```
@@ -228,69 +248,92 @@ public int programChange;
 この変数をMML Decoderに渡してシーケンスデータに変換します。  
 
 ----
+
 ### Public関数
+
 ----
+
 #### Play()
+
 ``` c#:PSGPlayer.cs
 public void Play();
 ```
+
 * パラメーター：なし  
 
 mmlStringのMML文字列をシーケンスデータに変換して、再生を開始します。  
 
 ----
+
 #### Play(string _mmlString)
+
 ``` c#:PSGPlayer.cs
 public void Play(string _mmlString);
 ```
+
 * パラメーター：_mmlString　MML文字列  
 
 パラメーターの引数をmmlString変数に渡して、シーケンスデータに変換して再生を開始します。  
 
 ----
+
 #### DecodeMML()
+
 ``` c#:PSGPlayer.cs
 public bool DecodeMML();
 ```
+
 * パラメーター：なし  
 * 戻り値：デコード成功でTrue  
 
 mmlStringのMML文字列をMML Decoderに渡してシーケンスデータに変換します。  
 
 ----
+
 #### PlayDecoded()
+
 ``` c#:PSGPlayer.cs
-ublic void PlayDecoded();
+public void PlayDecoded();
 ```
+
 * パラメーター：なし  
 
 デコード済みのシーケンスデータを再生します。  
 変換処理を行わないので、CPU負荷の軽減が期待できます。  
 
 ----
+
 #### Stop()
+
 ``` c#:PSGPlayer.cs
 public void Stop();
 ```
+
 * パラメーター：なし
 
 再生中の音を停止します。  
 
 ----
+
 #### IsPlaying()
+
 ``` c#:PSGPlayer.cs
 public bool IsPlaying();
 ```
+
 * パラメーター：なし
 * 戻り値：再生中ならTrue
 
 AudioSourceの再生状況を返します。  
 
 ----
+
 #### Mute
+
 ``` c#:PSGPlayer.cs
 public void Mute(bool isOn);
 ```
+
 * パラメーター：isOn　Trueならミュートオン
 
 ミュートをオンにすると、AudioSourceをミュートにした上で、生成されるサンプルを0（無音）にします。  
@@ -301,122 +344,157 @@ Falseで解除すると、AudioSourceは即時にミュート解除されます�
 
 ## MML Splitterスクリプトリファレンス
 
-### 変数・Public関数一覧
+### [MML Splitter] 変数・Public関数一覧
 
-- [変数](#変数-1)
-  - [psgPlayers](#psgplayers)
-  - [multiChMMLString](#multichmmlstring)
-- [Public関数](#public関数-1)
-  - [SplitMML()](#splitmml)
-  - [SplitMML(string \_multiChMMLString)](#splitmmlstring-_multichmmlstring)
-  - [SetAllChannelsSampleRate(int \_rate)](#setallchannelssamplerateint-_rate)
-  - [SetAllChannelClipSize(int \_msec)](#setallchannelclipsizeint-_msec)
-  - [PlayAllChannels()](#playallchannels)
-  - [PlayAllChannelsDecoded()](#playallchannelsdecoded)
-  - [StopAllChannels()](#stopallchannels)
-  - [IsAnyChannelPlaying()](#isanychannelplaying)
-  - [MuteChannel(int channel, bool isMute)](#mutechannelint-channel-bool-ismute)
+* [変数](#mml-splitter-変数)
+  * [psgPlayers](#psgplayers)
+  * [multiChMMLString](#multichmmlstring)
+* [Public関数](#mml-splitter-public関数)
+  * [SplitMML()](#splitmml)
+  * [SplitMML(string \_multiChMMLString)](#splitmmlstring-_multichmmlstring)
+  * [SetAllChannelsSampleRate(int \_rate)](#setallchannelssamplerateint-_rate)
+  * [SetAllChannelClipSize(int \_msec)](#setallchannelclipsizeint-_msec)
+  * [PlayAllChannels()](#playallchannels)
+  * [PlayAllChannelsDecoded()](#playallchannelsdecoded)
+  * [StopAllChannels()](#stopallchannels)
+  * [IsAnyChannelPlaying()](#isanychannelplaying)
+  * [MuteChannel(int channel, bool isMute)](#mutechannelint-channel-bool-ismute)
 
 ----
-### 変数
+
+### [MML Splitter] 変数
+
 ----
+
 #### psgPlayers
+
 ``` c#:MMLSplitter.cs
 [SerializeField] private PSGPlayer[] psgPlayers;
 ```
+
 MMLを分割送信するPSG Playerコンポーネントをチャンネルの数だけ登録します。  
 
 ----
+
 #### multiChMMLString
+
 ``` c#:MMLSplitter.cs
 public string multiChMMLString;
 ```
+
 分割送信する元のMML文字列を登録します。  
 
 ----
 
-### Public関数
+### [MML Splitter] Public関数
+
 ----
+
 #### SplitMML()
+
 ``` c#:MMLSplitter.cs
 public void SplitMML();
 ```
+
 * パラメーター：なし
 
 multiChMMLStringのMML文字列を分割して、psgPlayersに登録されてるPSG Playerに送信します。  
 送信チャンネルの振り分けについては「[MMLリファレンス](Unity%20PSG%20Player%20-%20MML%20reference.md#トラックのヘッダー)」を参照してください。  
 
 ----
+
 #### SplitMML(string _multiChMMLString)
+
 ``` c#:MMLSplitter.cs
 public void SplitMML(string _multiChMMLString);
 ```
+
 * パラメーター：_multiChMMLString　マルチチャンネルのMML文字列
 
 パラメーターの引数をmultiChMMLString変数に渡して、MMLをPSG Playerに分割送信します。  
 
 ----
+
 #### SetAllChannelsSampleRate(int _rate)
+
 ``` c#:MMLSplitter.cs
 public void SetAllChannelsSampleRate(int _rate);
 ```
+
 * パラメーター：_rate　サンプルレート
 
 全てのPSG Playerのサンプルレートを設定します（単位Hz）。  
 
 ----
+
 #### SetAllChannelClipSize(int _msec)
+
 ``` c#:MMLSplitter.cs
 public void SetAllChannelClipSize(int _msec);
 ```
+
 * パラメーター：_msec　AudioClipの長さ
 
 全てのPSG PlayerのAudioClip長さを設定します（単位ミリ秒）。  
 
 ----
+
 #### PlayAllChannels()
+
 ``` c#:MMLSplitter.cs
 public void PlayAllChannels();
 ```
+
 * パラメーター：なし
 
 全てのPSG Playerで同時にMMLをデコードして再生します。  
 
 ----
+
 #### PlayAllChannelsDecoded()
+
 ``` c#:MMLSplitter.cs
 public void PlayAllChannelsDecoded();
 ```
+
 * パラメーター：なし
 
 全てのPSG Playerで同時にデコード済みのシーケンスデータを再生します。  
 
 ----
+
 #### StopAllChannels()
+
 ``` c#:MMLSplitter.cs
 public void StopAllChannels();
 ```
+
 * パラメーター：なし
 
 全てのPSG Playerの再生を停止します。  
 
 ----
+
 #### IsAnyChannelPlaying()
+
 ``` c#:MMLSplitter.cs
 public bool IsAnyChannelPlaying();
 ```
+
 * パラメーター：なし
 * 戻り値：いずれかのPSG Playerが再生中ならTrue
 
 各PSG PlayerのAudioSourceのうち、どれか一つでも再生中ならTrueを返します。  
 
 ----
+
 #### MuteChannel(int channel, bool isMute)
+
 ``` c#:MMLSplitter.cs
 public void MuteChannel(int channel, bool isMute);
 ```
+
 * パラメーター：channel　対象チャンネル  
 　　　　　　　isMute　Trueならミュートオン
 
 指定したチャンネルをミュートします。
-

@@ -1,97 +1,91 @@
 # Unity PSG Player
 
-Unity上でレトロゲーム機などのPSG（Programmable Sound Generator）音源（いわゆる8ビットサウンド・ピコピコサウンド）を鳴らすライブラリです。  
-演奏データはMML（Music Macro Language）のテキストで、楽譜を文字で記述するため、手軽に音楽データを作成できます。  
-ファミコンの音源に似た（DPCMを除く）表現ができるように設計しています。  
+[日本語](README_JP.md)
 
+This library synthesizes PSG (Programmable Sound Generator) sound sources—commonly known as 8-bit sound—for retro game consoles like the NES within Unity.  
+Performance data is specified using MML (Music Macro Language) text, allowing you to easily create music data by describing the score with text.  
+It is designed to achieve sound characteristics similar to the NES sound source (excluding DPCM).
 
-## できること
+## What This Library Can Do
 
-* 音色は、矩形波4種類、三角波、ノイズ2種類が鳴らせます。三角波は4bit波形です。
-* 演奏表現として、スイープ、LFO（ビブラート）、音量エンベロープが使えます。
+* Four types of square waves, a triangle wave, and two types of noise can be synthesized. The triangle wave is a 4-bit waveform.
+* Performance expressions include sweep, LFO (vibrato), and volume envelope.
 
-> ファミコン音源の完全再現は目標にしていません。（めんどくさいので。）  
-> あくまでも、別途サウンドクリップなどを用意しないで、Unityだけで音を鳴らす目的で制作しています。  
+>I'm not aiming for a perfect recreation of the NES sound source. (It's too much trouble.)  I'm developing this solely to play sounds within Unity, without creating or searching for sound clips.  
 
-詳細は[マニュアル](./Unity%20PSG%20Player%20-%20manual.md)・[MMLリファレンス](./Unity%20PSG%20Player%20-%20MML%20reference.md)を参照してください。
+For details, refer to the [Manual](Unity%20PSG%20Player%20-%20manual_EN.md) and [MML Reference](Unity%20PSG%20Player%20-%20MML%20reference_EN.md).
 
+## Intended Use
 
-## 使用用途
+* For retro-style game BGM and sound effects.
+* When it's a hassle to create or search for sound effects one by one.
 
-* レトロ調ゲームのBGMや効果音に。
-* ちょっとした効果音を一々作ったり探したりするのが面倒なとき。
+## System Requirements
 
-## 動作環境
+* Unity 2022.3 (LTS) or later
 
-* Unity 2022.3(LTS)以上
+> I suspect it will work on versions prior to the above, but this has not been confirmed.
 
-> 上記以前のバージョンでも動作する気はしますが未確認。
+## Supported Platforms
 
-
-## 対応プラットホーム
-
-* 動作確認済み
+* Operation verified
   * Windows
   * Android
-* 非対応（現状）
+* Not supported (currently)
   * Web GL
-* 未検証
-  * 上記以外
+* Unverified
+  * Other than the above
 
-> Web GLは、ブラウザーが動的ストリーミングをサポートしていないので、現状は非対応。  
-> その他プラットホームは、単に自分では確認できる環境がないので、報告してもらえると助かります。
+> WebGL is currently unsupported because the browser does not support dynamic streaming.
+> For other platforms, since I don't have the means to verify them myself, I'd appreciate it if you could report them to me.
 
+## Quick Guide
 
-## クイックガイド
+* Download the unitypackage from the [Releases](https://github.com/bokanushi-design/Unity-PSG-Player/releases) page and import it into your project.
 
-### 基本的な使い方
+### Basic Usage
 
-1. PSG Playerプレハブをヒエラルキーに置きます。  
+1. Place the PSG Player prefab in the hierarchy.  
 ![fig01](./img/fig01.png)
 
-2. 操作するスクリプトでPSGPlayerクラス変数を用意し、設置したPSG Playerオブジェクトをアタッチします。  
+2. Prepare a PSGPlayer class variable in the script you are operating, and attach the PSG Player object you have placed.  
 ![fig02](./img/fig02.png)
 
-3. PSGPlayerの[mmlString](#mmlstring)変数に記述したMMLが、[Play()](#play)で再生されます。  
-MMLについては「[MMLリファレンス](Unity%20PSG%20Player%20-%20MML%20reference.md)」を参照してください。  
+3. The MML written in the [mmlString](Unity%20PSG%20Player%20-%20manual_EN.md) variable of the PSGPlayer is played by [Play()](Unity%20PSG%20Player%20-%20manual_EN.md).  
+For details on MML, refer to the [MML Reference](Unity%20PSG%20Player%20-%20MML%20reference_EN.md).  
 ![fig03](./img/fig03.png)
 
+### Multi-channel Usage
 
-### マルチチャンネルの使い方
-
-1. 必要なチャンネル数に合わせてPSG Playerプレハブを置きます。  
+1. Place the PSG Player prefab according to the required number of channels.  
 ![fig04](./img/fig04.png)
 
-2. 適当なゲームオブジェクトにMMLSplitterスクリプトをアタッチします。  
-3. インスペクターからMMLSplitterの[psgPlayers](#psgplayers)に、設置したPSG Playerを割り当てます。  
+2. Attach the MMLSplitter script to an appropriate game object.  
+3. Assign the placed PSG Player to the [psgPlayers](Unity%20PSG%20Player%20-%20manual_EN.md) field in the MMLSplitter from the Inspector.  
 ![fig05](./img/fig05.png)
 
-4. MMLSplitterの[multiChMMLString](#multichmmlstring)変数にMMLを入れて、[SplitMML()](#splitmml)で各チャンネルにMMLを分配し、[PlayAllChannels()](#playallchannels)で再生されます。  
+4. Place the MML into the [multiChMMLString](Unity%20PSG%20Player%20-%20manual_EN.md) variable of MMLSplitter, then use [SplitMML()](Unity%20PSG%20Player%20-%20manual_EN.md) to distribute the MML to each channel, and then play it using [PlayAllChannels()](Unity%20PSG%20Player%20-%20manual_EN.md).  
 ![fig06](./img/fig06.png)
 
+## Planned update (maybe)
 
-## アップデート（するかも）予定
+* JSON serialization of sequence data
 
-* シーケンスデータのJSON化
+> This may reduce CPU load by decreasing the burden of decoding MML.
 
-> MMLをデコードするコストが減るので、CPU負荷の軽減ができるかも？
+* Non-streaming playback
 
-* 非ストリーム再生
+> Pre-rendering and preparing waveform data in advance should improve responsiveness for sound effects and similar elements.
 
-> 効果音などは、プリレンダリングして波形データを用意しておくことで、レスポンスが良くなりそう。
+* Supports WebGL
 
-* Web GLに対応
+> There seems to be a way to play it on the web, but whether we'll integrate it is still undecided.
 
-> Webでも鳴らせる方法があるみたいだけど、統合するかは未定。
+* Replace sample music and sound effects with original content
 
-* サンプル曲と効果音をオリジナルに変更
+> I'm good at playing by ear, but I'm not so good at composing...  
+> If anyone is willing to create a sample track, your assistance would be greatly appreciated. 
 
-> 耳コピは得意なんですが作曲は苦手で。。。  
-> どなたか作ってくれる方がいらっしゃいましたらご協力お願いしますm(_ _)m  
+## License
 
-
-## ライセンス
-
-* MITライセンス
 * This library is under the MIT License.
-
