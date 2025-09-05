@@ -11,6 +11,9 @@ public class uPSGSample : MonoBehaviour
     private string[] sampleMMLs;
     private int sampleMMLIndex;
 
+    [SerializeField] private GameObject jsonPanel;
+    [SerializeField] private TMP_InputField jsonField;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -29,6 +32,7 @@ public class uPSGSample : MonoBehaviour
         inputField.text = mmlString;
         psgPlayer.mmlString = mmlString;    // PSG PlayerのmmlString変数にMMLを入れる
         psgPlayer.sampleRate = 44100;   // PSG Playerのサンプルレートを設定
+        jsonPanel.SetActive(false);
     }
 
     // Update is called once per frame
@@ -67,5 +71,26 @@ public class uPSGSample : MonoBehaviour
     public void OnNextButton()
     {
         SceneManager.LoadScene("MultiChannelSample");
+    }
+
+    public void OnExportJson()
+    {
+        jsonPanel.SetActive(true);
+        jsonField.text = psgPlayer.DecodeAndExportSeqJson(true);
+    }
+
+    public void OnJsonClose()
+    {
+        jsonPanel.SetActive(false);
+    }
+
+    public void OnImportJson()
+    {
+        string jsonString = Resources.Load<TextAsset>("sample-sequence_json").text;
+        Resources.UnloadUnusedAssets();
+        if (psgPlayer.ImportSeqJson(jsonString))
+        {
+            psgPlayer.PlaySequence();
+        }
     }
 }

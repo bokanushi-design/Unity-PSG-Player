@@ -11,8 +11,11 @@ public class uPSGMultiSample : MonoBehaviour
     [SerializeField] private AudioMixer audioMixer; // 音量を調整しやすいようにAudioMixerを使用
     [SerializeField] private Slider volumeSlider;
 
+    [SerializeField] private GameObject jsonPanel;
+    [SerializeField] private TMP_InputField multiSeqJsonField;
+
     public string mmlString;
-    private bool isMute = false;
+    private bool[] isMute = new bool[4];
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -26,6 +29,7 @@ public class uPSGMultiSample : MonoBehaviour
         _vol = Mathf.Clamp(_vol, -80f, 20f);
         float val = Mathf.Clamp01(Mathf.Pow(10f, _vol / 20f));
         volumeSlider.value = val;
+        jsonPanel.SetActive(false);
     }
 
     // Update is called once per frame
@@ -52,10 +56,30 @@ public class uPSGMultiSample : MonoBehaviour
         mmlString = inputText;
     }
 
-    public void OnMuteButton()
+    public void OnMuteToggleA(bool _isMute)
     {
-        isMute = !isMute;
-        mmlSplitter.MuteChannel(1, isMute); // チャンネル1（Bチャンネル）をミュート
+        isMute[0] = _isMute;
+        OnMute(0, isMute[0]);
+    }
+    public void OnMuteToggleB(bool _isMute)
+    {
+        isMute[1] = _isMute;
+        OnMute(1, isMute[1]);
+    }
+    public void OnMuteToggleC(bool _isMute)
+    {
+        isMute[2] = _isMute;
+        OnMute(2, isMute[2]);
+    }
+    public void OnMuteToggleD(bool _isMute)
+    {
+        isMute[3] = _isMute;
+        OnMute(3, isMute[3]);
+    }
+
+    private void OnMute(int _ch, bool _isMute)
+    {
+        mmlSplitter.MuteChannel(_ch, _isMute); // チャンネルをミュート
     }
 
     public void OnNextButton()
@@ -67,5 +91,24 @@ public class uPSGMultiSample : MonoBehaviour
     {
         val = Mathf.Clamp(val, 0.0001f, 10f);
         audioMixer.SetFloat("PSG-Mix", 20f * Mathf.Log10(val));
+    }
+
+    public void OnExportJson()
+    {
+        jsonPanel.SetActive(true);
+        mmlSplitter.SplitMML(mmlString);
+        multiSeqJsonField.text = mmlSplitter.DecodeAndExportMultiSeqJson(false);
+    }
+
+    public void OnImportJson()
+    {
+        string multiSeqJson = Resources.Load<TextAsset>("sample-multi-sequence_json").text;
+        mmlSplitter.ImportMultiSeqJson(multiSeqJson);
+        mmlSplitter.PlayAllChannelsDecoded();
+    }
+
+    public void OnJsonClose()
+    {
+        jsonPanel.SetActive(false);
     }
 }

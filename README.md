@@ -69,9 +69,10 @@ For details on MML, refer to the [MML Reference](Unity%20PSG%20Player%20-%20MML%
 
 ## Planned update (maybe)
 
-* JSON serialization of sequence data
+* ~~JSON serialization of sequence data~~
 
-> This may reduce CPU load by decreasing the burden of decoding MML.
+> ~~This may reduce CPU load by decreasing the burden of decoding MML.~~  
+> Supported in v0.9.3beta.
 
 * Non-streaming playback
 
@@ -84,7 +85,7 @@ For details on MML, refer to the [MML Reference](Unity%20PSG%20Player%20-%20MML%
 * Replace sample music and sound effects with original content
 
 > I'm good at playing by ear, but I'm not so good at composing...  
-> If anyone is willing to create a sample track, your assistance would be greatly appreciated. 
+> If anyone is willing to create a sample track, your assistance would be greatly appreciated.
 
 ## License
 

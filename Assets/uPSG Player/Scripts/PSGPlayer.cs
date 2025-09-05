@@ -281,7 +281,7 @@ public class PSGPlayer : MonoBehaviour
     }
 
     /// <summary>
-    /// Mute the volume of the currently playing audio to silence it.
+    /// Mute the volume of the currently playing audio to silence it
     /// </summary>
     /// <param name="isOn">True enables mute</param>
     public void Mute(bool isOn)
@@ -290,6 +290,90 @@ public class PSGPlayer : MonoBehaviour
         audioSource.mute = audioMute;
         if (audioMute) { seqMute = true; }
     }
+
+    /// <summary>
+    /// Playback of sequence data (same as PlayDecoded())
+    /// </summary>
+    public void PlaySequence()
+    {
+        PlayDecoded();
+    }
+
+    /// <summary>
+    /// Convert sequence data to JSON and return a string
+    /// </summary>
+    /// <param name="_prettyPrint">If True, format the output for readability</param>
+    /// <returns>JSON formatted string</returns>
+    public string ExportSeqJson(bool _prettyPrint)
+    {
+        if (seqList.Count < 1) { return null; }
+        string jsonString = JsonUtility.ToJson(GetSeqJson(), _prettyPrint);
+        return jsonString;
+    }
+
+    public string ExportSeqJson()
+    {
+        return ExportSeqJson(false);
+    }
+
+    /// <summary>
+    /// Return sequence data in SeqJson class object
+    /// </summary>
+    /// <returns>SeqJson Class Object</returns>
+    public SeqJson GetSeqJson()
+    {
+        SeqJson seqJson = new();
+        seqJson.jsonTickPerNote = tickPerNote;
+        seqJson.jsonSeqList.Clear();
+        seqJson.jsonSeqList.AddRange(seqList);
+        return seqJson;
+    }
+
+    /// <summary>
+    /// Decode MML and convert sequence data to JSON
+    /// </summary>
+    /// <param name="_prettyPrint">If True, format the output for readability</param>
+    /// <returns>JSON formatted string</returns>
+    public string DecodeAndExportSeqJson(bool _prettyPrint)
+    {
+        if (!DecodeMML()) { return null; }
+        return ExportSeqJson(_prettyPrint);
+    }
+
+    public string DecodeAndExportSeqJson()
+    {
+        return DecodeAndExportSeqJson(false);
+    }
+
+    /// <summary>
+    /// Read JSON as sequence data
+    /// </summary>
+    /// <param name="_jsonString">JSON formatted string</param>
+    /// <returns>True if import succeeded</returns>
+    public bool ImportSeqJson(string _jsonString)
+    {
+        SeqJson seqJson = JsonUtility.FromJson<SeqJson>(_jsonString);
+        return SetSeqJson(seqJson);
+    }
+
+    /// <summary>
+    /// Import the SeqJson class object directly into sequence data
+    /// </summary>
+    /// <param name="_seqJson">SeqJson Class Object</param>
+    /// <returns>True if import succeeded</returns>
+    public bool SetSeqJson(SeqJson _seqJson)
+    {
+        if (_seqJson.jsonTickPerNote > 0 && _seqJson.jsonSeqList.Count > 0)
+        {
+            tickPerNote = _seqJson.jsonTickPerNote;
+            seqList.Clear();
+            seqList.AddRange(_seqJson.jsonSeqList);
+            return true;
+        }
+        return false;
+    }
+
+    /*********************************/
 
     private void OnAudioRead(float[] data)
     {
@@ -515,9 +599,6 @@ public class PSGPlayer : MonoBehaviour
                     break;
                 case SEQ_CMD.PROGRAM_CHANGE:
                     programChange = seqList[seqListIndex].seqParam;
-                    break;
-                case SEQ_CMD.SHORT_NOISE:
-                    noiseShort = (seqList[seqListIndex].seqParam != 0) ? true : false;
                     break;
                 case SEQ_CMD.VOLUME:
                     seqVolume = Mathf.Clamp01(seqList[seqListIndex].seqParam / (float)ConstValue.SEQ_VOL_MAX);

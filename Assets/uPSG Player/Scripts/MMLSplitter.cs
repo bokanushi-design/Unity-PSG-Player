@@ -1,5 +1,6 @@
 using System.IO;
 using UnityEngine;
+using uPSG;
 
 public class MMLSplitter : MonoBehaviour
 {
@@ -154,6 +155,26 @@ public class MMLSplitter : MonoBehaviour
     }
 
     /// <summary>
+    /// Start simultaneous playback of sequences on all PSG player (same as PlayAllChannelsDecoded())
+    /// </summary>
+    public void PlayAllChannelsSequence()
+    {
+        PlayAllChannelsDecoded();
+    }
+
+    /// <summary>
+    /// Decode MML on all PSG players
+    /// </summary>
+    public void DecodeAllChannels()
+    {
+        if (!CheckPlayersReady()) { return; }
+        foreach (var pPlayer in psgPlayers)
+        {
+            pPlayer.DecodeMML();
+        }
+    }
+
+    /// <summary>
     /// Stop all PSG Player playback
     /// </summary>
     public void StopAllChannels()
@@ -215,5 +236,70 @@ public class MMLSplitter : MonoBehaviour
             result |= player.IsPlaying();
         }
         return result;
+    }
+
+    /// <summary>
+    /// Export decoded multi-channel sequences as JSON
+    /// </summary>
+    /// <param name="_prettyPrint">If True, format the output for readability</param>
+    /// <returns>JSON formatted string</returns>
+    public string ExportMultiSeqJson(bool _prettyPrint)
+    {
+        MultiSeqJson multiSeqJson = new();
+        foreach (var pPlayer in psgPlayers)
+        {
+            SeqJson seqJson = pPlayer.GetSeqJson();
+            multiSeqJson.seqJsonList.Add(seqJson);
+        }
+        string multiSeqJsonString = JsonUtility.ToJson(multiSeqJson, _prettyPrint);
+        return multiSeqJsonString;
+    }
+
+    public string ExportMultiSeqJson()
+    {
+        return ExportMultiSeqJson(false);
+    }
+
+    /// <summary>
+    /// Decode multi-channel MML into sequences and export JSON
+    /// </summary>
+    /// <param name="_prettyPrint">If True, format the output for readability</param>
+    /// <returns>JSON formatted string</returns>
+    public string DecodeAndExportMultiSeqJson(bool _prettyPrint)
+    {
+        DecodeAllChannels();
+        return ExportMultiSeqJson(_prettyPrint);
+    }
+
+    public string DecodeAndExportMultiSeqJson()
+    {
+        return DecodeAndExportMultiSeqJson(false);
+    }
+
+    /// <summary>
+    /// Import multichannel JSON data into sequences
+    /// </summary>
+    /// <param name="_jsonString">JSON formatted string</param>
+    public void ImportMultiSeqJson(string _jsonString)
+    {
+        MultiSeqJson multiSeqJson = JsonUtility.FromJson<MultiSeqJson>(_jsonString);
+        int seqJsonCount = 0;
+        foreach (var pPlayer in psgPlayers)
+        {
+            if (seqJsonCount < multiSeqJson.seqJsonList.Count)
+            {
+                SeqJson seqJson = multiSeqJson.seqJsonList[seqJsonCount];
+                pPlayer.SetSeqJson(seqJson);
+            }
+            else
+            {
+                SeqJson seqJson = new();
+                seqJson.jsonTickPerNote = ConstValue.DEFAULT_TICK_PER_NOTE;
+                SeqEvent seqEvent = new SeqEvent(SEQ_CMD.END_OF_SEQ, 0, 0);
+                seqJson.jsonSeqList.Add(seqEvent);
+                pPlayer.SetSeqJson(seqJson);
+            }
+            seqJsonCount++;
+        }
     }
 }

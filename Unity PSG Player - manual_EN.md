@@ -84,9 +84,12 @@ The number of samples required per wavelength varies depending on the tone, as f
 | 12.5% Pulse wave | 8 samples |
 | Triangle wave | 32 samples |
 
-The frequency of sound that can be produced without issues is determined by dividing the sample rate by the number of samples mentioned above, so the highest pitch achievable, especially for a triangle wave, will be lower.  
+The frequency of sound that can be produced without issues is determined by dividing the sample rate by the number of samples mentioned above, ~~so the highest pitch achievable, especially for a triangle wave, will be lower~~.
+
+`v0.9.2beta` Slightly modified the triangle wave generation logic, enabling it to produce high frequencies comparable to those of a square wave.
 
 * This represents the upper limit for achieving the expected pitch; higher notes will cause the tone to deteriorate.  
+ At the default sampling rate, proper sound reproduction is only guaranteed up to approximately the seventh octave (o7).  
 * Due to unique noise processing, lower sample rates will cause volume to decrease at high frequencies.  
 
 ## PSG Player script refference
@@ -109,9 +112,15 @@ The frequency of sound that can be produced without issues is determined by divi
   * [Play(string \_mmlString)](#playstring-_mmlstring)
   * [DecodeMML()](#decodemml)
   * [PlayDecoded()](#playdecoded)
+  * [PlaySequence()](#playsequence)
   * [Stop()](#stop)
   * [IsPlaying()](#isplaying)
-  * [Mute](#mute)
+  * [Mute(bool isOn)](#mutebool-ison)
+  * [ExportSeqJson(bool _prettyPrint)](#exportseqjsonbool-_prettyprint)
+  * [DecodeAndExportSeqJson(bool _prettyPrint)](#decodeandexportseqjsonbool-_prettyprint)
+  * [GetSeqJson()](#getseqjson)
+  * [ImportSeqJson(string _jsonString)](#importseqjsonstring-_jsonstring)
+  * [SetSeqJson(SeqJson _seqJson)](#setseqjsonseqjson-_seqjson)
 
 ----
 
@@ -278,7 +287,7 @@ public bool DecodeMML();
 ```
 
 * Parameter : None  
-* Return value : True if decoding succeeds  
+* Return value : `True` if decoding succeeds  
 
 Pass the MML string from the mmlString variable to the MML Decoder to convert it into sequence data.  
 
@@ -294,6 +303,19 @@ public void PlayDecoded();
 
 Plays back decoded sequence data.  
 Since no conversion processing is performed, reduced CPU load is expected.  
+
+----
+
+#### PlaySequence()
+
+``` c#:PSGPlayer.cs
+public void PlaySequence();
+```
+
+* Parameter : None  
+
+Plays back decoded sequence data.  
+Same as [PlayDecoded()](#playdecoded).
 
 ----
 
@@ -316,23 +338,94 @@ public bool IsPlaying();
 ```
 
 * Parameter : None
-* Return value : True if playing
+* Return value : `True` if playing
 
 Returns the playback status of AudioSource.  
 
 ----
 
-#### Mute
+#### Mute(bool isOn)
 
 ``` c#:PSGPlayer.cs
 public void Mute(bool isOn);
 ```
 
-* Parameter: **isOn** Set True to Mute on
+* Parameter: **isOn** Set `True` to Mute on
 
 When muted, the AudioSource is silenced and the generated sample is set to 0 (silence).  
-When unmuted with `false`, the AudioSource is immediately unmuted, but the sample remains silent until the next note event occurs.  
+When unmuted with `False`, the AudioSource is immediately unmuted, but the sample remains silent until the next note event occurs.  
 However, if unmuted before the buffered sample plays out, the already generated sample will be played.  
+
+----
+
+#### ExportSeqJson(bool _prettyPrint)
+
+``` c#:PSGPlayer.cs
+public string ExportSeqJson(bool _prettyPrint)
+```
+
+* Parameter: **_prettyPrint** `True` enables line breaks and indentation (`False` by default)
+* Return value: **JSON string**
+
+The decoded MML sequence data is converted to JSON and output as a string.  
+If there is no sequence data ([DecodeMML()](#decodemml) or [Play()](#play) has not been called), Null is returned.  
+The JSON content combines the [tickPerNote](#tickpernote) value with the [seqList](#seqlist).
+
+----
+
+#### DecodeAndExportSeqJson(bool _prettyPrint)
+
+``` c#:PSGPlayer.cs
+public string DecodeAndExportSeqJson(bool _prettyPrint)
+```
+
+* Parameter: **_prettyPrint** `True` enables line breaks and indentation (`False` by default)
+* Return value: **JSON string**
+
+After decoding MML, serializes the sequence data into JSON and outputs it.  
+
+----
+
+#### GetSeqJson()
+
+``` c#:PSGPlayer.cs
+public SeqJson GetSeqJson()
+```
+
+* Parameter: None
+* Return value: **SeqJson class object**
+
+Outputs the decoded MML sequence data as a SeqJson class object.  
+This is the data before being converted to JSON by [ExportSeqJson()](#exportseqjsonbool-_prettyprint).  
+It is primarily used when exporting multi-channel JSON with the MML Splitter.
+
+----
+
+#### ImportSeqJson(string _jsonString)
+
+``` c#:PSGPlayer.cs
+public bool ImportSeqJson(string _jsonString)
+```
+
+* Parameter: **_jsonString** JSON string
+* Return value: `True` if import succeeds
+
+Import JSON-formatted strings as sequence data.  
+At this time, the value of [tickPerNote](#tickpernote) is also loaded.
+
+----
+
+#### SetSeqJson(SeqJson _seqJson)
+
+``` c#:PSGPlayer.cs
+public bool SetSeqJson(SeqJson _seqJson)
+```
+
+* Parameter: **_jsonString** JSON string
+* Return value: `True` if import succeeds
+
+Directly reads the [tickPerNote](#tickpernote) value and sequence data from a SeqJson class object.  
+Primarily used when importing multi-channel JSON with MML Splitter.
 
 ----
 
@@ -350,9 +443,14 @@ However, if unmuted before the buffered sample plays out, the already generated 
   * [SetAllChannelClipSize(int \_msec)](#setallchannelclipsizeint-_msec)
   * [PlayAllChannels()](#playallchannels)
   * [PlayAllChannelsDecoded()](#playallchannelsdecoded)
+  * [PlayAllChannelsSequence()](#playallchannelssequence)
+  * [DecodeAllChannels()](#decodeallchannels)
   * [StopAllChannels()](#stopallchannels)
   * [IsAnyChannelPlaying()](#isanychannelplaying)
   * [MuteChannel(int channel, bool isMute)](#mutechannelint-channel-bool-ismute)
+  * [ExportMultiSeqJson(bool _prettyPrint)](#exportmultiseqjsonbool-_prettyprint)
+  * [DecodeAndExportMultiSeqJson(bool _prettyPrint)](#decodeandexportmultiseqjsonbool-_prettyprint)
+  * [ImportMultiSeqJson(string _jsonString)](#importmultiseqjsonstring-_jsonstring)
 
 ----
 
@@ -457,6 +555,32 @@ Play back the decoded sequence data simultaneously on all PSG Players.
 
 ----
 
+#### PlayAllChannelsSequence()
+
+``` c#:MMLSplitter.cs
+public void PlayAllChannelsSequence()
+```
+
+* Parameter : None
+
+Plays sequence data simultaneously on all PSG players.  
+Same as [PlayAllChannelsDecoded()](#playallchannelsdecoded).
+
+----
+
+#### DecodeAllChannels()
+
+``` c#:MMLSplitter.cs
+public void DecodeAllChannels()
+```
+
+* Parameter : None
+
+All PSG Players decode MML into sequence data.  
+Since multi-channel MML is not transmitted in split segments, please execute [SplitMML()](#splitmml) beforehand.
+
+----
+
 #### StopAllChannels()
 
 ``` c#:MMLSplitter.cs
@@ -476,9 +600,9 @@ public bool IsAnyChannelPlaying();
 ```
 
 * Parameter : None
-* Return value : True if any PSG Player is currently playing
+* Return value : `True` if any PSG Player is currently playing
 
-Returns true if any of the AudioSources for each PSG Player is currently playing.  
+Returns `True` if any of the AudioSources for each PSG Player is currently playing.  
 
 ----
 
@@ -489,6 +613,48 @@ public void MuteChannel(int channel, bool isMute);
 ```
 
 * Parameter: **channel** Target channel  
-　　　　　　　**isMute** True for mute on
+　　　　　　　**isMute** `True` for mute on
 
 Mutes the specified channel.
+
+----
+
+#### ExportMultiSeqJson(bool _prettyPrint)
+
+``` c#:MMLSplitter.cs
+public string ExportMultiSeqJson(bool _prettyPrint)
+```
+
+* Parameter: **_prettyPrint**  Enables line breaks and indentation when set to `True` (default `False`)
+* Return value: **JSON string**
+
+The decoded MML sequence data for each PSG Player is consolidated into JSON and output as a string.  
+The JSON contents consist of a list of [SeqJson class objects](#getseqjson) output by each PSG Player.
+
+----
+
+#### DecodeAndExportMultiSeqJson(bool _prettyPrint)
+
+``` c#:MMLSplitter.cs
+public string DecodeAndExportMultiSeqJson(bool _prettyPrint)
+```
+
+* Parameter: **_prettyPrint**  Enables line breaks and indentation when set to `True` (default `False`)
+* Return value: **JSON string**
+
+Each PSG Player's MML is decoded, then the sequence data is converted to JSON and output.  
+Since multi-channel MML is not transmitted in split segments, please execute [SplitMML()](#splitmml) beforehand.
+
+----
+
+#### ImportMultiSeqJson(string _jsonString)
+
+``` c#:PSGPlayer.cs
+public void ImportMultiSeqJson(string _jsonString)
+```
+
+* Parametr: **_jsonString** JSON string
+
+Import JSON-formatted strings as multi-channel sequence data.  
+
+----

@@ -90,9 +90,12 @@ PSG Playerでは生成するAudioClipのサンプルレートを設定できま�
 | 12.5%パルス波 | 8サンプル |
 | 三角波 | 32サンプル |
 
-問題なく出せる音の周波数は、サンプルレートを上記のサンプル数で割った値となるので、特に三角波は最高音程が低くなります。  
+問題なく出せる音の周波数は、サンプルレートを上記のサンプル数で割った値となるので、~~特に三角波は最高音程が低くなります。~~  
+
+`v0.9.2beta`三角波の生成ロジックを少し変更したので、矩形波と同程度の高音まで出せるようになりました。
 
 ※あくまでも期待通りの音程が出せる上限であり、高音になると音色は崩れていきます。  
+ デフォルトのサンプリングレートでは、ちゃんとした音が出るのはおおよそ7オクターブ目(o7)ぐらいまでです。  
 ※ノイズは独特な処理をしているので、サンプルレートが低いと高音で音量が下がります。  
 
 ## PSG Playerスクリプトリファレンス
@@ -115,9 +118,15 @@ PSG Playerでは生成するAudioClipのサンプルレートを設定できま�
   * [Play(string \_mmlString)](#playstring-_mmlstring)
   * [DecodeMML()](#decodemml)
   * [PlayDecoded()](#playdecoded)
+  * [PlaySequence()](#playsequence)
   * [Stop()](#stop)
   * [IsPlaying()](#isplaying)
-  * [Mute](#mute)
+  * [Mute(bool isOn)](#mutebool-ison)
+  * [ExportSeqJson(bool _prettyPrint)](#exportseqjsonbool-_prettyprint)
+  * [DecodeAndExportSeqJson(bool _prettyPrint)](#decodeandexportseqjsonbool-_prettyprint)
+  * [GetSeqJson()](#getseqjson)
+  * [ImportSeqJson(string _jsonString)](#importseqjsonstring-_jsonstring)
+  * [SetSeqJson(SeqJson _seqJson)](#setseqjsonseqjson-_seqjson)
 
 ----
 
@@ -261,7 +270,7 @@ public void Play();
 
 * パラメーター：なし  
 
-mmlStringのMML文字列をシーケンスデータに変換して、再生を開始します。  
+[mmlString](#mmlstring)のMML文字列をシーケンスデータに変換して、再生を開始します。  
 
 ----
 
@@ -271,9 +280,9 @@ mmlStringのMML文字列をシーケンスデータに変換して、再生を�
 public void Play(string _mmlString);
 ```
 
-* パラメーター：_mmlString　MML文字列  
+* パラメーター：**_mmlString**　MML文字列  
 
-パラメーターの引数をmmlString変数に渡して、シーケンスデータに変換して再生を開始します。  
+パラメーターの引数を[mmlString変数](#mmlstring)に渡して、シーケンスデータに変換して再生を開始します。  
 
 ----
 
@@ -284,9 +293,9 @@ public bool DecodeMML();
 ```
 
 * パラメーター：なし  
-* 戻り値：デコード成功でTrue  
+* 戻り値：デコード成功で`True`
 
-mmlStringのMML文字列をMML Decoderに渡してシーケンスデータに変換します。  
+[mmlString](#mmlstring)のMML文字列をMML Decoderに渡してシーケンスデータに変換します。  
 
 ----
 
@@ -300,6 +309,19 @@ public void PlayDecoded();
 
 デコード済みのシーケンスデータを再生します。  
 変換処理を行わないので、CPU負荷の軽減が期待できます。  
+
+----
+
+#### PlaySequence()
+
+``` c#:PSGPlayer.cs
+public void PlaySequence();
+```
+
+* パラメーター：なし  
+
+デコード済みのシーケンスデータを再生します。  
+[PlayDecoded()](#playdecoded)と同じです。
 
 ----
 
@@ -322,23 +344,94 @@ public bool IsPlaying();
 ```
 
 * パラメーター：なし
-* 戻り値：再生中ならTrue
+* 戻り値：再生中なら`True`
 
-AudioSourceの再生状況を返します。  
+[AudioSource](#audiosource)の再生状況を返します。  
 
 ----
 
-#### Mute
+#### Mute(bool isOn)
 
 ``` c#:PSGPlayer.cs
 public void Mute(bool isOn);
 ```
 
-* パラメーター：isOn　Trueならミュートオン
+* パラメーター：**isOn**　`True`ならミュートオン
 
-ミュートをオンにすると、AudioSourceをミュートにした上で、生成されるサンプルを0（無音）にします。  
-Falseで解除すると、AudioSourceは即時にミュート解除されますが、サンプルは次のノートイベントが発生するまで無音を継続します。  
+ミュートをオンにすると、[AudioSource](#audiosource)をミュートにした上で、生成されるサンプルを0（無音）にします。  
+`False`で解除すると、[AudioSource](#audiosource)は即時にミュート解除されますが、サンプルは次のノートイベントが発生するまで無音を継続します。  
 ただし、バッファ済みのサンプルより早くミュート解除した場合は、すでに生成されたサンプルが発音されます。  
+
+----
+
+#### ExportSeqJson(bool _prettyPrint)
+
+``` c#:PSGPlayer.cs
+public string ExportSeqJson(bool _prettyPrint)
+```
+
+* パラメーター：**_prettyPrint**　`True`で改行やインデントが有効（省略時`False`）
+* 戻り値：**JSON形式の文字列**
+
+デコードされたMMLのシーケンスデータをJSON化して文字列として出力します。  
+シーケンスデータが無い（[DecodeMML()](#decodemml)や[Play()](#play)を行ってない）場合はNullが戻ります。  
+JSONの中身は、[tickPerNote](#tickpernote)の値と[seqList](#seqlist)を組み合わせたものになります。
+
+----
+
+#### DecodeAndExportSeqJson(bool _prettyPrint)
+
+``` c#:PSGPlayer.cs
+public string DecodeAndExportSeqJson(bool _prettyPrint)
+```
+
+* パラメーター：**_prettyPrint**　`True`で改行やインデントが有効（省略時`False`）
+* 戻り値：**JSON形式の文字列**
+
+MMLをデコードしてからシーケンスデータをJSON化して出力します。  
+
+----
+
+#### GetSeqJson()
+
+``` c#:PSGPlayer.cs
+public SeqJson GetSeqJson()
+```
+
+* パラメーター：なし
+* 戻り値：**SeqJsonクラスオブジェクト**
+
+デコードされたMMLのシーケンスデータをSeqJsonクラスオブジェクトとして出力します。  
+[ExportSeqJson()](#exportseqjsonbool-_prettyprint)でJSON化する前のデータです。  
+主にMML SplitterでマルチチャンネルJSONをエクスポートする際に利用します。
+
+----
+
+#### ImportSeqJson(string _jsonString)
+
+``` c#:PSGPlayer.cs
+public bool ImportSeqJson(string _jsonString)
+```
+
+* パラメーター：**_jsonString**　JSON形式の文字列
+* 戻り値：インポート成功で`True`
+
+JSON形式の文字列をシーケンスデータとしてインポートします。  
+この際、[tickPerNote](#tickpernote)の値も読み込まれます。
+
+----
+
+#### SetSeqJson(SeqJson _seqJson)
+
+``` c#:PSGPlayer.cs
+public bool SetSeqJson(SeqJson _seqJson)
+```
+
+* パラメーター：**_seqJson**　SeqJsonクラスオブジェクト
+* 戻り値：インポート成功で`True`
+
+SeqJsonクラスオブジェクトから直接[tickPerNote](#tickpernote)の値とシーケンスデータを読み込みます。  
+主にMML SplitterでマルチチャンネルJSONをインポートする際に利用します。
 
 ----
 
@@ -356,9 +449,14 @@ Falseで解除すると、AudioSourceは即時にミュート解除されます�
   * [SetAllChannelClipSize(int \_msec)](#setallchannelclipsizeint-_msec)
   * [PlayAllChannels()](#playallchannels)
   * [PlayAllChannelsDecoded()](#playallchannelsdecoded)
+  * [PlayAllChannelsSequence()](#playallchannelssequence)
+  * [DecodeAllChannels()](#decodeallchannels)
   * [StopAllChannels()](#stopallchannels)
   * [IsAnyChannelPlaying()](#isanychannelplaying)
   * [MuteChannel(int channel, bool isMute)](#mutechannelint-channel-bool-ismute)
+  * [ExportMultiSeqJson(bool _prettyPrint)](#exportmultiseqjsonbool-_prettyprint)
+  * [DecodeAndExportMultiSeqJson(bool _prettyPrint)](#decodeandexportmultiseqjsonbool-_prettyprint)
+  * [ImportMultiSeqJson(string _jsonString)](#importmultiseqjsonstring-_jsonstring)
 
 ----
 
@@ -409,9 +507,9 @@ multiChMMLStringのMML文字列を分割して、psgPlayersに登録されてる
 public void SplitMML(string _multiChMMLString);
 ```
 
-* パラメーター：_multiChMMLString　マルチチャンネルのMML文字列
+* パラメーター：**_multiChMMLString**　マルチチャンネルのMML文字列
 
-パラメーターの引数をmultiChMMLString変数に渡して、MMLをPSG Playerに分割送信します。  
+パラメーターの引数を[multiChMMLString変数](#multichmmlstring)に渡して、MMLをPSG Playerに分割送信します。  
 
 ----
 
@@ -421,7 +519,7 @@ public void SplitMML(string _multiChMMLString);
 public void SetAllChannelsSampleRate(int _rate);
 ```
 
-* パラメーター：_rate　サンプルレート
+* パラメーター：**_rate**　サンプルレート
 
 全てのPSG Playerのサンプルレートを設定します（単位Hz）。  
 
@@ -433,7 +531,7 @@ public void SetAllChannelsSampleRate(int _rate);
 public void SetAllChannelClipSize(int _msec);
 ```
 
-* パラメーター：_msec　AudioClipの長さ
+* パラメーター：**_msec**　AudioClipの長さ
 
 全てのPSG PlayerのAudioClip長さを設定します（単位ミリ秒）。  
 
@@ -448,6 +546,7 @@ public void PlayAllChannels();
 * パラメーター：なし
 
 全てのPSG Playerで同時にMMLをデコードして再生します。  
+マルチチャンネルMMLの分割送信は行わないので、事前に[SplitMML()](#splitmml)を実行してください。
 
 ----
 
@@ -460,6 +559,32 @@ public void PlayAllChannelsDecoded();
 * パラメーター：なし
 
 全てのPSG Playerで同時にデコード済みのシーケンスデータを再生します。  
+
+----
+
+#### PlayAllChannelsSequence()
+
+``` c#:MMLSplitter.cs
+public void PlayAllChannelsSequence()
+```
+
+* パラメーター：なし
+
+全てのPSG Playerで同時にシーケンスデータを再生します。  
+[PlayAllChannelsDecoded()](#playallchannelsdecoded)と同じです。
+
+----
+
+#### DecodeAllChannels()
+
+``` c#:MMLSplitter.cs
+public void DecodeAllChannels()
+```
+
+* パラメーター：なし
+
+全てのPSG PlayerでMMLをシーケンスデータにデコードします。  
+マルチチャンネルMMLの分割送信は行わないので、事前に[SplitMML()](#splitmml)を実行してください。
 
 ----
 
@@ -482,9 +607,9 @@ public bool IsAnyChannelPlaying();
 ```
 
 * パラメーター：なし
-* 戻り値：いずれかのPSG Playerが再生中ならTrue
+* 戻り値：いずれかのPSG Playerが再生中なら`True`
 
-各PSG PlayerのAudioSourceのうち、どれか一つでも再生中ならTrueを返します。  
+各PSG Playerの[AudioSource](#audiosource)のうち、どれか一つでも再生中なら`True`を返します。  
 
 ----
 
@@ -494,7 +619,49 @@ public bool IsAnyChannelPlaying();
 public void MuteChannel(int channel, bool isMute);
 ```
 
-* パラメーター：channel　対象チャンネル  
-　　　　　　　isMute　Trueならミュートオン
+* パラメーター：**channel**　対象チャンネル  
+　　　　　　　**isMute**　`True`ならミュートオン
 
 指定したチャンネルをミュートします。
+
+----
+
+#### ExportMultiSeqJson(bool _prettyPrint)
+
+``` c#:MMLSplitter.cs
+public string ExportMultiSeqJson(bool _prettyPrint)
+```
+
+* パラメーター：**_prettyPrint**　`True`で改行やインデントが有効（省略時`False`）
+* 戻り値：**JSON形式の文字列**
+
+各PSG PlayerのデコードされたMMLのシーケンスデータをまとめてJSON化して文字列として出力します。  
+JSONの中身は、各PSG Playerで出力した[SeqJsonクラスオブジェクト](#getseqjson)をリスト化したものになります。
+
+----
+
+#### DecodeAndExportMultiSeqJson(bool _prettyPrint)
+
+``` c#:MMLSplitter.cs
+public string DecodeAndExportMultiSeqJson(bool _prettyPrint)
+```
+
+* パラメーター：**_prettyPrint**　`True`で改行やインデントが有効（省略時`False`）
+* 戻り値：**JSON形式の文字列**
+
+各PSG PlayerのMMLをデコードしてからシーケンスデータをJSON化して出力します。  
+マルチチャンネルMMLの分割送信は行わないので、事前に[SplitMML()](#splitmml)を実行してください。
+
+----
+
+#### ImportMultiSeqJson(string _jsonString)
+
+``` c#:PSGPlayer.cs
+public void ImportMultiSeqJson(string _jsonString)
+```
+
+* パラメーター：**_jsonString**　JSON形式の文字列
+
+JSON形式の文字列をマルチチャンネルのシーケンスデータとしてインポートします。  
+
+----

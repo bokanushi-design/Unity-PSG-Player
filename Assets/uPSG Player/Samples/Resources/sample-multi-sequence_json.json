@@ -1,0 +1,699 @@
+{
+    "seqJsonList": [
+        {
+            "jsonTickPerNote": 960,
+            "jsonSeqList": [
+                {
+                    "seqCmd": 1,
+                    "seqParam": 164,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 22,
+                    "seqParam": 1,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 23,
+                    "seqParam": 8,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 23,
+                    "seqParam": 8,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 23,
+                    "seqParam": 10,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 24,
+                    "seqParam": 0,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 31,
+                    "seqParam": 1,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 32,
+                    "seqParam": 0,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 34,
+                    "seqParam": 200,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 33,
+                    "seqParam": 120,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 35,
+                    "seqParam": 0,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 0,
+                    "seqParam": 3,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 21,
+                    "seqParam": 1,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 31,
+                    "seqParam": -1,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 13,
+                    "seqParam": 99,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 40,
+                    "seqParam": 0,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 80,
+                    "seqStep": 960
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 80,
+                    "seqStep": 960
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 78,
+                    "seqStep": 640
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 78,
+                    "seqStep": 960
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 78,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 78,
+                    "seqStep": 640
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 78,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 11,
+                    "seqParam": 0,
+                    "seqStep": 640
+                },
+                {
+                    "seqCmd": 31,
+                    "seqParam": 1,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 76,
+                    "seqStep": 960
+                },
+                {
+                    "seqCmd": 31,
+                    "seqParam": -1,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 76,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 76,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 76,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 78,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 80,
+                    "seqStep": 960
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 80,
+                    "seqStep": 960
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 78,
+                    "seqStep": 640
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 78,
+                    "seqStep": 960
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 78,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 78,
+                    "seqStep": 640
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 78,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 11,
+                    "seqParam": 0,
+                    "seqStep": 640
+                },
+                {
+                    "seqCmd": 31,
+                    "seqParam": 1,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 77,
+                    "seqStep": 960
+                },
+                {
+                    "seqCmd": 31,
+                    "seqParam": -1,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 77,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 77,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 77,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 78,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 99,
+                    "seqParam": 0,
+                    "seqStep": 0
+                }
+            ]
+        },
+        {
+            "jsonTickPerNote": 960,
+            "jsonSeqList": [
+                {
+                    "seqCmd": 1,
+                    "seqParam": 164,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 31,
+                    "seqParam": 1,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 32,
+                    "seqParam": 0,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 34,
+                    "seqParam": 200,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 33,
+                    "seqParam": 120,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 35,
+                    "seqParam": 0,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 0,
+                    "seqParam": 1,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 20,
+                    "seqParam": 6,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 31,
+                    "seqParam": -1,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 13,
+                    "seqParam": 99,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 40,
+                    "seqParam": 0,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 41,
+                    "seqParam": 0,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 73,
+                    "seqStep": 960
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 73,
+                    "seqStep": 960
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 72,
+                    "seqStep": 640
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 72,
+                    "seqStep": 960
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 72,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 71,
+                    "seqStep": 640
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 71,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 11,
+                    "seqParam": 0,
+                    "seqStep": 640
+                },
+                {
+                    "seqCmd": 31,
+                    "seqParam": 1,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 68,
+                    "seqStep": 960
+                },
+                {
+                    "seqCmd": 31,
+                    "seqParam": -1,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 68,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 68,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 68,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 75,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 42,
+                    "seqParam": 2,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 99,
+                    "seqParam": 0,
+                    "seqStep": 0
+                }
+            ]
+        },
+        {
+            "jsonTickPerNote": 960,
+            "jsonSeqList": [
+                {
+                    "seqCmd": 1,
+                    "seqParam": 164,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 0,
+                    "seqParam": 4,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 20,
+                    "seqParam": 15,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 13,
+                    "seqParam": 99,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 40,
+                    "seqParam": 0,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 41,
+                    "seqParam": 0,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 57,
+                    "seqStep": 640
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 57,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 57,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 69,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 57,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 57,
+                    "seqStep": 640
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 57,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 57,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 69,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 57,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 56,
+                    "seqStep": 640
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 56,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 56,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 68,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 56,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 61,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 73,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 61,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 61,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 30,
+                    "seqParam": -200,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 77,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 75,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 30,
+                    "seqParam": 0,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 42,
+                    "seqParam": 2,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 99,
+                    "seqParam": 0,
+                    "seqStep": 0
+                }
+            ]
+        },
+        {
+            "jsonTickPerNote": 960,
+            "jsonSeqList": [
+                {
+                    "seqCmd": 1,
+                    "seqParam": 164,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 22,
+                    "seqParam": 1,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 23,
+                    "seqParam": 10,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 23,
+                    "seqParam": 9,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 23,
+                    "seqParam": 8,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 23,
+                    "seqParam": 7,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 23,
+                    "seqParam": 6,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 23,
+                    "seqParam": 5,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 23,
+                    "seqParam": 4,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 23,
+                    "seqParam": 3,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 23,
+                    "seqParam": 2,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 23,
+                    "seqParam": 1,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 23,
+                    "seqParam": 0,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 24,
+                    "seqParam": 0,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 0,
+                    "seqParam": 5,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 21,
+                    "seqParam": 1,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 40,
+                    "seqParam": 0,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 41,
+                    "seqParam": 0,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 13,
+                    "seqParam": 30,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 65,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 65,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 65,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 13,
+                    "seqParam": 90,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 67,
+                    "seqStep": 640
+                },
+                {
+                    "seqCmd": 13,
+                    "seqParam": 30,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 10,
+                    "seqParam": 65,
+                    "seqStep": 320
+                },
+                {
+                    "seqCmd": 42,
+                    "seqParam": 8,
+                    "seqStep": 0
+                },
+                {
+                    "seqCmd": 99,
+                    "seqParam": 0,
+                    "seqStep": 0
+                }
+            ]
+        }
+    ]
+}

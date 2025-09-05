@@ -1,0 +1,155 @@
+{
+    "jsonTickPerNote": 960,
+    "jsonSeqList": [
+        {
+            "seqCmd": 1,
+            "seqParam": 220,
+            "seqStep": 0
+        },
+        {
+            "seqCmd": 0,
+            "seqParam": 1,
+            "seqStep": 0
+        },
+        {
+            "seqCmd": 10,
+            "seqParam": 72,
+            "seqStep": 120
+        },
+        {
+            "seqCmd": 10,
+            "seqParam": 67,
+            "seqStep": 120
+        },
+        {
+            "seqCmd": 10,
+            "seqParam": 72,
+            "seqStep": 120
+        },
+        {
+            "seqCmd": 10,
+            "seqParam": 76,
+            "seqStep": 120
+        },
+        {
+            "seqCmd": 10,
+            "seqParam": 79,
+            "seqStep": 120
+        },
+        {
+            "seqCmd": 10,
+            "seqParam": 84,
+            "seqStep": 120
+        },
+        {
+            "seqCmd": 10,
+            "seqParam": 79,
+            "seqStep": 120
+        },
+        {
+            "seqCmd": 10,
+            "seqParam": 68,
+            "seqStep": 120
+        },
+        {
+            "seqCmd": 10,
+            "seqParam": 72,
+            "seqStep": 120
+        },
+        {
+            "seqCmd": 10,
+            "seqParam": 75,
+            "seqStep": 120
+        },
+        {
+            "seqCmd": 10,
+            "seqParam": 80,
+            "seqStep": 120
+        },
+        {
+            "seqCmd": 10,
+            "seqParam": 75,
+            "seqStep": 120
+        },
+        {
+            "seqCmd": 10,
+            "seqParam": 80,
+            "seqStep": 120
+        },
+        {
+            "seqCmd": 10,
+            "seqParam": 84,
+            "seqStep": 120
+        },
+        {
+            "seqCmd": 10,
+            "seqParam": 87,
+            "seqStep": 120
+        },
+        {
+            "seqCmd": 10,
+            "seqParam": 92,
+            "seqStep": 120
+        },
+        {
+            "seqCmd": 10,
+            "seqParam": 87,
+            "seqStep": 120
+        },
+        {
+            "seqCmd": 10,
+            "seqParam": 70,
+            "seqStep": 120
+        },
+        {
+            "seqCmd": 10,
+            "seqParam": 74,
+            "seqStep": 120
+        },
+        {
+            "seqCmd": 10,
+            "seqParam": 77,
+            "seqStep": 120
+        },
+        {
+            "seqCmd": 10,
+            "seqParam": 82,
+            "seqStep": 120
+        },
+        {
+            "seqCmd": 10,
+            "seqParam": 77,
+            "seqStep": 120
+        },
+        {
+            "seqCmd": 10,
+            "seqParam": 82,
+            "seqStep": 120
+        },
+        {
+            "seqCmd": 10,
+            "seqParam": 86,
+            "seqStep": 120
+        },
+        {
+            "seqCmd": 10,
+            "seqParam": 89,
+            "seqStep": 120
+        },
+        {
+            "seqCmd": 10,
+            "seqParam": 94,
+            "seqStep": 120
+        },
+        {
+            "seqCmd": 10,
+            "seqParam": 89,
+            "seqStep": 120
+        },
+        {
+            "seqCmd": 99,
+            "seqParam": 0,
+            "seqStep": 0
+        }
+    ]
+}
