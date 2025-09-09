@@ -74,9 +74,10 @@ For details on MML, refer to the [MML Reference](Unity%20PSG%20Player%20-%20MML%
 > ~~This may reduce CPU load by decreasing the burden of decoding MML.~~  
 > Supported in v0.9.3beta.
 
-* Non-streaming playback
+* ~~Non-streaming playback~~
 
-> Pre-rendering and preparing waveform data in advance should improve responsiveness for sound effects and similar elements.
+> ~~Pre-rendering and preparing waveform data in advance should improve responsiveness for sound effects and similar elements.~~
+> Supported in v0.9.4beta.
 
 * Supports WebGL
 
