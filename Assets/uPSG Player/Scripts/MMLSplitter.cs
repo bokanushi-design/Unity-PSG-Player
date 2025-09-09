@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using uPSG;
@@ -301,5 +302,41 @@ public class MMLSplitter : MonoBehaviour
             }
             seqJsonCount++;
         }
+    }
+
+    /// <summary>
+    /// Mix the waveform data rendered by each PSG Player and export it as an AudioClip.
+    /// </summary>
+    /// <param name="_sampleRate"></param>
+    /// <returns>Rendered AudioClip</returns>
+    public AudioClip ExportMixedAudioClip(int _sampleRate)
+    {
+        SetAllChannelsSampleRate(_sampleRate);
+        List<float[]> channelClipData = new();
+        int mixedDataLength = 0;
+        foreach(var pPlayer in psgPlayers)
+        {
+            float[] clipData = pPlayer.RenderSequenceTodClipData();
+            channelClipData.Add(clipData);
+            if (clipData.Length > mixedDataLength) { mixedDataLength = clipData.Length; };
+        }
+
+        float[] mixedData = new float[mixedDataLength];
+        for (int dataCount=0; dataCount<mixedDataLength; dataCount++)
+        {
+            float data = 0;
+            for (int chCount=0; chCount<channelClipData.Count; chCount++)
+            {
+                if (dataCount < channelClipData[chCount].Length)
+                {
+                    data += channelClipData[chCount][dataCount];
+                }
+            }
+            mixedData[dataCount] = data / channelClipData.Count;
+        }
+
+        AudioClip audioClip = AudioClip.Create("Mixed Rendered Sound", mixedDataLength, 1, _sampleRate, false);
+        audioClip.SetData(mixedData, 0);
+        return audioClip;
     }
 }

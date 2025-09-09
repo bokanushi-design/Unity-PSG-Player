@@ -5,16 +5,16 @@ using UnityEngine.SceneManagement;
 public class uPSGSample : MonoBehaviour
 {
     [SerializeField] private TMP_InputField inputField;
-    [SerializeField] private PSGPlayer psgPlayer;   // 設置したPSG Playerプレハブを登録する
+    [SerializeField] private PSGPlayer psgPlayer;   // Register the placed PSG Player prefab.
+    [SerializeField] private AudioSource audioSource;   // AudioSource for playing rendered clip.
 
     public string mmlString;
     private string[] sampleMMLs;
     private int sampleMMLIndex;
 
     [SerializeField] private GameObject jsonPanel;
-    [SerializeField] private TMP_InputField jsonField;
+    [SerializeField] private TMP_InputField jsonField;  // Field for JSON display.
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         sampleMMLIndex = 0;
@@ -30,27 +30,28 @@ public class uPSGSample : MonoBehaviour
         };
         mmlString = sampleMMLs[sampleMMLIndex];
         inputField.text = mmlString;
-        psgPlayer.mmlString = mmlString;    // PSG PlayerのmmlString変数にMMLを入れる
-        psgPlayer.sampleRate = 44100;   // PSG Playerのサンプルレートを設定
+        psgPlayer.mmlString = mmlString;    // Insert MML into the mmlString variable of the PSG Player.
+        psgPlayer.sampleRate = 44100;   // Set the sample rate for the PSG Player.
         jsonPanel.SetActive(false);
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
     public void OnPlayButton()
     {
-        if (psgPlayer.IsPlaying())  // PSG Playerが鳴っているか
+        if (psgPlayer.IsPlaying())  // Is the PSG Player playing?
         {
-            psgPlayer.Stop();   // 再生を停止
+            psgPlayer.Stop();   // Stop playback.
         }
         else
         {
-            psgPlayer.Play();   // MMLをデコードして再生
+            psgPlayer.Play();   // Decode MML and play.
         }
+    }
+
+    public void OnRenderAudioClip()
+    {
+        psgPlayer.DecodeMML();  // Decode MML in PSG Player.
+        AudioClip audioClip = psgPlayer.ExportRenderedAudioClip();  // Render sequence to AudioClip.
+        audioSource.PlayOneShot(audioClip);
     }
 
     public void OnChangeSampleMML()
@@ -76,7 +77,7 @@ public class uPSGSample : MonoBehaviour
     public void OnExportJson()
     {
         jsonPanel.SetActive(true);
-        jsonField.text = psgPlayer.DecodeAndExportSeqJson(true);
+        jsonField.text = psgPlayer.DecodeAndExportSeqJson(true);    // Serialize the sequence into JSON.
     }
 
     public void OnJsonClose()
@@ -86,9 +87,9 @@ public class uPSGSample : MonoBehaviour
 
     public void OnImportJson()
     {
-        string jsonString = Resources.Load<TextAsset>("sample-sequence_json").text;
+        string jsonString = Resources.Load<TextAsset>("sample-sequence_json").text; // Load the sample JSON file.
         Resources.UnloadUnusedAssets();
-        if (psgPlayer.ImportSeqJson(jsonString))
+        if (psgPlayer.ImportSeqJson(jsonString))    // Deserialize JSON into a sequence.
         {
             psgPlayer.PlaySequence();
         }

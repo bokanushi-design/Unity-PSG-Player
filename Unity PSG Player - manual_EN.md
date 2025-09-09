@@ -121,6 +121,8 @@ The frequency of sound that can be produced without issues is determined by divi
   * [GetSeqJson()](#getseqjson)
   * [ImportSeqJson(string _jsonString)](#importseqjsonstring-_jsonstring)
   * [SetSeqJson(SeqJson _seqJson)](#setseqjsonseqjson-_seqjson)
+  * [RenderSequenceTodClipData()](#rendersequencetodclipdata)
+  * [ExportRenderedAudioClip()](#exportrenderedaudioclip)
 
 ----
 
@@ -364,6 +366,8 @@ However, if unmuted before the buffered sample plays out, the already generated 
 public string ExportSeqJson(bool _prettyPrint)
 ```
 
+`v0.9.3beta`
+
 * Parameter: **_prettyPrint** `True` enables line breaks and indentation (`False` by default)
 * Return value: **JSON string**
 
@@ -379,6 +383,8 @@ The JSON content combines the [tickPerNote](#tickpernote) value with the [seqLis
 public string DecodeAndExportSeqJson(bool _prettyPrint)
 ```
 
+`v0.9.3beta`
+
 * Parameter: **_prettyPrint** `True` enables line breaks and indentation (`False` by default)
 * Return value: **JSON string**
 
@@ -391,6 +397,8 @@ After decoding MML, serializes the sequence data into JSON and outputs it.
 ``` c#:PSGPlayer.cs
 public SeqJson GetSeqJson()
 ```
+
+`v0.9.3beta`
 
 * Parameter: None
 * Return value: **SeqJson class object**
@@ -407,6 +415,8 @@ It is primarily used when exporting multi-channel JSON with the MML Splitter.
 public bool ImportSeqJson(string _jsonString)
 ```
 
+`v0.9.3beta`
+
 * Parameter: **_jsonString** JSON string
 * Return value: `True` if import succeeds
 
@@ -421,11 +431,49 @@ At this time, the value of [tickPerNote](#tickpernote) is also loaded.
 public bool SetSeqJson(SeqJson _seqJson)
 ```
 
+`v0.9.3beta`
+
 * Parameter: **_jsonString** JSON string
 * Return value: `True` if import succeeds
 
 Directly reads the [tickPerNote](#tickpernote) value and sequence data from a SeqJson class object.  
 Primarily used when importing multi-channel JSON with MML Splitter.
+
+----
+
+#### RenderSequenceTodClipData()
+
+``` c#:PSGPlayer.cs
+public float[] RenderSequenceTodClipData()
+```
+
+`v0.9.4beta`
+
+* Parameter: None
+* Return value: **Sample data consisting of a float array**
+
+Generates the waveform data for the entire sequence.  
+Calculates each sample at the sample rate specified by [sampleRate](#samplerate), then returns each sample as a float array.  
+The higher the sample rate and the longer the sequence, rendering will take longer time.  
+Additionally, the sequence loop command ([MML Loop “L”](Unity%20PSG%20Player%20-%20manual_JP.md)) will be disabled during rendering.
+
+----
+
+#### ExportRenderedAudioClip()
+
+``` c#:PSGPlayer.cs
+public AudioClip ExportRenderedAudioClip()
+```
+
+`v0.9.4beta`
+
+* Parameter: None
+* Return value: **Rendered AudioClip**
+
+Generate waveform data for the entire sequence and export it as an AudioClip.  
+The sample rate of the AudioClip is set to the value specified by [samplRate](#samplerate).  
+When prioritizing responsiveness for sound effects, you can use this function to prepare the AudioClip in advance.  
+Conversely, for long sequences such as background music, be aware to rendering will takes long time.
 
 ----
 
@@ -451,6 +499,7 @@ Primarily used when importing multi-channel JSON with MML Splitter.
   * [ExportMultiSeqJson(bool _prettyPrint)](#exportmultiseqjsonbool-_prettyprint)
   * [DecodeAndExportMultiSeqJson(bool _prettyPrint)](#decodeandexportmultiseqjsonbool-_prettyprint)
   * [ImportMultiSeqJson(string _jsonString)](#importmultiseqjsonstring-_jsonstring)
+  * [ExportMixedAudioClip(int _sampleRate)](#exportmixedaudioclipint-_samplerate)
 
 ----
 
@@ -625,6 +674,8 @@ Mutes the specified channel.
 public string ExportMultiSeqJson(bool _prettyPrint)
 ```
 
+`v0.9.3beta`
+
 * Parameter: **_prettyPrint**  Enables line breaks and indentation when set to `True` (default `False`)
 * Return value: **JSON string**
 
@@ -638,6 +689,8 @@ The JSON contents consist of a list of [SeqJson class objects](#getseqjson) outp
 ``` c#:MMLSplitter.cs
 public string DecodeAndExportMultiSeqJson(bool _prettyPrint)
 ```
+
+`v0.9.3beta`
 
 * Parameter: **_prettyPrint**  Enables line breaks and indentation when set to `True` (default `False`)
 * Return value: **JSON string**
@@ -653,8 +706,29 @@ Since multi-channel MML is not transmitted in split segments, please execute [Sp
 public void ImportMultiSeqJson(string _jsonString)
 ```
 
+`v0.9.3beta`
+
 * Parametr: **_jsonString** JSON string
 
 Import JSON-formatted strings as multi-channel sequence data.  
+
+----
+
+#### ExportMixedAudioClip(int _sampleRate)
+
+``` c#:PSGPlayer.cs
+public AudioClip ExportMixedAudioClip(int _sampleRate)
+```
+
+`v0.9.4beta`
+
+* Parameter: **_sampleRate** AudioClip sample rate
+* Return value: **AudioClip**
+
+Mix the waveform data rendered by each PSG Player and export as an AudioClip.  
+The combined waveform data is summed by dividing by the number of channels to ensure it does not exceed the sample value range.  
+Therefore, the maximum volume of a single tone decreases depending on the number of channels.  
+Additionally, since the sample rate must be consistent across all channels, after using this function, the [sampleRate](#samplerate) of each PSG Player will be set to the value specified in the argument.  
+Please note that rendering all PSG players before mixing can take a significant amount of time, especially for longer sequences.
 
 ----

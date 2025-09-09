@@ -71,8 +71,8 @@ public class PSGPlayer : MonoBehaviour
     private double seqNextEventPosition = 0d;
     private double seqNextGatePosition = 0d;
     private double seqEndPosition = 0d;
-    private int seqRepeatIndex = 0;
-    private int seqRepeatCount = -1;
+    private List<int> seqRepeatIndexList = new();
+    private List<int> seqRepeatCountList = new();
     private bool seqLoop = false;
     private int seqLoopIndex = 0;
     /// <summary>
@@ -136,11 +136,6 @@ public class PSGPlayer : MonoBehaviour
         audioSource.playOnAwake = false;
 
         GenerateTriangleTable();
-
-    }
-
-    void Start()
-    {
 
     }
 
@@ -216,35 +211,7 @@ public class PSGPlayer : MonoBehaviour
             audioSource.Stop();
         }
 
-        audioPosition = 0;
-        audioPositionSetCount = 0;
-        stopAudio = false;
-        waveVolume = 1f;
-        seqListIndex = 0;
-        seqPosition = 0;
-        seqNextEventPosition = 0d;
-        seqNextGatePosition = 0d;
-        seqRepeatCount = -1;
-        seqLoop = false;
-        seqTempo = ConstValue.DEFAULT_TEMPO;
-        gateStepRate = ConstValue.DEFAULT_GATE_STEP_RATE;
-        waveTie = false;
-        noiseShort = false;
-        programChange = ConstValue.DEFAULT_PROGRAM_CHANGE;
-        envPatIndex = 0;
-        envDulation = sampleRate / 60;
-        envPatList.Clear();
-        envVolIndex = 0;
-        sweepPitch = 0;
-        sweepPitchRate = 0;
-        sweepDulation = sampleRate / 60;
-        isLfoOn = false;
-        lfoPatList.Clear();
-        lfoDelay = 0;
-        lfoDeapth = 0;
-        lfoSpeed = 1;
-        lfoCount = 0;
-        lfoDulation = sampleRate / 60;
+        InitSequence();
 
         audioClipSizeMilliSec = Mathf.Clamp(audioClipSizeMilliSec, ConstValue.AUDIO_CLIP_SIZE_MIN, ConstValue.AUDIO_CLIP_SIZE_MAX);
         // Generate an AudioClip for stream playback (requests samples for the buffer via OnAudioRead during generation)
@@ -373,7 +340,77 @@ public class PSGPlayer : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Renders the sequence and returns the sample data for AudioClip.
+    /// </summary>
+    /// <returns>Sample data consisting of a float array</returns>
+    public float[] RenderSequenceTodClipData()
+    {
+        if (seqList.Count == 0) { return null; }
+        List<float> dataList = new();
+        dataList.Clear();
+        float[] data = { 0 };
+        int dataPosition = 0;
+        seqEndPosition = -1;
+        InitSequence();
+        while (true)
+        {
+            OnAudioRead(data);
+            dataList.Add(data[0]);
+            dataPosition++;
+            if (seqEndPosition > 0 && dataPosition > seqEndPosition) { break; }
+        }
+        return dataList.ToArray();
+    }
+
+    /// <summary>
+    /// Render the sequence and export an AudioClip.
+    /// </summary>
+    /// <returns>Rendered AudioClip</returns>
+    public AudioClip ExportRenderedAudioClip()
+    {
+        float[] clipData = RenderSequenceTodClipData();
+        if (clipData == null) { return null; }
+        AudioClip audioClip = AudioClip.Create("Rendered Sound", clipData.Length, 1, sampleRate, false);
+        audioClip.SetData(clipData, 0);
+        return audioClip;
+    }
+
     /*********************************/
+
+    private void InitSequence()
+    {
+        audioPosition = 0;
+        audioPositionSetCount = 0;
+        stopAudio = false;
+        waveVolume = 1f;
+        seqListIndex = 0;
+        seqPosition = 0;
+        seqNextEventPosition = 0d;
+        seqNextGatePosition = 0d;
+        seqRepeatIndexList.Clear();
+        seqRepeatCountList.Clear();
+        seqLoop = false;
+        seqTempo = ConstValue.DEFAULT_TEMPO;
+        gateStepRate = ConstValue.DEFAULT_GATE_STEP_RATE;
+        waveTie = false;
+        noiseShort = false;
+        programChange = ConstValue.DEFAULT_PROGRAM_CHANGE;
+        envPatIndex = 0;
+        envDulation = sampleRate / 60;
+        envPatList.Clear();
+        envVolIndex = 0;
+        sweepPitch = 0;
+        sweepPitchRate = 0;
+        sweepDulation = sampleRate / 60;
+        isLfoOn = false;
+        lfoPatList.Clear();
+        lfoDelay = 0;
+        lfoDeapth = 0;
+        lfoSpeed = 1;
+        lfoCount = 0;
+        lfoDulation = sampleRate / 60;
+    }
 
     private void OnAudioRead(float[] data)
     {
@@ -565,7 +602,7 @@ public class PSGPlayer : MonoBehaviour
                     }
                     if (programChange < 5)
                     {
-                        // When the swept frequency reaches the lower or upper limit, stop the sound.
+                        // When the swept frequency reaches the lower or upper limit, mute the sound.
                         int x = (Mathf.Clamp(noteNumber, ConstValue.NOTE_NUM_MIN, ConstValue.NOTE_NUM_MAX) - ConstValue.A4_NOTE_NUM) * 100 + sweepPitch;   // Noten umber 69 is A4
                         if (x >=PITCH_MAX || x <= PITCH_MIN)
                         {
@@ -606,29 +643,33 @@ public class PSGPlayer : MonoBehaviour
                     isEnvOn = false;
                     break;
                 case SEQ_CMD.REPEAT_START:
-                    // Remember the repeat start position
-                    seqRepeatIndex = seqListIndex;
+                    // Remember the repeat start position.
+                    seqRepeatIndexList.Add(seqListIndex);
+                    // Set counter to -1.
+                    seqRepeatCountList.Add(-1);
                     break;
                 case SEQ_CMD.REPEAT_END:
-                    if (seqRepeatCount < 0)
-                    {
-                        // If the counter is -1 (not repeating), remember the repeat count.
-                        seqRepeatCount = seqList[seqListIndex].seqParam - 1;
-                    }
-                    else
+                    if ((seqRepeatCountList[seqRepeatCountList.Count - 1] > -1))
                     {
                         // If the counter is 0 or greater, subtract 1.
-                        seqRepeatCount--;
-                    }
-                    if (seqRepeatCount > 0)
-                    {
-                        // If the counter is 1 or greater, return to the repeat start position.
-                        seqListIndex = seqRepeatIndex;
+                        seqRepeatCountList[seqRepeatCountList.Count - 1]--;
                     }
                     else
                     {
-                        // When the counter reaches 0, set it to -1 (repeat ends)
-                        seqRepeatCount = -1;
+                        // If the counter is -1 (before repeating), remember the repeat count.
+                        seqRepeatCountList[seqRepeatCountList.Count - 1] = seqList[seqListIndex].seqParam - 1;
+                    }
+
+                    if (seqRepeatCountList[seqRepeatCountList.Count - 1] > 0)
+                    {
+                        // If the counter is 1 or greater, return to the repeat start position.
+                        seqListIndex = seqRepeatIndexList[seqRepeatIndexList.Count - 1];
+                    }
+                    else
+                    {
+                        // When the counter reaches 0, remove last counter and index (repeat ends).
+                        seqRepeatCountList.RemoveAt(seqRepeatCountList.Count - 1);
+                        seqRepeatIndexList.RemoveAt(seqRepeatIndexList.Count - 1);
                     }
                     break;
                 case SEQ_CMD.SWEEP:

@@ -7,17 +7,19 @@ using UnityEngine.UI;
 public class uPSGMusicEffectSample : MonoBehaviour
 {
     [SerializeField] private TMP_InputField inputField;
-    [SerializeField] private MMLSplitter mmlSplitter;   // BGM用のMML Splitter
-    [SerializeField] private PSGPlayer psgPlayerSE; // 効果音用のPSG Player
+    [SerializeField] private MMLSplitter mmlSplitter;   // MML Splitter for BGM
+    [SerializeField] private PSGPlayer psgPlayerSE; // PSG Player for Sound Effects
     [SerializeField] private AudioMixer audioMixer;
     [SerializeField] private Slider volumeBgmSlider;
     [SerializeField] private Slider volumeSeSlider;
+    [SerializeField] private AudioSource audioSource;   // AudioSource for playing rendered clip.
 
     public string mmlString;
     private string bgmMML;
     private string[] seMMLs;
     private int seMMLIndex;
     private bool isMute = false;
+    private AudioClip[] seClips;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -34,8 +36,8 @@ public class uPSGMusicEffectSample : MonoBehaviour
         Resources.UnloadUnusedAssets();
         inputField.text = bgmMML;
         mmlString = bgmMML;
-        mmlSplitter.SetAllChannelsSampleRate(32000);    // BGMのサンプルレートを設定
-        mmlSplitter.SetAllChannelClipSize(200); // BGMのAudioClipの長さを設定
+        mmlSplitter.SetAllChannelsSampleRate(32000);    // Set the BGM sample rate
+        mmlSplitter.SetAllChannelClipSize(200); // Set the length of the BGM AudioClip
 
         audioMixer.GetFloat("PSG-Mix", out float _volBgm);
         _volBgm = Mathf.Clamp(_volBgm, -80f, 20f);
@@ -44,12 +46,21 @@ public class uPSGMusicEffectSample : MonoBehaviour
         audioMixer.GetFloat("PSG-Mix", out float _volSe);
         _volSe = Mathf.Clamp(_volSe, -80f, 20f);
         volumeSeSlider.value = Mathf.Clamp01(Mathf.Pow(10f, _volSe / 20f));
+
+        seClips = new AudioClip[seMMLs.Length];
+        for(int chId = 0; chId < seMMLs.Length; chId++)
+        {
+            // Pre-render the MML for sound effects and prepare them as AudioClips.
+            psgPlayerSE.mmlString = seMMLs[chId];
+            psgPlayerSE.DecodeMML();
+            seClips[chId] = psgPlayerSE.ExportRenderedAudioClip();
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
-        // 効果音が鳴っている間、BGMのAチャンネルをミュート
+        // Mute BGM channel A while sound effects are playing
         if (isMute && !psgPlayerSE.IsPlaying())
         {
             mmlSplitter.MuteChannel(0, false);
@@ -59,35 +70,41 @@ public class uPSGMusicEffectSample : MonoBehaviour
 
     public void OnPlayButton()
     {
-        if (mmlSplitter.IsAnyChannelPlaying())  // BGMのいずれかのPSG Playerが再生中か
+        if (mmlSplitter.IsAnyChannelPlaying())  // Is any of the BGM PSG Players currently playing?
         {
-            mmlSplitter.StopAllChannels();  // BGMの全てのPSG Playerを再生停止
+            mmlSplitter.StopAllChannels();  // Stop all PSG Player background music playback
         }
         else
         {
-            mmlSplitter.SplitMML(mmlString);    // BGMのMMLを各PSG Playerに分配
-            mmlSplitter.PlayAllChannels();  // BGMをデコードして再生
+            mmlSplitter.SplitMML(mmlString);    // Distribute the BGM MML to each PSG Player
+            mmlSplitter.PlayAllChannels();  // Decode and play BGM MML
         }
     }
 
     public void OnSeButton(int _id)
     {
-        if (psgPlayerSE.IsPlaying())    // 効果音が鳴っているか
+        if (psgPlayerSE.IsPlaying())    // Is the sound effect playing?
         {
-            psgPlayerSE.Stop(); // 効果音を停止
+            psgPlayerSE.Stop(); // Stop sound effects
         }
         if (seMMLIndex == _id)
         {
-            psgPlayerSE.PlayDecoded();  // 連続して同じSEならMMLデコードしないで鳴らす
+            psgPlayerSE.PlayDecoded();  // If the same sound effect plays consecutively, play it without decoding the MML.
         }
         else
         {
-            psgPlayerSE.mmlString = seMMLs[_id];    // 新しいMMLを渡す
-            psgPlayerSE.Play(); // 効果音をデコードして再生
+            psgPlayerSE.mmlString = seMMLs[_id];    // Pass the new MML
+            psgPlayerSE.Play(); // Decode and play sound effects
         }
         seMMLIndex = _id;
-        mmlSplitter.MuteChannel(0, true);   // BGMのAチャンネルをミュート
+        mmlSplitter.MuteChannel(0, true);   // Mute BGM Channel A
         isMute = true;
+    }
+
+    public void OnRenderedSeButton(int _id)
+    {
+        // Play pre-rendered sound effects
+        audioSource.PlayOneShot(seClips[_id]);
     }
 
     public void OnInputChange(string inputText)

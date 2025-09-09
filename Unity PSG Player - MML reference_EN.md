@@ -319,7 +319,8 @@ The loop continues until playback is stopped.
 
 Repeat the content between the brackets "[ ]" the specified number of times.  
 Repeat count 1 does not repeat.  
-Nesting is not possible.  
+~~Nesting is not possible.~~  
+`v0.9.4beta` Nesting of repeat commands is now available.
 
 ----
 

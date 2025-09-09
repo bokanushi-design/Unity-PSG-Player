@@ -7,21 +7,21 @@ using UnityEngine.UI;
 public class uPSGMultiSample : MonoBehaviour
 {
     [SerializeField] private TMP_InputField inputField;
-    [SerializeField] private MMLSplitter mmlSplitter;   // 設置したMML Splitterコンポーネントを登録する
-    [SerializeField] private AudioMixer audioMixer; // 音量を調整しやすいようにAudioMixerを使用
+    [SerializeField] private MMLSplitter mmlSplitter;   // Register the placed MML Splitter component.
+    [SerializeField] private AudioMixer audioMixer; // Use AudioMixer to easily adjust the volume.
     [SerializeField] private Slider volumeSlider;
+    [SerializeField] private AudioSource audioSource;   // AudioSource for playing rendered clip.
 
     [SerializeField] private GameObject jsonPanel;
-    [SerializeField] private TMP_InputField multiSeqJsonField;
+    [SerializeField] private TMP_InputField multiSeqJsonField;  // Field for JSON display.
 
     public string mmlString;
     private bool[] isMute = new bool[4];
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        mmlSplitter.SetAllChannelsSampleRate(32000);    // 全てのPSG Playerのサンプルレートを設定
-        mmlString = Resources.Load<TextAsset>("sample-multi_channel_MML").text;
+        mmlSplitter.SetAllChannelsSampleRate(32000);    // Set the sample rate for all PSG Players.
+        mmlString = Resources.Load<TextAsset>("sample-multi_channel_MML").text; // Load sample MML from the Resources folder.
         Resources.UnloadUnusedAssets();
         inputField.text = mmlString;
 
@@ -32,23 +32,26 @@ public class uPSGMultiSample : MonoBehaviour
         jsonPanel.SetActive(false);
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
     public void OnPlayButton()
     {
-        if (mmlSplitter.IsAnyChannelPlaying())  // いずれかのPSG Playerが再生中か
+        if (mmlSplitter.IsAnyChannelPlaying())  // Either a PSG Player is currently playing.
         {
-            mmlSplitter.StopAllChannels();  // 全てのPSG Playerを再生停止
+            mmlSplitter.StopAllChannels();  // Stop playing all PSG Players.
         }
         else
         {
-            mmlSplitter.SplitMML(mmlString);    // マルチチャンネルMMLを各PSG Playerに分配
-            mmlSplitter.PlayAllChannels();  // 全てのPSG Playerでデコードして再生
+            mmlSplitter.SplitMML(mmlString);    // Distribute the multi-channel MML to each PSG Player.
+            mmlSplitter.PlayAllChannels();  // Decode and play on all PSG Players.
         }
+    }
+
+    public void OnPlayRendered()
+    {
+        if (audioSource.isPlaying) { audioSource.Stop(); return; }
+        mmlSplitter.SplitMML(mmlString);    // Distribute the multi-channel MML to each PSG Player.
+        mmlSplitter.DecodeAllChannels();    // Decode on all PSG Players.
+        AudioClip audioClip = mmlSplitter.ExportMixedAudioClip(32000);  // Render sequence to AudioClip.
+        audioSource.PlayOneShot(audioClip);
     }
 
     public void OnInputChange(string inputText)
@@ -79,7 +82,7 @@ public class uPSGMultiSample : MonoBehaviour
 
     private void OnMute(int _ch, bool _isMute)
     {
-        mmlSplitter.MuteChannel(_ch, _isMute); // チャンネルをミュート
+        mmlSplitter.MuteChannel(_ch, _isMute); // Mute the channel.
     }
 
     public void OnNextButton()
@@ -97,14 +100,14 @@ public class uPSGMultiSample : MonoBehaviour
     {
         jsonPanel.SetActive(true);
         mmlSplitter.SplitMML(mmlString);
-        multiSeqJsonField.text = mmlSplitter.DecodeAndExportMultiSeqJson(false);
+        multiSeqJsonField.text = mmlSplitter.DecodeAndExportMultiSeqJson(false);    // Serialize the sequence into JSON.
     }
 
     public void OnImportJson()
     {
-        string multiSeqJson = Resources.Load<TextAsset>("sample-multi-sequence_json").text;
-        mmlSplitter.ImportMultiSeqJson(multiSeqJson);
-        mmlSplitter.PlayAllChannelsDecoded();
+        string multiSeqJson = Resources.Load<TextAsset>("sample-multi-sequence_json").text; // Load the sample JSON file.
+        mmlSplitter.ImportMultiSeqJson(multiSeqJson);   // Deserialize JSON into a sequence.
+        mmlSplitter.PlayAllChannelsDecoded();   // Play the sequence.
     }
 
     public void OnJsonClose()

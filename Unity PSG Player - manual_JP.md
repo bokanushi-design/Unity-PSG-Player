@@ -127,6 +127,8 @@ PSG Playerでは生成するAudioClipのサンプルレートを設定できま�
   * [GetSeqJson()](#getseqjson)
   * [ImportSeqJson(string _jsonString)](#importseqjsonstring-_jsonstring)
   * [SetSeqJson(SeqJson _seqJson)](#setseqjsonseqjson-_seqjson)
+  * [RenderSequenceTodClipData()](#rendersequencetodclipdata)
+  * [ExportRenderedAudioClip()](#exportrenderedaudioclip)
 
 ----
 
@@ -370,6 +372,8 @@ public void Mute(bool isOn);
 public string ExportSeqJson(bool _prettyPrint)
 ```
 
+`v0.9.3beta`
+
 * パラメーター：**_prettyPrint**　`True`で改行やインデントが有効（省略時`False`）
 * 戻り値：**JSON形式の文字列**
 
@@ -385,6 +389,8 @@ JSONの中身は、[tickPerNote](#tickpernote)の値と[seqList](#seqlist)を組
 public string DecodeAndExportSeqJson(bool _prettyPrint)
 ```
 
+`v0.9.3beta`
+
 * パラメーター：**_prettyPrint**　`True`で改行やインデントが有効（省略時`False`）
 * 戻り値：**JSON形式の文字列**
 
@@ -397,6 +403,8 @@ MMLをデコードしてからシーケンスデータをJSON化して出力し�
 ``` c#:PSGPlayer.cs
 public SeqJson GetSeqJson()
 ```
+
+`v0.9.3beta`
 
 * パラメーター：なし
 * 戻り値：**SeqJsonクラスオブジェクト**
@@ -413,6 +421,8 @@ public SeqJson GetSeqJson()
 public bool ImportSeqJson(string _jsonString)
 ```
 
+`v0.9.3beta`
+
 * パラメーター：**_jsonString**　JSON形式の文字列
 * 戻り値：インポート成功で`True`
 
@@ -427,11 +437,49 @@ JSON形式の文字列をシーケンスデータとしてインポートしま�
 public bool SetSeqJson(SeqJson _seqJson)
 ```
 
+`v0.9.3beta`
+
 * パラメーター：**_seqJson**　SeqJsonクラスオブジェクト
 * 戻り値：インポート成功で`True`
 
 SeqJsonクラスオブジェクトから直接[tickPerNote](#tickpernote)の値とシーケンスデータを読み込みます。  
 主にMML SplitterでマルチチャンネルJSONをインポートする際に利用します。
+
+----
+
+#### RenderSequenceTodClipData()
+
+``` c#:PSGPlayer.cs
+public float[] RenderSequenceTodClipData()
+```
+
+`v0.9.4beta`
+
+* パラメーター：なし
+* 戻り値：**float配列で構成されるサンプルデータ**
+
+シーケンス全体の波形データを生成します。  
+[sampleRate](#samplerate)で指定されたサンプルレートで1サンプル毎に計算し、各サンプルをfloat配列にして返します。  
+サンプルレートが高いほど、そしてシーケンスが長いほど、レンダリングに時間がかかります。  
+また、シーケンスのループコマンド（[MMLのループ"L"](Unity%20PSG%20Player%20-%20manual_JP.md)）は、レンダリング時は無効になります。
+
+----
+
+#### ExportRenderedAudioClip()
+
+``` c#:PSGPlayer.cs
+public AudioClip ExportRenderedAudioClip()
+```
+
+`v0.9.4beta`
+
+* パラメーター：なし
+* 戻り値：**AudioClip**
+
+シーケンス全体の波形データ生成し、AudioClipにしてエクスポートします。  
+AudioClipのサンプルレートは[samplRate](#samplerate)で指定した値になります。  
+効果音などレスポンスを重視したい場合に、この関数でAudioClipを先に用意しておくことができます。  
+逆にBGMなど長いシーケンスの場合は、レンダリングに時間がかかるので注意が必要です。
 
 ----
 
@@ -457,6 +505,7 @@ SeqJsonクラスオブジェクトから直接[tickPerNote](#tickpernote)の値�
   * [ExportMultiSeqJson(bool _prettyPrint)](#exportmultiseqjsonbool-_prettyprint)
   * [DecodeAndExportMultiSeqJson(bool _prettyPrint)](#decodeandexportmultiseqjsonbool-_prettyprint)
   * [ImportMultiSeqJson(string _jsonString)](#importmultiseqjsonstring-_jsonstring)
+  * [ExportMixedAudioClip(int _sampleRate)](#exportmixedaudioclipint-_samplerate)
 
 ----
 
@@ -632,6 +681,8 @@ public void MuteChannel(int channel, bool isMute);
 public string ExportMultiSeqJson(bool _prettyPrint)
 ```
 
+`v0.9.3beta`
+
 * パラメーター：**_prettyPrint**　`True`で改行やインデントが有効（省略時`False`）
 * 戻り値：**JSON形式の文字列**
 
@@ -645,6 +696,8 @@ JSONの中身は、各PSG Playerで出力した[SeqJsonクラスオブジェク�
 ``` c#:MMLSplitter.cs
 public string DecodeAndExportMultiSeqJson(bool _prettyPrint)
 ```
+
+`v0.9.3beta`
 
 * パラメーター：**_prettyPrint**　`True`で改行やインデントが有効（省略時`False`）
 * 戻り値：**JSON形式の文字列**
@@ -660,8 +713,29 @@ public string DecodeAndExportMultiSeqJson(bool _prettyPrint)
 public void ImportMultiSeqJson(string _jsonString)
 ```
 
+`v0.9.3beta`
+
 * パラメーター：**_jsonString**　JSON形式の文字列
 
 JSON形式の文字列をマルチチャンネルのシーケンスデータとしてインポートします。  
+
+----
+
+#### ExportMixedAudioClip(int _sampleRate)
+
+``` c#:PSGPlayer.cs
+public AudioClip ExportMixedAudioClip(int _sampleRate)
+```
+
+`v0.9.4beta`
+
+* パラメーター：**_sampleRate**　AudioClipのサンプルレート
+* 戻り値：**AudioClip**
+
+各PSG Playerでレンダリングした波形データをミックスしてAudioClipをエクスポートします。  
+混合した波形データがサンプル値の範囲を超えないように、チャンネル数で割った値で合成します。  
+そのため、単音の最大音量はチャンネル数によって減少します。  
+また、全チャンネルでサンプルレートを揃える必要があるので、この関数を使用後は各PSG Playerの[sampleRate](#samplerate)が引数で指定した値になります。  
+全部のPSG Playerでレンダリングした後にミックスするので、特に長いシーケンスの場合は処理に時間がかかるので注意してください。
 
 ----
