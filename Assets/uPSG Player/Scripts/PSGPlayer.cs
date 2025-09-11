@@ -44,6 +44,7 @@ public class PSGPlayer : MonoBehaviour
     private int audioPositionSetCount = 0;
     private bool stopAudio = false;
     private int noteNumber;
+    private float directFreq = 0;
     private Queue<float> waveQueue = new();
     private float waveFreq;
     private double waveLength;
@@ -393,6 +394,7 @@ public class PSGPlayer : MonoBehaviour
         seqLoop = false;
         seqTempo = ConstValue.DEFAULT_TEMPO;
         gateStepRate = ConstValue.DEFAULT_GATE_STEP_RATE;
+        directFreq = 0;
         waveTie = false;
         noiseShort = false;
         programChange = ConstValue.DEFAULT_PROGRAM_CHANGE;
@@ -541,6 +543,14 @@ public class PSGPlayer : MonoBehaviour
                         }
                     }
                 }
+
+                if (directFreq > 0)
+                {
+                    /*** Direct Frequency ***/
+                    // If directFreq is not zero, the frequency is forcibly fixed.
+                    waveFreq = directFreq;
+                    waveLength = sampleRate / waveFreq;
+                }
             }
 
             if (waveFreq == 0 || seqMute)
@@ -581,6 +591,7 @@ public class PSGPlayer : MonoBehaviour
             seqNextEventPosition = 0d;
             seqPosition = 0;
         }
+        directFreq = 0;
         bool tieGate = false;
         bool eos = false;
         int _duration = 0;
@@ -620,6 +631,25 @@ public class PSGPlayer : MonoBehaviour
                         // The pitch of noise ranges from 0 to 15, so set the note number to the remainder when divided by 16.
                         waveFreq = a4Freq;
                         noiseIndex = noteNumber % noiseTable.Length;
+                    }
+                    PrepareSound();
+                    break;
+                case SEQ_CMD.DIRECT_FREQ:
+                    directFreq = seqList[seqListIndex].seqParam;
+                    if (directFreq < 0)
+                    {
+                        // For negative note numbers, since they are tied notes, set the gate to 100%.
+                        tieGate = true;
+                        directFreq = -directFreq;
+                    }
+                    if (programChange < 5)
+                    {
+                        waveFreq = directFreq;
+                        waveLength = sampleRate / waveFreq;
+                    }
+                    else
+                    {
+                        waveFreq = 0;
                     }
                     PrepareSound();
                     break;

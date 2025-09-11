@@ -10,6 +10,7 @@ namespace uPSG
         REST = 11,
         NOTE_TIE = 12,
         GATE_STEP_RATE = 13,
+        DIRECT_FREQ = 14,
         VOLUME = 20,
         ENV_ON = 21,
         ENV_PARAM_START = 22,

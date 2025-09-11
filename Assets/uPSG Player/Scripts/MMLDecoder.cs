@@ -221,6 +221,60 @@ public class MMLDecoder : MonoBehaviour
                 continue;
             }
 
+            if (chr == 'z')
+            {
+                /* direct frequency */
+                int tmpFreq = ConstValue.DEFAULT_A4_FREQ;
+                int tmpLength = 0;
+                int tmpDots = 0;
+                var resultZ = MMLGetNum(mmlString, mmlCount + 1);
+                if (resultZ[1] > 0)
+                {
+                    tmpFreq = Mathf.Clamp(resultZ[1], 1, 20000);
+                }
+                mmlCount += resultZ[0];
+                if (mmlCount + 1 < mmlString.Length)
+                {
+                    char subChr = mmlString[mmlCount + 1];
+                    if (subChr == ',')
+                    {
+                        mmlCount++;
+                        var resultL = MMLGetLength(mmlString, mmlCount + 1);
+                        if (resultL[1] > 0)
+                        {
+                            tmpLength = Mathf.Clamp(resultL[1], ConstValue.LENGTH_MIN, ConstValue.LENGTH_MAX);
+                        }
+                        tmpDots = resultL[2];
+                        mmlCount += resultL[0] + 1;
+                        if (mmlCount < mmlString.Length)
+                        {
+                            subChr = mmlString[mmlCount];
+                            if (subChr == '&')
+                            {
+                                tmpFreq = -tmpFreq;
+                            }
+                        }
+                    }
+                }
+                int tmpDulation;
+                if (tmpLength > 0)
+                {
+                    tmpDulation = tickPerNote * 4 / tmpLength;
+                }
+                else
+                {
+                    tmpDulation = baseTics;
+                }
+                int tDot = tmpDulation;
+                for (int i = 0; i < tmpDots; i++)
+                {
+                    tDot /= 2;
+                    tmpDulation += tDot;
+                }
+                seqList.Add(new SeqEvent(SEQ_CMD.DIRECT_FREQ, tmpFreq, tmpDulation));
+                continue;
+            }
+
             if (chr >='a' && chr <= 'g')
             {
                 /* note */

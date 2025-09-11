@@ -88,6 +88,22 @@ For details on MML, refer to the [MML Reference](Unity%20PSG%20Player%20-%20MML%
 > I'm good at playing by ear, but I'm not so good at composing...  
 > If anyone is willing to create a sample track, your assistance would be greatly appreciated.
 
+## Change log
+
+* `v0.9.5 beta`
+  * Supports frequency-specific tones
+* `v0.9.4 beta`
+  * Added rendering functionality
+  * Nested Repeats Supported
+* `v0.9.3 beta`
+  * Supports exporting and importing sequence data in JSON format
+* `v0.9.2 beta`
+  * Modify the high-frequency behavior of the triangle wave
+* `v0.9.1 beta`
+  * Change the access modifier of the tickPerNote variable in PSG Player.cs to public
+* `v0.9 beta`
+  * A version I expect to work for now.  
+
 ## License
 
 * This library is under the MIT License.
