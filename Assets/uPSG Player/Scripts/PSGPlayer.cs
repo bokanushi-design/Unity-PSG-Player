@@ -1,9 +1,14 @@
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using uPSG;
 
 public class PSGPlayer : MonoBehaviour
 {
+    /**** v0.9.6beta ****/
+
     /// <summary>
     /// Specify the MML Decoder component
     /// </summary>
@@ -119,6 +124,19 @@ public class PSGPlayer : MonoBehaviour
     private bool seqMute = false;
 
     /// <summary>
+    /// True when asynchronous rendering completes
+    /// </summary>
+    public bool asyncRenderIsDone { get; private set; } = false;
+    /// <summary>
+    /// Progress during asynchronous rendering
+    /// </summary>
+    public float asyncRenderProgress { get; private set; } = 0f;
+    /// <summary>
+    /// Rendered clip data
+    /// </summary>
+    public float[] renderedDatas { get; private set; }
+
+    /// <summary>
     /// MML data for playback
     /// </summary>
     [Tooltip("MML data for playback")]
@@ -169,7 +187,7 @@ public class PSGPlayer : MonoBehaviour
     }
 
     /// <summary>
-    /// _Decode and play the MML specified in _mmlString
+    /// Decode and play the MML specified in _mmlString
     /// </summary>
     /// <param name="_mmlString">MML string</param>
     public void Play(string _mmlString)
@@ -236,6 +254,7 @@ public class PSGPlayer : MonoBehaviour
         {
             audioSource.Stop();
             audioSource.clip = null;
+            audioSource.loop = false;
         }
     }
 
@@ -361,7 +380,33 @@ public class PSGPlayer : MonoBehaviour
             dataPosition++;
             if (seqEndPosition > 0 && dataPosition > seqEndPosition) { break; }
         }
-        return dataList.ToArray();
+        renderedDatas = new float[dataList.Count];
+        renderedDatas = dataList.ToArray();
+        dataList.Clear();
+        return renderedDatas;
+    }
+
+    /// <summary>
+    /// Render the sequence and export an AudioClip.
+    /// </summary>
+    /// <param name="isAsync">If true, export audiio clip after asynchronous processing</param>
+    /// <returns>Rendered AudioClip</returns>
+    public AudioClip ExportRenderedAudioClip(bool isAsyncRendered)
+    {
+        //float[] clipData = RenderSequenceTodClipData();
+        float[] clipData;
+        if (isAsyncRendered)
+        {
+            clipData = renderedDatas;
+        }
+        else
+        {
+            clipData = RenderSequenceTodClipData();
+        }
+        if (clipData == null) { return null; }
+        AudioClip audioClip = AudioClip.Create("Rendered Sound", clipData.Length, 1, sampleRate, false);
+        audioClip.SetData(clipData, 0);
+        return audioClip;
     }
 
     /// <summary>
@@ -370,11 +415,90 @@ public class PSGPlayer : MonoBehaviour
     /// <returns>Rendered AudioClip</returns>
     public AudioClip ExportRenderedAudioClip()
     {
-        float[] clipData = RenderSequenceTodClipData();
-        if (clipData == null) { return null; }
-        AudioClip audioClip = AudioClip.Create("Rendered Sound", clipData.Length, 1, sampleRate, false);
-        audioClip.SetData(clipData, 0);
-        return audioClip;
+        return ExportRenderedAudioClip(false);
+    }
+
+    /// <summary>
+    /// Renders the sequence for AudioClip data asynchronic.
+    /// </summary>
+    /// <param name="interruptSample">Number of samples at which processing is interrupted</param>
+    /// <returns>True if succeess to start rendering</returns>
+    public bool RenderSeqToClipDataAsync(int interruptSample)
+    {
+        if (seqList.Count == 0) { return false; }
+        renderedDatas = null;
+        asyncRenderIsDone = false;
+        asyncRenderProgress = 0f;
+        StartCoroutine(RenderSeqCoroutine(interruptSample, CalcSeqSample(), (dataList) =>
+        {
+            renderedDatas = new float[dataList.Count];
+            renderedDatas = dataList.ToArray();
+            dataList.Clear();
+            asyncRenderIsDone = true;
+            asyncRenderProgress = 1f;
+        }));
+        return true;
+    }
+
+    public bool RenderSeqToClipDataAsync()
+    {
+        return RenderSeqToClipDataAsync(ConstValue.DEFAULT_ASYNC_INTERRUPT);
+    }
+
+    IEnumerator RenderSeqCoroutine(int _interruptSample, int _seqSampleLength, UnityAction<List<float>> callback)
+    {
+        InitSequence();
+        List<float> _dataList = new();
+        _dataList.Clear();
+        float[] data = { 0 };
+        int dataPosition = 0;
+        seqEndPosition = -1;
+        while (true)
+        {
+            OnAudioRead(data);
+            _dataList.Add(data[0]);
+            dataPosition++;
+            if (seqEndPosition > 0 && dataPosition > seqEndPosition) { break; }
+            if (dataPosition % _interruptSample == 0)
+            {
+                asyncRenderProgress = dataPosition / (float)_seqSampleLength;
+                yield return null;
+            }
+        }
+        callback(_dataList);
+    }
+
+    /// <summary>
+    /// Calculate the size of the clip data to be rendered.
+    /// </summary>
+    /// <returns>Number of samples at clip length</returns>
+    public int CalcSeqSample()
+    {
+        if (seqList.Count == 0) { return 0; }
+        InitSequence();
+        seqEndPosition = -1;
+        while(seqEndPosition < 0)
+        {
+            GetSeqEvent();
+            seqPosition = (uint)System.Math.Round(seqNextEventPosition, 0, System.MidpointRounding.AwayFromZero);
+        }
+        return (int)seqEndPosition;
+    }
+
+    /// <summary>
+    /// Play the rendered clip.
+    /// </summary>
+    /// <param name="isLoop">If true, loop playback</param>
+    /// <returns>True if succeed</returns>
+    public bool PlayRenderedClipData(bool isLoop)
+    {
+        if (renderedDatas == null) { return false; }
+        AudioClip audioClip = AudioClip.Create("Rendered Sound", renderedDatas.Length, 1, sampleRate, false);
+        audioClip.SetData(renderedDatas, 0);
+        audioSource.clip = audioClip;
+        audioSource.loop = isLoop;
+        audioSource.Play();
+        return true;
     }
 
     /*********************************/

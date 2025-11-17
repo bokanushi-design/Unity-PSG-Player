@@ -1,5 +1,7 @@
 namespace uPSG
 {
+    /**** v0.9.6beta ****/
+
     public static class ConstValue
     {
         public const int SEMITONES_IN_OCTAVE = 12;
@@ -37,5 +39,6 @@ namespace uPSG
         public const int REPEAT_MAX = 128;
         public const int GATE_MAX = 100;
         public const int LFO_MAX = 255;
+        public const int DEFAULT_ASYNC_INTERRUPT = 1000;
     }
 }

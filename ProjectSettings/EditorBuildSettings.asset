@@ -14,4 +14,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/uPSG Player/Samples/Scenes/MusicAndEffectSample.unity
     guid: 808d45f0fa610bf4cad2d4ff47623581
+  - enabled: 1
+    path: Assets/uPSG Player/Samples/Scenes/DTMFsample.unity
+    guid: 0384c523a591fdd43bf336690370bed2
   m_configObjects: {}

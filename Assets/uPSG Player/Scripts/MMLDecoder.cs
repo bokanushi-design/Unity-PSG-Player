@@ -5,6 +5,8 @@ using System;
 
 public class MMLDecoder : MonoBehaviour
 {
+    /**** v0.9.6beta ****/
+
     private List<SeqEvent> seqList;
     private readonly int[] noteOffsetTable = { 9, 11, 0, 2, 4, 5, 7 }; // a,b,c,d,e,f,g
     private const int PARAM_OMIT = -2;

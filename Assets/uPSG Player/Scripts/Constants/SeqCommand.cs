@@ -1,5 +1,7 @@
 namespace uPSG
 {
+    /**** v0.9.6beta ****/
+
     [System.Serializable]
     public enum SEQ_CMD
     {

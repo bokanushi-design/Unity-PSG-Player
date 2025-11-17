@@ -6,6 +6,22 @@ using UnityEngine.UI;
 
 public class uPSGMultiSample : MonoBehaviour
 {
+    /**** v0.9.6beta ****/
+
+    /// <summary>
+    /// This is a sample that synthesizes polyphonic sound using four PSG Players and an MMLSplitter.
+    /// This script is attached to the SceneController in the MultiChannelSample scene.
+    /// The MML is displayed in the InputField at the center of the screen and streamed using the ÅgPLAY/STOPÅh button.
+    /// The sample MML loads the MML text file located in the Resource folder.
+    /// MML can be manually rewritten and will be reflected each time it is played back.
+    /// Click the ÅgPlay RenderedÅh button to render the entire MML into an AudioClip.
+    /// Regular rendering places a load on the CPU, so playback may freeze briefly until it resumes.
+    /// Press ÅgPlay Async RenderedÅh to render asynchronously.
+    /// Asynchronous rendering takes longer to produce output, but it can distribute CPU load.
+    /// Pressing ÅgImport SequenceÅh will load the JSON file from the Resources folder and play it as a stream.
+    /// Pressing ÅgExport SequenceÅh displays the decoded MML sequence in JSON format.
+    /// </summary>
+
     [SerializeField] private TMP_InputField inputField;
     [SerializeField] private MMLSplitter mmlSplitter;   // Register the placed MML Splitter component.
     [SerializeField] private AudioMixer audioMixer; // Use AudioMixer to easily adjust the volume.
@@ -14,6 +30,10 @@ public class uPSGMultiSample : MonoBehaviour
 
     [SerializeField] private GameObject jsonPanel;
     [SerializeField] private TMP_InputField multiSeqJsonField;  // Field for JSON display.
+
+    [SerializeField] private GameObject renderingPanel;
+    [SerializeField] private RectTransform progressBar;
+    private bool isAsyncRendering = false;
 
     public string mmlString;
     private bool[] isMute = new bool[4];
@@ -30,6 +50,24 @@ public class uPSGMultiSample : MonoBehaviour
         float val = Mathf.Clamp01(Mathf.Pow(10f, _vol / 20f));
         volumeSlider.value = val;
         jsonPanel.SetActive(false);
+        renderingPanel.SetActive(false);
+    }
+
+    private void Update()
+    {
+        if (isAsyncRendering)
+        {
+            progressBar.localScale = new Vector3(mmlSplitter.asyncMultiRenderProgress, 1, 1);
+            if (mmlSplitter.asyncMultiRenderIsDone) // Check if asynchronic rendering is done.
+            {
+                //mmlSplitter.PlayAllChannelsRenderedClipData();    // Play rendered clip at each channels.
+                AudioClip audioClip = mmlSplitter.ExportMixedAudioClip(32000, true);  // Convert mixed rendered data to AudioClip.
+                audioSource.PlayOneShot(audioClip);
+
+                isAsyncRendering = false;
+                renderingPanel.SetActive(false);
+            }
+        }
     }
 
     public void OnPlayButton()
@@ -52,6 +90,15 @@ public class uPSGMultiSample : MonoBehaviour
         mmlSplitter.DecodeAllChannels();    // Decode on all PSG Players.
         AudioClip audioClip = mmlSplitter.ExportMixedAudioClip(32000);  // Render sequence to AudioClip.
         audioSource.PlayOneShot(audioClip);
+    }
+
+    public void OnPlayRenderedAsync()
+    {
+        if (audioSource.isPlaying) { audioSource.Stop(); return; }
+        mmlSplitter.SplitMML(mmlString);    // Distribute the multi-channel MML to each PSG Player.
+        mmlSplitter.DecodeAllChannels();    // Decode on all PSG Players.
+        isAsyncRendering = mmlSplitter.RenderMultiSeqToClipDataAsync(32000, 1000);  // Start rendering asynchronous.
+        if (isAsyncRendering) { renderingPanel.SetActive(true); }
     }
 
     public void OnInputChange(string inputText)

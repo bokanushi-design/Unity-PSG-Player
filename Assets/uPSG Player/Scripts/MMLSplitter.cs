@@ -5,6 +5,8 @@ using uPSG;
 
 public class MMLSplitter : MonoBehaviour
 {
+    /**** v0.9.6beta ****/
+
     /// <summary>
     /// PSG Player component for each channel
     /// </summary>
@@ -21,11 +23,45 @@ public class MMLSplitter : MonoBehaviour
     [Tooltip("MML data after splitting")]
     private string[] mmlStrings;
 
+    /// <summary>
+    /// True when asynchronous rendering completes on all channels
+    /// </summary>
+    public bool asyncMultiRenderIsDone { get; private set; } = false;
+    /// <summary>
+    /// Progress during asynchronous rendering on all channels
+    /// </summary>
+    public float asyncMultiRenderProgress { get; private set; } = 0f;
+
+    private List<bool> renderStartedList = new();
+    private bool isAsyncMultiRendering = false;
+
     private void Awake()
     {
         if (!CheckPlayersReady())
         {
             Debug.LogError("PSG Player component not attached : " + gameObject.name);
+        }
+    }
+
+    private void Update()
+    {
+        if (isAsyncMultiRendering)
+        {
+            int pNum = 0;
+            float pSum = 0;
+            int pIndex = 0;
+            asyncMultiRenderIsDone = true;
+            foreach (var pPlayer in psgPlayers)
+            {
+                if (renderStartedList[pIndex]){
+                    asyncMultiRenderIsDone &= pPlayer.asyncRenderIsDone;
+                    pSum += pPlayer.asyncRenderProgress;
+                    pNum++;
+                }
+                pIndex++;
+            }
+            asyncMultiRenderProgress = pSum / pNum;
+            isAsyncMultiRendering = !asyncMultiRenderIsDone;
         }
     }
 
@@ -212,7 +248,7 @@ public class MMLSplitter : MonoBehaviour
     }
 
     /// <summary>
-    /// Set the length of all PSG Player AudioClips
+    /// Set the length of AudioClips all PSG Player that stream playback
     /// </summary>
     /// <param name="_msec">AudioClip duration (milliseconds)</param>
     public void SetAllChannelClipSize(int _msec)
@@ -307,16 +343,17 @@ public class MMLSplitter : MonoBehaviour
     /// <summary>
     /// Mix the waveform data rendered by each PSG Player and export it as an AudioClip.
     /// </summary>
-    /// <param name="_sampleRate"></param>
+    /// <param name="_sampleRate">Sample rate</param>
+    /// <param name="isAsyncRendered">If true, use asynchronously rendered data.</param>
     /// <returns>Rendered AudioClip</returns>
-    public AudioClip ExportMixedAudioClip(int _sampleRate)
+    public AudioClip ExportMixedAudioClip(int _sampleRate, bool isAsyncRendered)
     {
-        SetAllChannelsSampleRate(_sampleRate);
         List<float[]> channelClipData = new();
         int mixedDataLength = 0;
-        foreach(var pPlayer in psgPlayers)
+        SetAllChannelsSampleRate(_sampleRate);
+        foreach (var pPlayer in psgPlayers)
         {
-            float[] clipData = pPlayer.RenderSequenceTodClipData();
+            float[] clipData = isAsyncRendered ? pPlayer.renderedDatas : pPlayer.RenderSequenceTodClipData();
             channelClipData.Add(clipData);
             if (clipData.Length > mixedDataLength) { mixedDataLength = clipData.Length; };
         }
@@ -338,5 +375,42 @@ public class MMLSplitter : MonoBehaviour
         AudioClip audioClip = AudioClip.Create("Mixed Rendered Sound", mixedDataLength, 1, _sampleRate, false);
         audioClip.SetData(mixedData, 0);
         return audioClip;
+    }
+
+    public AudioClip ExportMixedAudioClip(int _sampleRate)
+    {
+        return ExportMixedAudioClip(_sampleRate, false);
+    }
+
+    /// <summary>
+    /// Start asynchronous rendering on all channels.
+    /// </summary>
+    /// <param name="_sampleRate">Sample rate</param>
+    /// <param name="interruptSample">Number of samples at which processing is interrupted</param>
+    /// <returns>True if rendering has started on any channel</returns>
+    public bool RenderMultiSeqToClipDataAsync(int _sampleRate, int interruptSample)
+    {
+        SetAllChannelsSampleRate(_sampleRate);
+        renderStartedList.Clear();
+        isAsyncMultiRendering = false;
+        foreach (var pPlayer in psgPlayers)
+        {
+            bool rs = pPlayer.RenderSeqToClipDataAsync(interruptSample);
+            renderStartedList.Add(rs);
+            isAsyncMultiRendering |= rs;
+        }
+        return isAsyncMultiRendering;
+    }
+
+    /// <summary>
+    /// Play the rendered clip on each channels.
+    /// </summary>
+    /// <param name="isLoop">If true, loop playback</param>
+    public void PlayAllChannelsRenderedClipData(bool isLoop)
+    {
+        foreach (var pPlayer in psgPlayers)
+        {
+            pPlayer.PlayRenderedClipData(isLoop);
+        }
     }
 }

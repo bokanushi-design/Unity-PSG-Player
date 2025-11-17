@@ -1,19 +1,37 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class uPSGSample : MonoBehaviour
 {
+    /**** v0.9.6beta ****/
+
+    /// <summary>
+    /// This is a sample that synthesizes a monophonic sound using one PSG Player.
+    /// This script is attached to the SceneController in the SingleChannelSample scene.
+    /// The MML is displayed in the central InputField, and pressing the ÅgPLAY/STOPÅh button starts streaming playback.
+    /// Click the ÅgChange Sample MMLÅh button to change the sample MML.
+    /// MML can be manually rewritten and will be reflected each time it is played back.
+    /// Pressing ÅgPlay RenderedÅh generates an AudioClip from the entire MML content and plays it.
+    /// Pressing ÅgImport SequenceÅh will load the JSON file from the Resources folder and play it as a stream.
+    /// Pressing ÅgExport SequenceÅh displays the decoded MML sequence in JSON format.
+    /// </summary>
+
     [SerializeField] private TMP_InputField inputField;
     [SerializeField] private PSGPlayer psgPlayer;   // Register the placed PSG Player prefab.
     [SerializeField] private AudioSource audioSource;   // AudioSource for playing rendered clip.
+    [SerializeField] private Slider volumeSlider;
 
     public string mmlString;
     private string[] sampleMMLs;
     private int sampleMMLIndex;
+    private bool isAsyncRendering;
 
     [SerializeField] private GameObject jsonPanel;
     [SerializeField] private TMP_InputField jsonField;  // Field for JSON display.
+    [SerializeField] private GameObject renderingPanel;
+    [SerializeField] private RectTransform progressBar;
 
     void Start()
     {
@@ -33,6 +51,24 @@ public class uPSGSample : MonoBehaviour
         psgPlayer.mmlString = mmlString;    // Insert MML into the mmlString variable of the PSG Player.
         psgPlayer.sampleRate = 44100;   // Set the sample rate for the PSG Player.
         jsonPanel.SetActive(false);
+        volumeSlider.value = psgPlayer.GetComponent<AudioSource>().volume;
+        isAsyncRendering = false;
+        renderingPanel.SetActive(false);
+    }
+
+    private void Update()
+    {
+        if (isAsyncRendering)
+        {
+            progressBar.localScale = new Vector3(psgPlayer.asyncRenderProgress, 1, 1);
+            if (psgPlayer.asyncRenderIsDone)    // Check if asynchronic rendering is done.
+            {
+                AudioClip audioClip = psgPlayer.ExportRenderedAudioClip(true);  // Render sequence to AudioClip.
+                audioSource.PlayOneShot(audioClip);
+                isAsyncRendering = false;
+                renderingPanel.SetActive(false);
+            }
+        }
     }
 
     public void OnPlayButton()
@@ -49,9 +85,19 @@ public class uPSGSample : MonoBehaviour
 
     public void OnRenderAudioClip()
     {
+        if (audioSource.isPlaying) { audioSource.Stop(); return; }
         psgPlayer.DecodeMML();  // Decode MML in PSG Player.
         AudioClip audioClip = psgPlayer.ExportRenderedAudioClip();  // Render sequence to AudioClip.
         audioSource.PlayOneShot(audioClip);
+    }
+
+    public void OnAsyncRenderAudioClip()
+    {
+        if (audioSource.isPlaying || isAsyncRendering) { audioSource.Stop(); return; }
+        psgPlayer.DecodeMML();  // Decode MML in PSG Player.
+        psgPlayer.RenderSeqToClipDataAsync();  // Render sequence to AudioClip asynchronic.
+        isAsyncRendering = true;
+        renderingPanel.SetActive(true);
     }
 
     public void OnChangeSampleMML()
@@ -72,6 +118,11 @@ public class uPSGSample : MonoBehaviour
     public void OnNextButton()
     {
         SceneManager.LoadScene("MultiChannelSample");
+    }
+
+    public void OnVolumeChange(float val)
+    {
+        psgPlayer.GetComponent<AudioSource>().volume = val;
     }
 
     public void OnExportJson()

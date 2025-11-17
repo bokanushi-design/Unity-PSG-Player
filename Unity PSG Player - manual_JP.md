@@ -103,6 +103,27 @@ PSG Playerでは生成するAudioClipのサンプルレートを設定できま�
 PSG Playerでは、演奏表現としてボリュームエンベロープ・スイープ・LFOが使えます。  
 ただし、ノイズ音色および周波数指定で出した音は、ピッチ変化の効果があるスイープとLFOは無効になります。  
 
+## レンダリングについて
+
+`v0.9.6beta`
+
+PSG PlayerはAudioClip.Create()のStreamを使うことを前提に開発してきました。  
+ストリーム再生は負荷を分散するのでBGMのような長時間のシーケンスでもそこそこレスポンスよく演奏することができます。  
+ただ、Create()を呼んだ時点でバッファリングが発生するため、タイミングにシビアな効果音を鳴らすには少し懸念がありました。  
+  
+レンダリングはシーケンス全体をAudioClipの波形データとして出力します。  
+この波形データを事前に作っておくことで、通常の音源ファイルを鳴らすのと同等のパフォーマンスができるようになります。  
+しかし、レンダリングは負荷が高いので、長時間の演奏を変換するとフリーズが発生します。  
+  
+非同期レンダリングを使うと、一定間隔ごとにメインスレッドに戻るので負荷を分散できます。  
+その代わり、レンダリングを完了するまでの時間は伸びます。  
+用途に合わせてストリーム、レンダリング、非同期レンダリングを使い分けるのをお勧めします。  
+  
+なお、レンダリングの際はシーケンスのループコマンド（MMLのループ「L」）は無効になります。  
+（Unityの謎仕様で、音源ファイルに埋め込んだループポイントはAudioClipに反映されるのに、Createで作ると入れる手段がないという…）
+
+ちなみにWebGLではAudioClip.Create()のStreamが非対応（鳴るけどバッファが更新されない）ですが、レンダリングしたAudioClipは再生することができます。
+
 ## PSG Playerスクリプトリファレンス
 
 ### 変数・Public関数一覧
@@ -118,6 +139,9 @@ PSG Playerでは、演奏表現としてボリュームエンベロープ・ス�
   * [seqListIndex](#seqlistindex)
   * [seqList](#seqlist)
   * [mmlString](#mmlstring)
+  * [asyncRenderIsDone](#asyncrenderisdone)
+  * [asyncRenderProgress](#asyncrenderprogress)
+  * [renderedDatas](#rendereddatas)
 * [Public関数](#public関数)
   * [Play()](#play)
   * [Play(string \_mmlString)](#playstring-_mmlstring)
@@ -133,7 +157,10 @@ PSG Playerでは、演奏表現としてボリュームエンベロープ・ス�
   * [ImportSeqJson(string _jsonString)](#importseqjsonstring-_jsonstring)
   * [SetSeqJson(SeqJson _seqJson)](#setseqjsonseqjson-_seqjson)
   * [RenderSequenceTodClipData()](#rendersequencetodclipdata)
-  * [ExportRenderedAudioClip()](#exportrenderedaudioclip)
+  * [ExportRenderedAudioClip(bool isAsyncRendered)](#exportrenderedaudioclipbool-isasyncrendered)
+  * [RenderSeqToClipDataAsync(int interruptSample)](#renderseqtoclipdataasyncint-interruptsample)
+  * [CalcSeqSample()](#calcseqsample)
+  * [PlayRenderedClipData(bool isLoop)](#playrenderedclipdatabool-isloop)
 
 ----
 
@@ -143,7 +170,7 @@ PSG Playerでは、演奏表現としてボリュームエンベロープ・ス�
 
 #### mmlDecoder
 
-``` c#:PSGPlayer.cs
+``` c# PSGPlayer.cs
 [SerializeField] private MMLDecoder mmlDecoder;
 ```
 
@@ -153,7 +180,7 @@ MMLをシーケンスデータに変換するMML Decoderコンポーネントを
 
 #### audioSource
 
-``` c#:PSGPlayer.cs
+``` c# PSGPlayer.cs
 [SerializeField] private AudioSource audioSource;
 ```
 
@@ -163,7 +190,7 @@ MMLをシーケンスデータに変換するMML Decoderコンポーネントを
 
 #### sampleRate
 
-``` c#:PSGPlayer.cs
+``` c# PSGPlayer.cs
 public int sampleRate = 32000;
 ```
 
@@ -174,7 +201,7 @@ AudioClipのサンプルレートを設定します。
 
 #### audioClipSizeMilliSec
 
-``` c#:PSGPlayer.cs
+``` c# PSGPlayer.cs
 public int audioClipSizeMilliSec = 1000;
 ```
 
@@ -185,7 +212,7 @@ AudioClipの長さを設定します。
 
 #### a4Freq
 
-``` c#:PSGPlayer.cs
+``` c# PSGPlayer.cs
 public float a4Freq = 440f;
 ```
 
@@ -197,7 +224,7 @@ public float a4Freq = 440f;
 
 #### tickPerNote
 
-``` C#:PSGPlayer.cs
+``` C# PSGPlayer.cs
 public int tickPerNote = 960;
 ```
 
@@ -212,7 +239,7 @@ public int tickPerNote = 960;
 
 #### programChange
 
-``` c#:PSGPlayer.cs
+``` c# PSGPlayer.cs
 public int programChange;
 ```
 
@@ -234,7 +261,7 @@ public int programChange;
 
 #### seqListIndex
 
-``` c#:PSGPlayer.cs
+``` c# PSGPlayer.cs
 [SerializeField] private int seqListIndex = 0;
 ```
 
@@ -245,7 +272,7 @@ public int programChange;
 
 #### seqList
 
-``` c#:PSGPlayer.cs
+``` c# PSGPlayer.cs
 [SerializeField] private List<SeqEvent> seqList = new();
 ```
 
@@ -256,12 +283,50 @@ public int programChange;
 
 #### mmlString
 
-``` c#:PSGPlayer.cs
+``` c# PSGPlayer.cs
 [Multiline] public string mmlString = "";
 ```
 
 演奏するMML文字列です。  
 この変数をMML Decoderに渡してシーケンスデータに変換します。  
+
+----
+
+#### asyncRenderIsDone
+
+``` C# PSGPlayer.cs
+public bool asyncRenderIsDone { get; private set; } = false;
+```
+
+`v0.9.6beta`
+
+非同期レンダリングが完了すると`True`になります。  
+[RenderSeqToClipDataAsync()](#renderseqtoclipdataasyncint-interruptsample)を呼び出した後に使用します。
+
+----
+
+#### asyncRenderProgress
+
+``` C# PSGPlayer.cs
+public float asyncRenderProgress { get; private set; } = 0f;
+```
+
+`v0.9.6beta`
+
+非同期レンダリングの進捗率で0から1の範囲で増加します。  
+[RenderSeqToClipDataAsync()](#renderseqtoclipdataasyncint-interruptsample)を呼び出した後に使用します。
+
+----
+
+#### renderedDatas
+
+``` C# PSGPlayer.cs
+public float[] renderedDatas { get; private set; }
+```
+
+`v0.9.6beta`
+
+[RenderSequenceTodClipData()](#rendersequencetodclipdata)または[RenderSeqToClipDataAsync()](#renderseqtoclipdataasyncint-interruptsample)で生成されたクリップデータが入ります。  
 
 ----
 
@@ -271,7 +336,7 @@ public int programChange;
 
 #### Play()
 
-``` c#:PSGPlayer.cs
+``` c# PSGPlayer.cs
 public void Play();
 ```
 
@@ -283,7 +348,7 @@ public void Play();
 
 #### Play(string _mmlString)
 
-``` c#:PSGPlayer.cs
+``` c# PSGPlayer.cs
 public void Play(string _mmlString);
 ```
 
@@ -295,7 +360,7 @@ public void Play(string _mmlString);
 
 #### DecodeMML()
 
-``` c#:PSGPlayer.cs
+``` c# PSGPlayer.cs
 public bool DecodeMML();
 ```
 
@@ -308,7 +373,7 @@ public bool DecodeMML();
 
 #### PlayDecoded()
 
-``` c#:PSGPlayer.cs
+``` c# PSGPlayer.cs
 public void PlayDecoded();
 ```
 
@@ -321,7 +386,7 @@ public void PlayDecoded();
 
 #### PlaySequence()
 
-``` c#:PSGPlayer.cs
+``` c# PSGPlayer.cs
 public void PlaySequence();
 ```
 
@@ -334,7 +399,7 @@ public void PlaySequence();
 
 #### Stop()
 
-``` c#:PSGPlayer.cs
+``` c# PSGPlayer.cs
 public void Stop();
 ```
 
@@ -346,7 +411,7 @@ public void Stop();
 
 #### IsPlaying()
 
-``` c#:PSGPlayer.cs
+``` c# PSGPlayer.cs
 public bool IsPlaying();
 ```
 
@@ -359,7 +424,7 @@ public bool IsPlaying();
 
 #### Mute(bool isOn)
 
-``` c#:PSGPlayer.cs
+``` c# PSGPlayer.cs
 public void Mute(bool isOn);
 ```
 
@@ -373,7 +438,7 @@ public void Mute(bool isOn);
 
 #### ExportSeqJson(bool _prettyPrint)
 
-``` c#:PSGPlayer.cs
+``` c# PSGPlayer.cs
 public string ExportSeqJson(bool _prettyPrint)
 ```
 
@@ -390,7 +455,7 @@ JSONの中身は、[tickPerNote](#tickpernote)の値と[seqList](#seqlist)を組
 
 #### DecodeAndExportSeqJson(bool _prettyPrint)
 
-``` c#:PSGPlayer.cs
+``` c# PSGPlayer.cs
 public string DecodeAndExportSeqJson(bool _prettyPrint)
 ```
 
@@ -405,7 +470,7 @@ MMLをデコードしてからシーケンスデータをJSON化して出力し�
 
 #### GetSeqJson()
 
-``` c#:PSGPlayer.cs
+``` c# PSGPlayer.cs
 public SeqJson GetSeqJson()
 ```
 
@@ -422,7 +487,7 @@ public SeqJson GetSeqJson()
 
 #### ImportSeqJson(string _jsonString)
 
-``` c#:PSGPlayer.cs
+``` c# PSGPlayer.cs
 public bool ImportSeqJson(string _jsonString)
 ```
 
@@ -438,7 +503,7 @@ JSON形式の文字列をシーケンスデータとしてインポートしま�
 
 #### SetSeqJson(SeqJson _seqJson)
 
-``` c#:PSGPlayer.cs
+``` c# PSGPlayer.cs
 public bool SetSeqJson(SeqJson _seqJson)
 ```
 
@@ -454,7 +519,7 @@ SeqJsonクラスオブジェクトから直接[tickPerNote](#tickpernote)の値�
 
 #### RenderSequenceTodClipData()
 
-``` c#:PSGPlayer.cs
+``` c# PSGPlayer.cs
 public float[] RenderSequenceTodClipData()
 ```
 
@@ -468,12 +533,16 @@ public float[] RenderSequenceTodClipData()
 サンプルレートが高いほど、そしてシーケンスが長いほど、レンダリングに時間がかかります。  
 また、シーケンスのループコマンド（[MMLのループ"L"](Unity%20PSG%20Player%20-%20manual_JP.md)）は、レンダリング時は無効になります。
 
+`v0.9.6beta`
+
+生成されたクリップデータは[renderedDatas](#rendereddatas)にも入ります。  
+
 ----
 
-#### ExportRenderedAudioClip()
+#### ExportRenderedAudioClip(bool isAsyncRendered)
 
-``` c#:PSGPlayer.cs
-public AudioClip ExportRenderedAudioClip()
+``` c# PSGPlayer.cs
+public AudioClip ExportRenderedAudioClip(bool isAsyncRendered)
 ```
 
 `v0.9.4beta`
@@ -481,10 +550,68 @@ public AudioClip ExportRenderedAudioClip()
 * パラメーター：なし
 * 戻り値：**AudioClip**
 
-シーケンス全体の波形データ生成し、AudioClipにしてエクスポートします。  
+シーケンス全体の波形データを生成し、AudioClipにしてエクスポートします。  
 AudioClipのサンプルレートは[samplRate](#samplerate)で指定した値になります。  
 効果音などレスポンスを重視したい場合に、この関数でAudioClipを先に用意しておくことができます。  
 逆にBGMなど長いシーケンスの場合は、レンダリングに時間がかかるので注意が必要です。
+
+`v0.9.6beta`
+
+* パラメーター：**isAsyncRendered**　`True`でrenderdDatasを使用（省略時`False`）
+* 戻り値：**AudioClip**
+
+レンダリングを行わずに[renderedDatas](#rendereddatas)を使ってAudioClipをエクスポートします。  
+
+----
+
+#### RenderSeqToClipDataAsync(int interruptSample)
+
+``` c# PSGPlayer.cs
+public bool RenderSeqToClipDataAsync(int interruptSample)
+```
+
+`v0.9.6beta`
+
+* パラメーター：**interruptSample**　処理が中断されるサンプル数
+* 戻り値：レンダリングの開始に成功した場合に`True`
+
+シーケンス全体の波形データの非同期レンダリングを開始します。  
+メインスレッドのUpdate()内などでレンダリングを監視してください。
+レンダリングの進捗率は[asyncRenderProgress](#asyncrenderprogress)で0から1の範囲で増加します。  
+レンダリングが完了すると[asyncRenderIsDone](#asyncrenderisdone)が`True`になります。  
+生成されたクリップデータは[renderedDatas](#rendereddatas)に入ります。  
+[ExportRenderedAudioClip(true)](#exportrenderedaudioclipbool-isasyncrendered)で[renderedDatas](#rendereddatas)をAudioClipに変換できます。  
+なお、シーケンスのループコマンド（[MMLのループ"L"](Unity%20PSG%20Player%20-%20manual_JP.md)）は、レンダリング時は無効になります。
+
+----
+
+#### CalcSeqSample()
+
+``` c# PSGPlayer.cs
+public int CalcSeqSample()
+```
+
+`v0.9.6beta`
+
+* パラメーター：なし
+* 戻り値：レンダリング後のサンプル数
+
+レンダリングした場合に生成されるクリップデータのサイズを計算します。
+
+----
+
+#### PlayRenderedClipData(bool isLoop)
+
+``` c# PSGPlayer.cs
+public bool PlayRenderedClipData(bool isLoop)
+```
+
+`v0.9.6beta`
+
+* パラメーター：**isLoop**　`True`ならループ再生
+* 戻り値：再生に成功した場合に`True`
+
+[renderedDatas](#rendereddatas)を使ってAudioClipを生成し、PSG Playerに指定されているAudioSourceで再生します。
 
 ----
 
@@ -495,6 +622,8 @@ AudioClipのサンプルレートは[samplRate](#samplerate)で指定した値�
 * [変数](#mml-splitter-変数)
   * [psgPlayers](#psgplayers)
   * [multiChMMLString](#multichmmlstring)
+  * [asyncMultiRenderIsDone](#asyncmultirenderisdone)
+  * [asyncMultiRenderProgress](#asyncmultirenderprogress)
 * [Public関数](#mml-splitter-public関数)
   * [SplitMML()](#splitmml)
   * [SplitMML(string \_multiChMMLString)](#splitmmlstring-_multichmmlstring)
@@ -510,7 +639,9 @@ AudioClipのサンプルレートは[samplRate](#samplerate)で指定した値�
   * [ExportMultiSeqJson(bool _prettyPrint)](#exportmultiseqjsonbool-_prettyprint)
   * [DecodeAndExportMultiSeqJson(bool _prettyPrint)](#decodeandexportmultiseqjsonbool-_prettyprint)
   * [ImportMultiSeqJson(string _jsonString)](#importmultiseqjsonstring-_jsonstring)
-  * [ExportMixedAudioClip(int _sampleRate)](#exportmixedaudioclipint-_samplerate)
+  * [ExportMixedAudioClip(int _sampleRate, bool isAsyncRendered)](#exportmixedaudioclipint-_samplerate-bool-isasyncrendered)
+  * [RenderMultiSeqToClipDataAsync(int _sampleRate, int interruptSample)](#rendermultiseqtoclipdataasyncint-_samplerate-int-interruptsample)
+  * [PlayAllChannelsRenderedClipData(bool isLoop)](#playallchannelsrenderedclipdatabool-isloop)
 
 ----
 
@@ -520,7 +651,7 @@ AudioClipのサンプルレートは[samplRate](#samplerate)で指定した値�
 
 #### psgPlayers
 
-``` c#:MMLSplitter.cs
+``` c# MMLSplitter.cs
 [SerializeField] private PSGPlayer[] psgPlayers;
 ```
 
@@ -530,11 +661,37 @@ MMLを分割送信するPSG Playerコンポーネントをチャンネルの数�
 
 #### multiChMMLString
 
-``` c#:MMLSplitter.cs
+``` c# MMLSplitter.cs
 public string multiChMMLString;
 ```
 
 分割送信する元のMML文字列を登録します。  
+
+----
+
+#### asyncMultiRenderIsDone
+
+``` c# MMLSplitter.cs
+public bool asyncMultiRenderIsDone { get; private set; } = false;
+```
+
+`v0.9.6beta`
+
+全てのチャンネルで非同期レンダリングが完了すると`True`になります。  
+[RenderMultiSeqToClipDataAsync()](#rendermultiseqtoclipdataasyncint-_samplerate-int-interruptsample)を呼び出した後に使用します。
+
+----
+
+#### asyncMultiRenderProgress
+
+``` c# MMLSplitter.cs
+public float asyncMultiRenderProgress { get; private set; } = 0f;
+```
+
+`v0.9.6beta`
+
+全てのチャンネルの非同期レンダリングの進捗率で0から1の範囲で増加します。  
+[RenderMultiSeqToClipDataAsync()](#rendermultiseqtoclipdataasyncint-_samplerate-int-interruptsample)を呼び出した後に使用します。
 
 ----
 
@@ -544,7 +701,7 @@ public string multiChMMLString;
 
 #### SplitMML()
 
-``` c#:MMLSplitter.cs
+``` c# MMLSplitter.cs
 public void SplitMML();
 ```
 
@@ -557,7 +714,7 @@ multiChMMLStringのMML文字列を分割して、psgPlayersに登録されてる
 
 #### SplitMML(string _multiChMMLString)
 
-``` c#:MMLSplitter.cs
+``` c# MMLSplitter.cs
 public void SplitMML(string _multiChMMLString);
 ```
 
@@ -569,7 +726,7 @@ public void SplitMML(string _multiChMMLString);
 
 #### SetAllChannelsSampleRate(int _rate)
 
-``` c#:MMLSplitter.cs
+``` c# MMLSplitter.cs
 public void SetAllChannelsSampleRate(int _rate);
 ```
 
@@ -581,7 +738,7 @@ public void SetAllChannelsSampleRate(int _rate);
 
 #### SetAllChannelClipSize(int _msec)
 
-``` c#:MMLSplitter.cs
+``` c# MMLSplitter.cs
 public void SetAllChannelClipSize(int _msec);
 ```
 
@@ -593,7 +750,7 @@ public void SetAllChannelClipSize(int _msec);
 
 #### PlayAllChannels()
 
-``` c#:MMLSplitter.cs
+``` c# MMLSplitter.cs
 public void PlayAllChannels();
 ```
 
@@ -606,7 +763,7 @@ public void PlayAllChannels();
 
 #### PlayAllChannelsDecoded()
 
-``` c#:MMLSplitter.cs
+``` c# MMLSplitter.cs
 public void PlayAllChannelsDecoded();
 ```
 
@@ -618,7 +775,7 @@ public void PlayAllChannelsDecoded();
 
 #### PlayAllChannelsSequence()
 
-``` c#:MMLSplitter.cs
+``` c# MMLSplitter.cs
 public void PlayAllChannelsSequence()
 ```
 
@@ -631,7 +788,7 @@ public void PlayAllChannelsSequence()
 
 #### DecodeAllChannels()
 
-``` c#:MMLSplitter.cs
+``` c# MMLSplitter.cs
 public void DecodeAllChannels()
 ```
 
@@ -644,7 +801,7 @@ public void DecodeAllChannels()
 
 #### StopAllChannels()
 
-``` c#:MMLSplitter.cs
+``` c# MMLSplitter.cs
 public void StopAllChannels();
 ```
 
@@ -656,7 +813,7 @@ public void StopAllChannels();
 
 #### IsAnyChannelPlaying()
 
-``` c#:MMLSplitter.cs
+``` c# MMLSplitter.cs
 public bool IsAnyChannelPlaying();
 ```
 
@@ -669,7 +826,7 @@ public bool IsAnyChannelPlaying();
 
 #### MuteChannel(int channel, bool isMute)
 
-``` c#:MMLSplitter.cs
+``` c# MMLSplitter.cs
 public void MuteChannel(int channel, bool isMute);
 ```
 
@@ -682,7 +839,7 @@ public void MuteChannel(int channel, bool isMute);
 
 #### ExportMultiSeqJson(bool _prettyPrint)
 
-``` c#:MMLSplitter.cs
+``` c# MMLSplitter.cs
 public string ExportMultiSeqJson(bool _prettyPrint)
 ```
 
@@ -698,7 +855,7 @@ JSONの中身は、各PSG Playerで出力した[SeqJsonクラスオブジェク�
 
 #### DecodeAndExportMultiSeqJson(bool _prettyPrint)
 
-``` c#:MMLSplitter.cs
+``` c# MMLSplitter.cs
 public string DecodeAndExportMultiSeqJson(bool _prettyPrint)
 ```
 
@@ -714,7 +871,7 @@ public string DecodeAndExportMultiSeqJson(bool _prettyPrint)
 
 #### ImportMultiSeqJson(string _jsonString)
 
-``` c#:PSGPlayer.cs
+``` c# MMLSplitter.cs
 public void ImportMultiSeqJson(string _jsonString)
 ```
 
@@ -726,10 +883,10 @@ JSON形式の文字列をマルチチャンネルのシーケンスデータと�
 
 ----
 
-#### ExportMixedAudioClip(int _sampleRate)
+#### ExportMixedAudioClip(int _sampleRate, bool isAsyncRendered)
 
-``` c#:PSGPlayer.cs
-public AudioClip ExportMixedAudioClip(int _sampleRate)
+``` c# MMLSplitter.cs
+public AudioClip ExportMixedAudioClip(int _sampleRate, bool isAsyncRendered)
 ```
 
 `v0.9.4beta`
@@ -742,5 +899,52 @@ public AudioClip ExportMixedAudioClip(int _sampleRate)
 そのため、単音の最大音量はチャンネル数によって減少します。  
 また、全チャンネルでサンプルレートを揃える必要があるので、この関数を使用後は各PSG Playerの[sampleRate](#samplerate)が引数で指定した値になります。  
 全部のPSG Playerでレンダリングした後にミックスするので、特に長いシーケンスの場合は処理に時間がかかるので注意してください。
+
+`v0.9.6beta`
+
+* パラメーター：**_sampleRate**　AudioClipのサンプルレート
+* パラメーター：**isAsyncRendered**　`True`でレンダリング済みの波形データを使用（省略時`False`）
+* 戻り値：**AudioClip**
+
+isAsyncRenderedを`True`にすると、各チャンネルでレンダリングした[renderedDatas](#rendereddatas)をミックスしてAudioClipをエクスポートします。  
+この場合レンダリングはしないので、[RenderMultiSeqToClipDataAsync()](#rendermultiseqtoclipdataasyncint-_samplerate-int-interruptsample)を呼び出した後、[asyncMultiRenderIsDone](#asyncmultirenderisdone)が`True`になってから使用してください。
+
+----
+
+#### RenderMultiSeqToClipDataAsync(int _sampleRate, int interruptSample)
+
+``` c# MMLSplitter.cs
+public bool RenderMultiSeqToClipDataAsync(int _sampleRate, int interruptSample)
+```
+
+`v0.9.6beta`
+
+* パラメーター：**_sampleRate**　AudioClipのサンプルレート
+* パラメーター：**interruptSample**　処理が中断されるサンプル数
+* 戻り値：いずれかのチャンネルでレンダリングが開始したら`True`
+
+全チャンネルで非同期レンダリングを開始します。  
+メインスレッドのUpdate()内などでレンダリングを監視してください。  
+レンダリングの進捗率は[asyncMultiRenderProgress](#asyncmultirenderprogress)で0から1の範囲で増加します。  
+レンダリングが完了すると[asyncMultiRenderIsDone](#asyncmultirenderisdone)が`True`になります。  
+生成されたクリップデータは各PSG Playerの[renderedDatas](#rendereddatas)に入ります。  
+[ExportMixedAudioClip()](#exportmixedaudioclipint-_samplerate-bool-isasyncrendered)で[renderedDatas](#rendereddatas)をミックスしてAudioClipに変換できます。  
+なお、シーケンスのループコマンド（[MMLのループ"L"](Unity%20PSG%20Player%20-%20manual_JP.md)）は、レンダリング時は無効になります。
+
+----
+
+#### PlayAllChannelsRenderedClipData(bool isLoop)
+
+``` c# MMLSplitter.cs
+public void PlayAllChannelsRenderedClipData(bool isLoop)
+```
+
+`v0.9.6beta`
+
+* パラメーター：**isLoop**　`True`ならループ再生
+* 戻り値：なし
+
+各チャンネルで[renderedDatas](#rendereddatas)を使ってAudioClipを生成し、それぞれのPSG Playerに指定されているAudioSourceで再生します。  
+ミックスされずに鳴らすので、各チャネルの音量変更やミュートをすることができます。
 
 ----

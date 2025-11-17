@@ -27,7 +27,7 @@ public class WaveformVisualizer : MonoBehaviour
         }
 
         lineRenderer.positionCount = numSamples;
-        lineRenderer.useWorldSpace = false; // ローカル座標で表示
+        lineRenderer.useWorldSpace = false; // Display in local coordinates
         lineRenderer.startWidth = 0.005f;
         lineRenderer.endWidth = 0.005f;
     }

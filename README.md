@@ -32,7 +32,7 @@ For details, refer to the [Manual](Unity%20PSG%20Player%20-%20manual_EN.md) and 
   * Windows
   * Android
 * Not supported (currently)
-  * Web GL
+  * Web GL (Rendering is supported)
 * Unverified
   * Other than the above
 
@@ -82,6 +82,7 @@ For details on MML, refer to the [MML Reference](Unity%20PSG%20Player%20-%20MML%
 * Supports WebGL
 
 > There seems to be a way to play it on the web, but whether we'll integrate it is still undecided.
+> Only rendering is supported in v0.9.6beta.
 
 * Replace sample music and sound effects with original content
 
@@ -90,6 +91,8 @@ For details on MML, refer to the [MML Reference](Unity%20PSG%20Player%20-%20MML%
 
 ## Change log
 
+* `v0.9.6 beta`
+  * Supports asynchronous rendering
 * `v0.9.5 beta`
   * Supports frequency-specific tones
 * `v0.9.4 beta`

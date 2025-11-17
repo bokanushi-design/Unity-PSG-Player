@@ -1,4 +1,4 @@
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
@@ -6,6 +6,18 @@ using UnityEngine.UI;
 
 public class uPSGMusicEffectSample : MonoBehaviour
 {
+    /**** v0.9.6beta ****/
+
+    /// <summary>
+    /// This is a sample that synthesizes background music using four PSG Players and an MMLSplitter, and synthesizes sound effects using an additional PSG Player.
+    /// This script is attached to the SceneController in the MusicAndEffectSample scene.
+    /// The MML is displayed in the InputField at the center of the screen and streamed using the “PLAY/STOP” button.
+    /// The sample MML loads the MML text file located in the Resources folder.
+    /// MML can be manually rewritten and will be reflected each time it is played back.
+    /// Pressing the “SE1–5” buttons mutes one BGM channel and streams the sound effects.
+    /// The “Rendered SE1-5” button plays the AudioClip rendered at startup.
+    /// </summary>
+
     [SerializeField] private TMP_InputField inputField;
     [SerializeField] private MMLSplitter mmlSplitter;   // MML Splitter for BGM
     [SerializeField] private PSGPlayer psgPlayerSE; // PSG Player for Sound Effects
@@ -104,7 +116,15 @@ public class uPSGMusicEffectSample : MonoBehaviour
     public void OnRenderedSeButton(int _id)
     {
         // Play pre-rendered sound effects
-        audioSource.PlayOneShot(seClips[_id]);
+        if (audioSource.isPlaying)
+        {
+            audioSource.Stop();
+        }
+        audioSource.clip = seClips[_id];
+        audioSource.loop = false;
+        audioSource.Play();
+        mmlSplitter.MuteChannel(0, true);   // Mute BGM Channel A
+        isMute = true;
     }
 
     public void OnInputChange(string inputText)

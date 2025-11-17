@@ -6,6 +6,16 @@ using UnityEngine.UI;
 
 public class uPSGDTMFsample : MonoBehaviour
 {
+    /**** v0.9.6beta ****/
+
+    /// <summary>
+    /// This is a sample that generates DTMF tones using two PSG players.
+    /// This script is attached to the SceneController in the DTMFsample scene.
+    /// Pressing a button on the numeric keypad will generate a DTMF tone.
+    /// DTMF is a method of transmitting codes using a composite signal composed of two audio frequency bands: low and high.
+    /// Each time you press the button, it rewrites the MML and synthesizes the specified frequency.
+    /// </summary>
+
     [SerializeField] MMLSplitter mmlSplitter;
     [SerializeField] TMP_InputField inputField;
     [SerializeField] private AudioMixer audioMixer;

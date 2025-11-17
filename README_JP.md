@@ -33,7 +33,7 @@ Unity上でレトロゲーム機などのPSG（Programmable Sound Generator）�
   * Windows
   * Android
 * 非対応（現状）
-  * Web GL
+  * Web GL（レンダリングは対応）
 * 未検証
   * 上記以外
 
@@ -83,6 +83,7 @@ MMLについては「[MMLリファレンス](Unity%20PSG%20Player%20-%20MML%20re
 * Web GLに対応
 
 > Webでも鳴らせる方法があるみたいだけど、統合するかは未定。
+> v0.9.6bbetaでレンダリングのみ対応。
 
 * サンプル曲と効果音をオリジナルに変更
 
@@ -91,6 +92,8 @@ MMLについては「[MMLリファレンス](Unity%20PSG%20Player%20-%20MML%20re
 
 ## 更新履歴
 
+* `v0.9.6 beta`
+  * 非同期レンダリングに対応
 * `v0.9.5 beta`
   * 周波数指定の発音に対応
 * `v0.9.4 beta`
