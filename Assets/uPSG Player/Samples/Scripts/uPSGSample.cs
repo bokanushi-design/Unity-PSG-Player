@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class uPSGSample : MonoBehaviour
 {
-    /**** v0.9.6beta ****/
+    /**** v0.9.7beta ****/
 
     /// <summary>
     /// This is a sample that synthesizes a monophonic sound using one PSG Player.
@@ -115,6 +115,18 @@ public class uPSGSample : MonoBehaviour
         psgPlayer.mmlString = mmlString;
     }
 
+    public void OnCopyMml()
+    {
+        GUIUtility.systemCopyBuffer = mmlString;
+    }
+
+    public void OnClearMml()
+    {
+        mmlString = "";
+        inputField.text = mmlString;
+        psgPlayer.mmlString = mmlString;
+    }
+
     public void OnNextButton()
     {
         SceneManager.LoadScene("MultiChannelSample");
@@ -129,6 +141,11 @@ public class uPSGSample : MonoBehaviour
     {
         jsonPanel.SetActive(true);
         jsonField.text = psgPlayer.DecodeAndExportSeqJson(true);    // Serialize the sequence into JSON.
+    }
+
+    public void OnCopyJson()
+    {
+        GUIUtility.systemCopyBuffer = psgPlayer.DecodeAndExportSeqJson(true);
     }
 
     public void OnJsonClose()

@@ -1,0 +1,863 @@
+# Unity PSG Player - Script reference
+
+* [Class]
+  * [PSG Player](#class-psg-player)
+  * [MML Spltter](#class-mml-splitter)
+
+## [Class] PSG Player
+
+### [PSG Player] Properties, Public Methods index
+
+* [Properties](#psg-player-properties)
+  * [mmlDecoder](#mmldecoder)
+  * [audioSource](#audiosource)
+  * [sampleRate](#samplerate)
+  * [audioClipSizeMilliSec](#audioclipsizemillisec)
+  * [a4Freq](#a4freq)
+  * [tickPerNote](#tickpernote)
+  * [programChange](#programchange)
+  * [seqListIndex](#seqlistindex)
+  * [seqList](#seqlist)
+  * [mmlString](#mmlstring)
+  * [asyncRenderIsDone](#asyncrenderisdone)
+  * [asyncRenderProgress](#asyncrenderprogress)
+  * [renderedDatas](#rendereddatas)
+* [Public Methods](#psg-player-public-methods)
+  * [Play()](#play)
+  * [Play(string \_mmlString)](#playstring-_mmlstring)
+  * [DecodeMML()](#decodemml)
+  * [PlayDecoded()](#playdecoded)
+  * [PlaySequence()](#playsequence)
+  * [Stop()](#stop)
+  * [IsPlaying()](#isplaying)
+  * [Mute(bool isOn)](#mutebool-ison)
+  * [ExportSeqJson(bool _prettyPrint)](#exportseqjsonbool-_prettyprint)
+  * [DecodeAndExportSeqJson(bool _prettyPrint)](#decodeandexportseqjsonbool-_prettyprint)
+  * [GetSeqJson()](#getseqjson)
+  * [ImportSeqJson(string _jsonString)](#importseqjsonstring-_jsonstring)
+  * [SetSeqJson(SeqJson _seqJson)](#setseqjsonseqjson-_seqjson)
+  * [RenderSequenceTodClipData()](#rendersequencetodclipdata)
+  * [ExportRenderedAudioClip(bool isAsyncRendered)](#exportrenderedaudioclipbool-isasyncrendered)
+  * [RenderSeqToClipDataAsync(int interruptSample)](#renderseqtoclipdataasyncint-interruptsample)
+  * [CalcSeqSample()](#calcseqsample)
+  * [PlayRenderedClipData(bool isLoop)](#playrenderedclipdatabool-isloop)
+
+----
+
+### [PSG Player] Properties
+
+----
+
+#### mmlDecoder
+
+``` C# PSGPlayer.cs
+[SerializeField] private MMLDecoder mmlDecoder;
+```
+
+Register the MML Decoder component that converts MML into sequence data.  
+
+----
+
+#### audioSource
+
+``` C# PSGPlayer.cs
+[SerializeField] private AudioSource audioSource;
+```
+
+Register the AudioSource that will receive the generated AudioClip.  
+
+----
+
+#### sampleRate
+
+``` C# PSGPlayer.cs
+public int sampleRate = 32000;
+```
+
+Sets the sample rate for the AudioClip.  
+The default is 32000Hz (32kHz).  
+
+----
+
+#### audioClipSizeMilliSec
+
+``` C# PSGPlayer.cs
+public int audioClipSizeMilliSec = 1000;
+```
+
+Sets the length of the AudioClip.  
+The default is 1000 milliseconds (1 second).  
+
+----
+
+#### a4Freq
+
+``` C# PSGPlayer.cs
+public float a4Freq = 440f;
+```
+
+Set the frequency of the A note in the fourth octave (o4a), which serves as the standard for the musical scale.  
+The default is 440Hz.  
+This variable can be changed using MML commands.  
+
+----
+
+#### tickPerNote
+
+``` C# PSGPlayer.cs
+public int tickPerNote = 960;
+```
+
+Set the resolution to one beat (quarter note).  
+Note duration is converted to the number of ticks based on this resolution, and the actual note length (in seconds) is calculated from the tempo and this resolution.  
+
+(Example: An eighth note corresponds to 480 ticks. At a tempo of 120, the note duration is  
+60[sec] / 120[notePerMin] * 480[tick] / 960[tickPerNote] = 0.25[sec]  
+which equals 0.25 seconds.)  
+
+----
+
+#### programChange
+
+``` C# PSGPlayer.cs
+public int programChange;
+```
+
+The number of the tone to be generated.  
+
+| Number | Wave form |
+| :--: | :-- |
+| 0 | Pulse wave（12.5%） |
+| 1 | Pulse wave（25%） |
+| 2 | Square wave（50%） |
+| 3 | Pulse wave（75%） |
+| 4 | Triangle wave |
+| 5 | Noise |
+| 6 | Short-cycle noise |
+
+This variable can be changed using MML commands.
+
+----
+
+#### seqListIndex
+
+``` C# PSGPlayer.cs
+[SerializeField] private int seqListIndex = 0;
+```
+
+Current position in sequence data processing.  
+Mainly displayed for debugging purposes.  
+
+----
+
+#### seqList
+
+``` C# PSGPlayer.cs
+[SerializeField] private List<SeqEvent> seqList = new();
+```
+
+A List array of sequence data.  
+Mainly displayed for debugging purposes.  
+
+----
+
+#### mmlString
+
+``` C# PSGPlayer.cs
+[Multiline] public string mmlString = "";
+```
+
+This is the MML string to be played.  
+Pass this variable to the MML Decoder to convert it into sequence data.  
+
+----
+
+#### asyncRenderIsDone
+
+``` C# PSGPlayer.cs
+public bool asyncRenderIsDone { get; private set; } = false;
+```
+
+`v0.9.6beta`
+
+Asynchronous rendering completes and returns `True`.  
+Use after calling [RenderSeqToClipDataAsync()](#renderseqtoclipdataasyncint-interruptsample).
+
+----
+
+#### asyncRenderProgress
+
+``` C# PSGPlayer.cs
+public float asyncRenderProgress { get; private set; } = 0f;
+```
+
+`v0.9.6beta`
+
+The progress rate for asynchronous rendering increases from 0 to 1.  
+Use after calling [RenderSeqToClipDataAsync()](#renderseqtoclipdataasyncint-interruptsample).
+
+----
+
+#### renderedDatas
+
+``` C# PSGPlayer.cs
+public float[] renderedDatas { get; private set; }
+```
+
+`v0.9.6beta`
+
+This contains clip data generated by [RenderSequenceToClipData()](#rendersequencetodclipdata) or [RenderSeqToClipDataAsync()](#renderseqtoclipdataasyncint-interruptsample).  
+
+----
+
+### [PSG Player] Public Methods
+
+----
+
+#### Play()
+
+``` C# PSGPlayer.cs
+public void Play();
+```
+
+* Parameter : None  
+
+Converts the MML string in the mmlString variable into sequence data and begins playback.  
+
+----
+
+#### Play(string _mmlString)
+
+``` C# PSGPlayer.cs
+public void Play(string _mmlString);
+```
+
+* Parameter : **_mmlString** MML string  
+
+Pass the parameter arguments to the mmlString variable, convert them to sequence data, and start playback.  
+
+----
+
+#### DecodeMML()
+
+``` C# PSGPlayer.cs
+public bool DecodeMML();
+```
+
+* Parameter : None  
+* Return value : `True` if decoding succeeds  
+
+Pass the MML string from the mmlString variable to the MML Decoder to convert it into sequence data.  
+
+----
+
+#### PlayDecoded()
+
+``` C# PSGPlayer.cs
+public void PlayDecoded();
+```
+
+* Parameter : None  
+
+Plays back decoded sequence data.  
+Since no conversion processing is performed, reduced CPU load is expected.  
+
+----
+
+#### PlaySequence()
+
+``` C# PSGPlayer.cs
+public void PlaySequence();
+```
+
+* Parameter : None  
+
+Plays back decoded sequence data.  
+Same as [PlayDecoded()](#playdecoded).
+
+----
+
+#### Stop()
+
+``` C# PSGPlayer.cs
+public void Stop();
+```
+
+* Parameter : None  
+
+Stop the currently playing audio.  
+
+----
+
+#### IsPlaying()
+
+``` C# PSGPlayer.cs
+public bool IsPlaying();
+```
+
+* Parameter : None
+* Return value : `True` if playing
+
+Returns the playback status of AudioSource.  
+
+----
+
+#### Mute(bool isOn)
+
+``` c# PSGPlayer.cs
+public void Mute(bool isOn);
+```
+
+* Parameter: **isOn** Set `True` to Mute on
+
+~~When muted, the AudioSource is silenced and the generated sample is set to 0 (silence).  
+When unmuted with `False`, the AudioSource is immediately unmuted, but the sample remains silent until the next note event occurs.  
+However, if unmuted before the buffered sample plays out, the already generated sample will be played.~~  
+
+`v0.9.7beta`  
+
+Setting `True` immediately enables the [AudioSource](#audiosource) mute, while setting `False` immediately disables it.  
+In other words, it now behaves the same as a standard mute.
+
+----
+
+#### NoteSyncMute(bool isOn)
+
+``` C# PSGPlayer.cs
+public void NoteSyncMute(bool isOn);
+```
+
+`v0.9.7beta`  
+
+* Parameter: **isOn** Set `True` to Mute on
+
+Setting this to `True` immediately mutes the [AudioSource](#audiosource), but setting it to `False` unmutes it when the next note event occurs.  
+This allows you to simulate the sound effect interrupts found in older game consoles.
+
+![NoteSyncMute](./img/NoteSyncMute.drawio.svg)
+
+----
+
+#### ExportSeqJson(bool _prettyPrint)
+
+``` C# PSGPlayer.cs
+public string ExportSeqJson(bool _prettyPrint)
+```
+
+`v0.9.3beta`
+
+* Parameter: **_prettyPrint** `True` enables line breaks and indentation (`False` by default)
+* Return value: **JSON string**
+
+The decoded MML sequence data is converted to JSON and output as a string.  
+If there is no sequence data ([DecodeMML()](#decodemml) or [Play()](#play) has not been called), Null is returned.  
+The JSON content combines the [tickPerNote](#tickpernote) value with the [seqList](#seqlist).
+
+----
+
+#### DecodeAndExportSeqJson(bool _prettyPrint)
+
+``` C# PSGPlayer.cs
+public string DecodeAndExportSeqJson(bool _prettyPrint)
+```
+
+`v0.9.3beta`
+
+* Parameter: **_prettyPrint** `True` enables line breaks and indentation (`False` by default)
+* Return value: **JSON string**
+
+After decoding MML, serializes the sequence data into JSON and outputs it.  
+
+----
+
+#### GetSeqJson()
+
+``` C# PSGPlayer.cs
+public SeqJson GetSeqJson()
+```
+
+`v0.9.3beta`
+
+* Parameter: None
+* Return value: **SeqJson class object**
+
+Outputs the decoded MML sequence data as a SeqJson class object.  
+This is the data before being converted to JSON by [ExportSeqJson()](#exportseqjsonbool-_prettyprint).  
+It is primarily used when exporting multi-channel JSON with the MML Splitter.
+
+----
+
+#### ImportSeqJson(string _jsonString)
+
+``` C# PSGPlayer.cs
+public bool ImportSeqJson(string _jsonString)
+```
+
+`v0.9.3beta`
+
+* Parameter: **_jsonString** JSON string
+* Return value: `True` if import succeeds
+
+Import JSON-formatted strings as sequence data.  
+At this time, the value of [tickPerNote](#tickpernote) is also loaded.
+
+----
+
+#### SetSeqJson(SeqJson _seqJson)
+
+``` C# PSGPlayer.cs
+public bool SetSeqJson(SeqJson _seqJson)
+```
+
+`v0.9.3beta`
+
+* Parameter: **_jsonString** JSON string
+* Return value: `True` if import succeeds
+
+Directly reads the [tickPerNote](#tickpernote) value and sequence data from a SeqJson class object.  
+Primarily used when importing multi-channel JSON with MML Splitter.
+
+----
+
+#### RenderSequenceTodClipData()
+
+``` C# PSGPlayer.cs
+public float[] RenderSequenceTodClipData()
+```
+
+`v0.9.4beta`
+
+* Parameter: None
+* Return value: **Sample data consisting of a float array**
+
+Generates the waveform data for the entire sequence.  
+Calculates each sample at the sample rate specified by [sampleRate](#samplerate), then returns each sample as a float array.  
+The higher the sample rate and the longer the sequence, rendering will take longer time.  
+Additionally, the sequence loop command ([MML Loop “L”](Unity%20PSG%20Player%20-%20manual_JP.md)) will be disabled during rendering.
+
+----
+
+#### ExportRenderedAudioClip(bool isAsyncRendered)
+
+``` C# PSGPlayer.cs
+public AudioClip ExportRenderedAudioClip(bool isAsyncRendered)
+```
+
+`v0.9.4beta`
+
+* Parameter: None
+* Return value: **Rendered AudioClip**
+
+Generate waveform data for the entire sequence and export it as an AudioClip.  
+The sample rate of the AudioClip is set to the value specified by [samplRate](#samplerate).  
+When prioritizing responsiveness for sound effects, you can use this function to prepare the AudioClip in advance.  
+Conversely, for long sequences such as background music, be aware to rendering will takes long time.
+
+`v0.9.6beta`
+
+* Parameter: **isAsyncRendered**　Use renderedDatas when `True` (default `False`)
+* Return value: **Rendered AudioClip**
+
+Export the AudioClip using [renderedDatas](#rendereddatas) without performing rendering.  
+
+----
+
+#### RenderSeqToClipDataAsync(int interruptSample)
+
+``` c# PSGPlayer.cs
+public bool RenderSeqToClipDataAsync(int interruptSample)
+```
+
+`v0.9.6beta`
+
+* Parameter: **interruptSample**　Number of samples where processing is interrupted
+* Return value: `True` when rendering starts successfully
+
+Begin asynchronous rendering of the entire sequence to waveform data.  
+Monitor rendering within the main thread's Update() method or similar.
+The rendering progress increases from 0 to 1 using [asyncRenderProgress](#asyncrenderprogress).  
+When rendering completes, [asyncRenderIsDone](#asyncrenderisdone) becomes `True`.  
+The generated clip data is stored in [renderedDatas](#rendereddatas).  
+[ExportRenderedAudioClip(true)](#exportrenderedaudioclipbool-isasyncrendered) converts [renderedDatas](#rendereddatas) into an AudioClip.  
+Note that the sequence loop command ([MML Loop “L”](Unity%20PSG%20Player%20-%20manual_JP.md)) is disabled during rendering.
+
+----
+
+#### CalcSeqSample()
+
+``` c# PSGPlayer.cs
+public int CalcSeqSample()
+```
+
+`v0.9.6beta`
+
+* Parameter: None
+* Return value: Number of samples after rendering
+
+Calculates the size of the clip data generated when rendering.
+
+----
+
+#### PlayRenderedClipData(bool isLoop)
+
+``` c# PSGPlayer.cs
+public bool PlayRenderedClipData(bool isLoop)
+```
+
+`v0.9.6beta`
+
+* Parameter: **isLoop**　`True` for loop playback
+* Return value: `True` if playback is successful
+
+Use [renderedDatas](#rendereddatas) to generate an AudioClip and play it using the [AudioSource](#audiosource) specified for the PSG Player.
+
+----
+
+## [Class] MML Splitter
+
+### [MML Splitter] Properties, Public Methods index
+
+* [Properties](#mml-splitter-properties)
+  * [psgPlayers](#psgplayers)
+  * [multiChMMLString](#multichmmlstring)
+  * [asyncMultiRenderIsDone](#asyncmultirenderisdone)
+  * [asyncMultiRenderProgress](#asyncmultirenderprogress)
+* [Public Methods](#mml-splitter-public-methods)
+  * [SplitMML()](#splitmml)
+  * [SplitMML(string \_multiChMMLString)](#splitmmlstring-_multichmmlstring)
+  * [SetAllChannelsSampleRate(int \_rate)](#setallchannelssamplerateint-_rate)
+  * [SetAllChannelClipSize(int \_msec)](#setallchannelclipsizeint-_msec)
+  * [PlayAllChannels()](#playallchannels)
+  * [PlayAllChannelsDecoded()](#playallchannelsdecoded)
+  * [PlayAllChannelsSequence()](#playallchannelssequence)
+  * [DecodeAllChannels()](#decodeallchannels)
+  * [StopAllChannels()](#stopallchannels)
+  * [IsAnyChannelPlaying()](#isanychannelplaying)
+  * [MuteChannel(int channel, bool isOn)](#mutechannelint-channel-bool-ison)
+  * [NoteSyncMuteChannel(int channel, bool isOn)](#notesyncmutechannelint-channel-bool-ison)
+  * [ExportMultiSeqJson(bool _prettyPrint)](#exportmultiseqjsonbool-_prettyprint)
+  * [DecodeAndExportMultiSeqJson(bool _prettyPrint)](#decodeandexportmultiseqjsonbool-_prettyprint)
+  * [ImportMultiSeqJson(string _jsonString)](#importmultiseqjsonstring-_jsonstring)
+  * [ExportMixedAudioClip(int _sampleRate, bool isAsyncRendered)](#exportmixedaudioclipint-_samplerate-bool-isasyncrendered)
+  * [RenderMultiSeqToClipDataAsync(int _sampleRate, int interruptSample)](#rendermultiseqtoclipdataasyncint-_samplerate-int-interruptsample)
+  * [PlayAllChannelsRenderedClipData(bool isLoop)](#playallchannelsrenderedclipdatabool-isloop)
+
+----
+
+### [MML Splitter] Properties
+
+----
+
+#### psgPlayers
+
+``` C# MMLSplitter.cs
+[SerializeField] private PSGPlayer[] psgPlayers;
+```
+
+Register a PSG Player component for each channel to send the MML in segments.  
+
+----
+
+#### multiChMMLString
+
+``` C# MMLSplitter.cs
+public string multiChMMLString;
+```
+
+Register the original MML string to be sent in segments.  
+
+----
+
+#### asyncMultiRenderIsDone
+
+``` c# MMLSplitter.cs
+public bool asyncMultiRenderIsDone { get; private set; } = false;
+```
+
+`v0.9.6beta`
+
+Asynchronous rendering completes on all channels returns `True`.  
+Use after calling [RenderMultiSeqToClipDataAsync()](#rendermultiseqtoclipdataasyncint-_samplerate-int-interruptsample).
+
+----
+
+#### asyncMultiRenderProgress
+
+``` c# MMLSplitter.cs
+public float asyncMultiRenderProgress { get; private set; } = 0f;
+```
+
+`v0.9.6beta`
+
+The progress rate for asynchronous rendering across all channels increases from 0 to 1.  
+Use after calling [RenderMultiSeqToClipDataAsync()](#rendermultiseqtoclipdataasyncint-_samplerate-int-interruptsample).
+
+----
+
+### [MML Splitter] Public Methods
+
+----
+
+#### SplitMML()
+
+``` C# MMLSplitter.cs
+public void SplitMML();
+```
+
+* Parameter : None
+
+Splits the MML string from multiChMMLString and sends it to the PSG Player registered in psgPlayers.  
+For channel assignment details, refer to “[MML Reference](Unity%20PSG%20Player%20-%20MML%20reference.md#Track%20Header)”.  
+
+----
+
+#### SplitMML(string _multiChMMLString)
+
+``` C# MMLSplitter.cs
+public void SplitMML(string _multiChMMLString);
+```
+
+* Parameter : **_multiChMMLString** Multi-channel MML string
+
+Pass the parameter arguments to the multiChMMLString variable to send the MML to PSG Player in segments.  
+
+----
+
+#### SetAllChannelsSampleRate(int _rate)
+
+``` C# MMLSplitter.cs
+public void SetAllChannelsSampleRate(int _rate);
+```
+
+* Parameter : **_rate** Sample rate
+
+Set the sample rate for all PSG players (in Hz).  
+
+----
+
+#### SetAllChannelClipSize(int _msec)
+
+``` C# MMLSplitter.cs
+public void SetAllChannelClipSize(int _msec);
+```
+
+* Parameter : **_msec** AudioClip length
+
+Sets the AudioClip length for all PSG Players (in milliseconds).  
+
+----
+
+#### PlayAllChannels()
+
+``` C# MMLSplitter.cs
+public void PlayAllChannels();
+```
+
+* Parameter : None
+
+All PSG Players decode MML and play simultaneously.  
+
+----
+
+#### PlayAllChannelsDecoded()
+
+``` C# MMLSplitter.cs
+public void PlayAllChannelsDecoded();
+```
+
+* Parameter : None
+
+Play back the decoded sequence data simultaneously on all PSG Players.  
+
+----
+
+#### PlayAllChannelsSequence()
+
+``` C# MMLSplitter.cs
+public void PlayAllChannelsSequence()
+```
+
+* Parameter : None
+
+Plays sequence data simultaneously on all PSG players.  
+Same as [PlayAllChannelsDecoded()](#playallchannelsdecoded).
+
+----
+
+#### DecodeAllChannels()
+
+``` C# MMLSplitter.cs
+public void DecodeAllChannels()
+```
+
+* Parameter : None
+
+All PSG Players decode MML into sequence data.  
+Since multi-channel MML is not transmitted in split segments, please execute [SplitMML()](#splitmml) beforehand.
+
+----
+
+#### StopAllChannels()
+
+``` C# MMLSplitter.cs
+public void StopAllChannels();
+```
+
+* Parameter : None
+
+Stop playing all PSG players.  
+
+----
+
+#### IsAnyChannelPlaying()
+
+``` C# MMLSplitter.cs
+public bool IsAnyChannelPlaying();
+```
+
+* Parameter : None
+* Return value : `True` if any PSG Player is currently playing
+
+Returns `True` if any of the AudioSources for each PSG Player is currently playing.  
+
+----
+
+#### MuteChannel(int channel, bool isOn)
+
+``` C# MMLSplitter.cs
+public void MuteChannel(int channel, bool isOn);
+```
+
+* Parameter: **channel** Target channel  
+　　　　　　　**isOn** `True` for mute on
+
+Mutes the specified channel.
+
+----
+
+#### NoteSyncMuteChannel(int channel, bool isOn)
+
+``` C# MMLSplitter.cs
+public void NoteSyncMuteChannel(int channel, bool isOn);
+```
+
+`v0.9.7beta`
+
+* Parameter: **channel** Target channel  
+　　　　　　　**isOn** `True` for mute on
+
+Sets [NoteSyncMute](#notesyncmutebool-ison) on the specified channel.  
+
+----
+
+#### ExportMultiSeqJson(bool _prettyPrint)
+
+``` C# MMLSplitter.cs
+public string ExportMultiSeqJson(bool _prettyPrint)
+```
+
+`v0.9.3beta`
+
+* Parameter: **_prettyPrint**  Enables line breaks and indentation when set to `True` (default `False`)
+* Return value: **JSON string**
+
+The decoded MML sequence data for each PSG Player is consolidated into JSON and output as a string.  
+The JSON contents consist of a list of [SeqJson class objects](#getseqjson) output by each PSG Player.
+
+----
+
+#### DecodeAndExportMultiSeqJson(bool _prettyPrint)
+
+``` C# MMLSplitter.cs
+public string DecodeAndExportMultiSeqJson(bool _prettyPrint)
+```
+
+`v0.9.3beta`
+
+* Parameter: **_prettyPrint**  Enables line breaks and indentation when set to `True` (default `False`)
+* Return value: **JSON string**
+
+Each PSG Player's MML is decoded, then the sequence data is converted to JSON and output.  
+Since multi-channel MML is not transmitted in split segments, please execute [SplitMML()](#splitmml) beforehand.
+
+----
+
+#### ImportMultiSeqJson(string _jsonString)
+
+``` C# MMLSplitter.cs
+public void ImportMultiSeqJson(string _jsonString)
+```
+
+`v0.9.3beta`
+
+* Parametr: **_jsonString** JSON string
+
+Import JSON-formatted strings as multi-channel sequence data.  
+
+----
+
+#### ExportMixedAudioClip(int _sampleRate, bool isAsyncRendered)
+
+``` C# MMLSplitter.cs
+public AudioClip ExportMixedAudioClip(int _sampleRate, bool isAsyncRendered)
+```
+
+`v0.9.4beta`
+
+* Parameter: **_sampleRate** AudioClip sample rate
+* Return value: **AudioClip**
+
+Mix the waveform data rendered by each PSG Player and export as an AudioClip.  
+The combined waveform data is summed by dividing by the number of channels to ensure it does not exceed the sample value range.  
+Therefore, the maximum volume of a single tone decreases depending on the number of channels.  
+Additionally, since the sample rate must be consistent across all channels, after using this function, the [sampleRate](#samplerate) of each PSG Player will be set to the value specified in the argument.  
+Please note that rendering all PSG players before mixing can take a significant amount of time, especially for longer sequences.
+
+`v0.9.6beta`
+
+* Parameter: **_sampleRate** AudioClip sample rate
+* Parameter: **isAsyncRendered**　Use rendered waveform data (default `False`)
+* Return value: **AudioClip**
+
+Setting `isAsyncRendered` to `True` will mix the [renderedDatas](#rendereddatas) from each channel and export an AudioClip.  
+In this case, rendering is not performed, so after calling [RenderMultiSeqToClipDataAsync()](#rendermultiseqtoclipdataasyncint-_samplerate-int-interruptsample), use it only after [asyncMultiRenderIsDone](#asyncmultirenderisdone) returns `True`.
+
+----
+
+#### RenderMultiSeqToClipDataAsync(int _sampleRate, int interruptSample)
+
+``` c# MMLSplitter.cs
+public bool RenderMultiSeqToClipDataAsync(int _sampleRate, int interruptSample)
+```
+
+`v0.9.6beta`
+
+* Parameter: **_sampleRate** AudioClip sample rate
+* Parameter: **interruptSample**　Number of samples where processing is interrupted
+* Return value: Once rendering begins on any channel, return `True`
+
+Begin asynchronous rendering on all channels.  
+Monitor rendering within the main thread's Update() method or similar.  
+The rendering progress increases from 0 to 1 using [asyncMultiRenderProgress](#asyncmultirenderprogress).  
+When rendering completes, [asyncMultiRenderIsDone](#asyncmultirenderisdone) becomes `True`.  
+The generated clip data is stored in the [renderedDatas](#rendereddatas) of each PSG Player.  
+You can use [ExportMixedAudioClip()](#exportmixedaudioclipint-_samplerate-bool-isasyncrendered) to mix [renderedDatas](#rendereddatas) and convert them into an AudioClip.  
+Note that the sequence loop command ([MML Loop “L”](Unity%20PSG%20Player%20-%20manual_JP.md)) is disabled during rendering.
+
+----
+
+#### PlayAllChannelsRenderedClipData(bool isLoop)
+
+``` c# MMLSplitter.cs
+public void PlayAllChannelsRenderedClipData(bool isLoop)
+```
+
+`v0.9.6beta`
+
+* Parameter: **isLoop**　If `True`, loop playback
+* Return value: None
+
+Use [renderedDatas](#rendereddatas) to generate AudioClips on each channel, then play them using the AudioSource specified for each PSG Player.
+Since the audio is played unmixed, you can adjust the volume or mute each channel individually.
+
+----

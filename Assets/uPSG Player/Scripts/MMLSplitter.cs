@@ -5,7 +5,7 @@ using uPSG;
 
 public class MMLSplitter : MonoBehaviour
 {
-    /**** v0.9.6beta ****/
+    /**** v0.9.7beta ****/
 
     /// <summary>
     /// PSG Player component for each channel
@@ -227,11 +227,22 @@ public class MMLSplitter : MonoBehaviour
     /// Mute the specified channel
     /// </summary>
     /// <param name="channel">Specifying the channel</param>
-    /// <param name="isMute">Set to True to mute</param>
-    public void MuteChannel(int channel, bool isMute)
+    /// <param name="isOn">Set to True to mute</param>
+    public void MuteChannel(int channel, bool isOn)
     {
         if (!CheckPlayersReady()) { return; }
-        psgPlayers[channel].Mute(isMute);
+        psgPlayers[channel].Mute(isOn);
+    }
+
+    /// <summary>
+    /// Mutes the volume of the currently playing audio, and the unmute timing aligns with the start of the next note.
+    /// </summary>
+    /// <param name="channel">Specifying the channel</param>
+    /// <param name="isOn">True enables mute, and False to unmute on the next note-on event.</param>
+    public void NoteSyncMuteChannel(int channel, bool isOn)
+    {
+        if (!CheckPlayersReady()) { return; }
+        psgPlayers[channel].NoteSyncMute(isOn);
     }
 
     /// <summary>

@@ -1,6 +1,6 @@
 namespace uPSG
 {
-    /**** v0.9.6beta ****/
+    /**** v0.9.7beta ****/
 
     public static class ConstValue
     {
@@ -34,6 +34,7 @@ namespace uPSG
         public const int LENGTH_MIN = 1;
         public const int LENGTH_MAX = 128;
         public const int DEFAULT_NOTE_NUM = 60;
+        public const int PERFORM_DIVISOR = 60;
         public const int SWEEP_MIN = -1200;
         public const int SWEEP_MAX = 1200;
         public const int REPEAT_MAX = 128;

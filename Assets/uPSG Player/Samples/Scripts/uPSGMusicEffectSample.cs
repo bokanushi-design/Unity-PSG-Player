@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class uPSGMusicEffectSample : MonoBehaviour
 {
-    /**** v0.9.6beta ****/
+    /**** v0.9.7beta ****/
 
     /// <summary>
     /// This is a sample that synthesizes background music using four PSG Players and an MMLSplitter, and synthesizes sound effects using an additional PSG Player.
@@ -75,7 +75,8 @@ public class uPSGMusicEffectSample : MonoBehaviour
         // Mute BGM channel A while sound effects are playing
         if (isMute && !psgPlayerSE.IsPlaying())
         {
-            mmlSplitter.MuteChannel(0, false);
+            //mmlSplitter.MuteChannel(0, false);
+            mmlSplitter.NoteSyncMuteChannel(0, false);
             isMute = false;
         }
     }
@@ -109,7 +110,8 @@ public class uPSGMusicEffectSample : MonoBehaviour
             psgPlayerSE.Play(); // Decode and play sound effects
         }
         seMMLIndex = _id;
-        mmlSplitter.MuteChannel(0, true);   // Mute BGM Channel A
+        //mmlSplitter.MuteChannel(0, true);   // Mute BGM Channel A
+        mmlSplitter.NoteSyncMuteChannel(0, true);
         isMute = true;
     }
 
@@ -123,7 +125,8 @@ public class uPSGMusicEffectSample : MonoBehaviour
         audioSource.clip = seClips[_id];
         audioSource.loop = false;
         audioSource.Play();
-        mmlSplitter.MuteChannel(0, true);   // Mute BGM Channel A
+        //mmlSplitter.MuteChannel(0, true);   // Mute BGM Channel A
+        mmlSplitter.NoteSyncMuteChannel(0, true);
         isMute = true;
     }
 

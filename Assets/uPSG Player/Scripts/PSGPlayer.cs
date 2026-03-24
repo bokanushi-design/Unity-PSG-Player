@@ -7,7 +7,7 @@ using uPSG;
 
 public class PSGPlayer : MonoBehaviour
 {
-    /**** v0.9.6beta ****/
+    /**** v0.9.7beta ****/
 
     /// <summary>
     /// Specify the MML Decoder component
@@ -47,6 +47,7 @@ public class PSGPlayer : MonoBehaviour
 
     private int audioPosition = 0;
     private int audioPositionSetCount = 0;
+    private int audioClipSamplesInAudioSource = 0;
     private bool stopAudio = false;
     private int noteNumber;
     private float directFreq = 0;
@@ -120,8 +121,15 @@ public class PSGPlayer : MonoBehaviour
     private uint lfoNextEventPosition;
     private bool isLfoOn = false;
 
-    private bool audioMute = false;
     private bool seqMute = false;
+
+    private Queue<uint> noteOnEventPositionQueue = new();
+    private uint nextNoteOnEventPosition = 0;
+    private bool isSyncMuteOffReady = false;
+    private bool isNextNoteOnEventPositionUpdated = true;
+    private int audioSourcePosition = 0;
+    private int audioSourceLoopCount = 0;
+    private int seqLoopCount = 0;
 
     /// <summary>
     /// True when asynchronous rendering completes
@@ -166,6 +174,11 @@ public class PSGPlayer : MonoBehaviour
             audioSource.loop = false;
             if (audioSource.timeSamples > seqEndPosition % sampleRate)
             {
+                if (isSyncMuteOffReady)
+                {
+                    audioSource.mute = false;
+                    isSyncMuteOffReady = false;
+                }
                 Stop();
                 stopAudio = false;
             }
@@ -173,6 +186,40 @@ public class PSGPlayer : MonoBehaviour
         if (audioSource.loop == false && !audioSource.isPlaying && audioSource.clip != null)
         {
             audioSource.clip = null;
+        }
+
+        if (audioSource.isPlaying)
+        {
+            // Synchronize the NoteSyncMute release timing with the note-on event.
+            if (audioSource.timeSamples < audioSourcePosition)
+            {
+                audioSourceLoopCount++;
+            }
+            audioSourcePosition = audioSource.timeSamples;
+            int aPos = audioSourcePosition + (audioClipSamplesInAudioSource * audioSourceLoopCount - (int)seqEndPosition * seqLoopCount);
+            if (aPos >= nextNoteOnEventPosition)
+            {
+                if (isNextNoteOnEventPositionUpdated)
+                {
+                    if (isSyncMuteOffReady)
+                    {
+                        audioSource.mute = false;
+                        isSyncMuteOffReady = false;
+                    }
+                }
+                isNextNoteOnEventPositionUpdated = false;
+                while (true)
+                {
+                    if (noteOnEventPositionQueue.Count == 0) { break; }
+                    nextNoteOnEventPosition = noteOnEventPositionQueue.Dequeue();
+                    //Debug.Log(aPos.ToString() + " : " + nextNoteOnEvent.ToString());
+                    if (nextNoteOnEventPosition > aPos)
+                    {
+                        isNextNoteOnEventPositionUpdated = true;
+                        break;
+                    }
+                }
+            }
         }
     }
 
@@ -233,8 +280,9 @@ public class PSGPlayer : MonoBehaviour
         InitSequence();
 
         audioClipSizeMilliSec = Mathf.Clamp(audioClipSizeMilliSec, ConstValue.AUDIO_CLIP_SIZE_MIN, ConstValue.AUDIO_CLIP_SIZE_MAX);
+        audioClipSamplesInAudioSource = (int)(sampleRate * ((float)audioClipSizeMilliSec / 1000f));
         // Generate an AudioClip for stream playback (requests samples for the buffer via OnAudioRead during generation)
-        AudioClip channelClip = AudioClip.Create("PSG Sound", (int)(sampleRate * ((float)audioClipSizeMilliSec / 1000f)), 1, sampleRate, true, OnAudioRead, OnAudioSetPosition);
+        AudioClip channelClip = AudioClip.Create("PSG Sound", audioClipSamplesInAudioSource, 1, sampleRate, true, OnAudioRead, OnAudioSetPosition);
         audioSource.clip = channelClip;
         audioSource.loop = true;
         audioSource.Play();
@@ -273,9 +321,7 @@ public class PSGPlayer : MonoBehaviour
     /// <param name="isOn">True enables mute</param>
     public void Mute(bool isOn)
     {
-        audioMute = isOn;
-        audioSource.mute = audioMute;
-        if (audioMute) { seqMute = true; }
+        audioSource.mute = isOn;
     }
 
     /// <summary>
@@ -284,6 +330,32 @@ public class PSGPlayer : MonoBehaviour
     public void PlaySequence()
     {
         PlayDecoded();
+    }
+
+    /// <summary>
+    /// Mutes the volume of the currently playing audio, and the unmute timing aligns with the start of the next note.
+    /// </summary>
+    /// <param name="isOn">True enables mute, and False to unmute on the next note-on event.</param>
+    public void NoteSyncMute(bool isOn)
+    {
+        if (isOn)
+        {
+            audioSource.mute = true;
+        }
+        else
+        {
+            isSyncMuteOffReady = true;
+        }
+    }
+
+    /// <summary>
+    /// Set the generated sound data to silent.
+    /// Primarily used for rendering.
+    /// </summary>
+    /// <param name="isOn">Set to True for silent data.</param>
+    public void SeqMute(bool isOn)
+    {
+        seqMute = isOn;
     }
 
     /// <summary>
@@ -393,7 +465,6 @@ public class PSGPlayer : MonoBehaviour
     /// <returns>Rendered AudioClip</returns>
     public AudioClip ExportRenderedAudioClip(bool isAsyncRendered)
     {
-        //float[] clipData = RenderSequenceTodClipData();
         float[] clipData;
         if (isAsyncRendered)
         {
@@ -523,19 +594,25 @@ public class PSGPlayer : MonoBehaviour
         noiseShort = false;
         programChange = ConstValue.DEFAULT_PROGRAM_CHANGE;
         envPatIndex = 0;
-        envDulation = sampleRate / 60;
+        envDulation = sampleRate / ConstValue.PERFORM_DIVISOR;
         envPatList.Clear();
         envVolIndex = 0;
         sweepPitch = 0;
         sweepPitchRate = 0;
-        sweepDulation = sampleRate / 60;
+        sweepDulation = sampleRate / ConstValue.PERFORM_DIVISOR;
         isLfoOn = false;
         lfoPatList.Clear();
         lfoDelay = 0;
         lfoDeapth = 0;
         lfoSpeed = 1;
         lfoCount = 0;
-        lfoDulation = sampleRate / 60;
+        lfoDulation = sampleRate / ConstValue.PERFORM_DIVISOR;
+        noteOnEventPositionQueue.Clear();
+        nextNoteOnEventPosition = 0;
+        isNextNoteOnEventPositionUpdated = true;
+        seqLoopCount = 0;
+        audioSourcePosition = 0;
+        audioSourceLoopCount = 0;
     }
 
     private void OnAudioRead(float[] data)
@@ -556,7 +633,8 @@ public class PSGPlayer : MonoBehaviour
         if (seqListIndex < 0)
         {
             // Since AudioSource can only be manipulated on the main thread, set the stopAudio true.
-            stopAudio = seqEndPosition < audioPositionSetCount * (int)(sampleRate * ((float)audioClipSizeMilliSec / 1000f));
+            //stopAudio = seqEndPosition < audioPositionSetCount * (int)(sampleRate * ((float)audioClipSizeMilliSec / 1000f));
+            stopAudio = seqEndPosition < (audioPositionSetCount * audioClipSamplesInAudioSource);
         }
         if (audioPosition == 0)
         {
@@ -984,6 +1062,9 @@ public class PSGPlayer : MonoBehaviour
             if (seqLoop)
             {
                 seqListIndex = seqLoopIndex;
+                noteOnEventPositionQueue.Clear();
+                nextNoteOnEventPosition = 0;
+                seqLoopCount++;
             }
             else
             {
@@ -996,7 +1077,7 @@ public class PSGPlayer : MonoBehaviour
     private void PrepareSound()
     {
         // Preprocessing for sound generation
-        if (!audioMute && seqMute) { seqMute = false; }
+        //if (!audioMute && seqMute) { seqMute = false; }
 
         if (programChange < 4)
         {
@@ -1019,6 +1100,8 @@ public class PSGPlayer : MonoBehaviour
             sweepNextEventPosition = 0;
             lfoCount = 0;
             lfoNextEventPosition = 0;
+            // Queue the timing for releasing NoteSyncMute.
+            noteOnEventPositionQueue.Enqueue(seqPosition);
         }
         else
         {
