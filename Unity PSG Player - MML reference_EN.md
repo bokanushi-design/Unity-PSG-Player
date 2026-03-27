@@ -368,12 +368,12 @@ If “|” is omitted, the sound will play at the volume maintained after the en
 
 ----
 
-#### **M\<num\>{\<delay\>,\<deapth\>,\<speed\>}** LFO Difinition
+#### **M\<num\>{\<delay\>,\<depth\>,\<speed\>}** LFO Difinition
 
 * Parameters
   * \<num\> *LFO number [1-127] (Required)*
   * \<delay\> *LFO delay time [0–255] (Omitted: 0)*
-  * \<deapth\> *Pitch range [0–255] (Omitted: 0)*
+  * \<depth\> *Pitch range [0–255] (Omitted: 0)*
   * \<speed\> *Pitch change speed [1–255] (Omitted: 1)*
 
 **LFO number 0 cannot be defined.*  

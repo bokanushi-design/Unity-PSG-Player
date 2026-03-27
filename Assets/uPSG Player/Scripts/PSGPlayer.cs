@@ -114,7 +114,7 @@ public class PSGPlayer : MonoBehaviour
     private int lfoPatId = 0;
     private int lfoDelay = 0;
     private int lfoSpeed = 0;
-    private int lfoDeapth = 0;
+    private int lfoDepth = 0;
     private int lfoCount = 0;
     private float lfoPitch = 0;
     private int lfoDulation;
@@ -603,7 +603,7 @@ public class PSGPlayer : MonoBehaviour
         isLfoOn = false;
         lfoPatList.Clear();
         lfoDelay = 0;
-        lfoDeapth = 0;
+        lfoDepth = 0;
         lfoSpeed = 1;
         lfoCount = 0;
         lfoDulation = sampleRate / ConstValue.PERFORM_DIVISOR;
@@ -734,7 +734,7 @@ public class PSGPlayer : MonoBehaviour
                         else
                         {
                             // The pitch is calculated by multiplying the triangle wave table value by lfoDepth.
-                            lfoPitch = (triangleTable[lfoCount] * lfoDeapth * 100f / 255f);
+                            lfoPitch = (triangleTable[lfoCount] * lfoDepth * 100f / 255f);
                             int x = (Mathf.Clamp(noteNumber, ConstValue.NOTE_NUM_MIN, ConstValue.NOTE_NUM_MAX) - ConstValue.A4_NOTE_NUM) * 100 + (int)lfoPitch;
                             waveFreq = (float)(a4Freq * System.Math.Pow(2d, x / (double)ConstValue.CENT_IN_OCTAVE));
                             waveLength = sampleRate / waveFreq;
@@ -1005,7 +1005,7 @@ public class PSGPlayer : MonoBehaviour
                         isLfoOn = true;
                         lfoCount = 0;
                         lfoDelay = lfoPatList[lfoPatIndex].lfoDelay;
-                        lfoDeapth = lfoPatList[lfoPatIndex].lfoDeapth;
+                        lfoDepth = lfoPatList[lfoPatIndex].lfoDeapth;
                         lfoSpeed = lfoPatList[lfoPatIndex].lfoSpeed;
                         lfoNextEventPosition = 0;
                     }
@@ -1013,8 +1013,8 @@ public class PSGPlayer : MonoBehaviour
                 case SEQ_CMD.LFO_DELAY:
                     lfoDelay = seqList[seqListIndex].seqParam;
                     break;
-                case SEQ_CMD.LFO_DEAPTH:
-                    lfoDeapth = seqList[seqListIndex].seqParam;
+                case SEQ_CMD.LFO_DEPTH:
+                    lfoDepth = seqList[seqListIndex].seqParam;
                     break;
                 case SEQ_CMD.LFO_SPEED:
                     lfoSpeed = seqList[seqListIndex].seqParam;
@@ -1035,7 +1035,7 @@ public class PSGPlayer : MonoBehaviour
                             break;
                         }
                     }
-                    lfoPatList.Add(new LfoPat(lfoPatId, lfoDelay, lfoDeapth, lfoSpeed));
+                    lfoPatList.Add(new LfoPat(lfoPatId, lfoDelay, lfoDepth, lfoSpeed));
                     isLfoOn = true;
                     break;
                 case SEQ_CMD.LOOP_POINT:

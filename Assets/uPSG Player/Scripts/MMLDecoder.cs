@@ -521,7 +521,7 @@ public class MMLDecoder : MonoBehaviour
                                 int _lSpeed = (pResult[3] >= 0) ? pResult[3] : 1;
                                 seqList.Add(new SeqEvent(SEQ_CMD.LFO_SET, tmpId, 0));
                                 seqList.Add(new SeqEvent(SEQ_CMD.LFO_DELAY, Mathf.Clamp(_lDelay, 0, ConstValue.LFO_MAX), 0));
-                                seqList.Add(new SeqEvent(SEQ_CMD.LFO_DEAPTH, Mathf.Clamp(_lDeapth, 0, ConstValue.LFO_MAX), 0));
+                                seqList.Add(new SeqEvent(SEQ_CMD.LFO_DEPTH, Mathf.Clamp(_lDeapth, 0, ConstValue.LFO_MAX), 0));
                                 seqList.Add(new SeqEvent(SEQ_CMD.LFO_SPEED, Mathf.Clamp(_lSpeed, 1, ConstValue.LFO_MAX), 0));
                                 seqList.Add(new SeqEvent(SEQ_CMD.LFO_PARAM_END, 0, 0));
                             }

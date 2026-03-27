@@ -22,7 +22,7 @@ namespace uPSG
         LFO_SET = 31,
         LFO_DELAY = 32,
         LFO_SPEED = 33,
-        LFO_DEAPTH = 34,
+        LFO_DEPTH = 34,
         LFO_PARAM_END = 35,
         LOOP_POINT = 40,
         REPEAT_START = 41,
