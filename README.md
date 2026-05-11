@@ -69,6 +69,10 @@ For details on MML, refer to the [MML Reference](./Unity%20PSG%20Player%20-%20MM
 
 ## Planned update (maybe)
 
+* Synchronizing channels during multi-channel playback
+
+> Currently, there is no mechanism to synchronize the channels, so repeating the loop may cause them to become out of sync.
+
 * Improving rendering performance
 
 > Performance might improve if avoid using collection classes when generating waveform data.
