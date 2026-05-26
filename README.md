@@ -5,6 +5,7 @@
 This library synthesizes PSG (Programmable Sound Generator) sound sources—commonly known as 8-bit sound—for retro game consoles like the NES within Unity.  
 Performance data is specified using MML (Music Macro Language) text, allowing you to easily synthesis sound  in using only scripts by describing the music score with text.  
 It is designed to achieve sound characteristics similar to the NES sound source (excluding DPCM).
+Since the library does not contain any waveform files, you can reduce the size of the build.
 
 ## What This Library Can Do
 
@@ -19,6 +20,7 @@ For details, refer to the [Manual](./Unity%20PSG%20Player%20-%20manual_EN.md), [
 
 * For retro-style game BGM and sound effects.
 * When it's a hassle to create or search for sound effects one by one.
+* For middle-aged guys like me who want to feel a little nostalgic...
 
 ## System Requirements
 
@@ -60,18 +62,19 @@ For details on MML, refer to the [MML Reference](./Unity%20PSG%20Player%20-%20MM
 1. Place the PSG Player prefab according to the required number of channels.  
 ![fig04](./img/fig04.png)
 
-2. Attach the MMLSplitter script to an appropriate game object.  
-3. Assign the placed PSG Player to the [psgPlayers](./Unity%20PSG%20Player%20-%20Script%20refernce_EN.md#psgplayers) field in the MMLSplitter from the Inspector.  
+2. Attach the MultiChannelController script to an appropriate game object.  
+3. Assign the placed PSG Player to the [psgPlayers](./Unity%20PSG%20Player%20-%20Script%20refernce_EN.md#psgplayers) field in the MultiChannelController from the Inspector.  
 ![fig05](./img/fig05.png)
 
-4. Place the MML into the [multiChMMLString](./Unity%20PSG%20Player%20-%20Script%20refernce_EN.md#multichmmlstring) variable of MMLSplitter, then use [SplitMML()](./Unity%20PSG%20Player%20-%20Script%20refernce_EN.md#splitmml) to distribute the MML to each channel, and then play it using [PlayAllChannels()](./Unity%20PSG%20Player%20-%20Script%20refernce_EN.md#playallchannels).  
+4. Place the MML into the [multiChMMLString](./Unity%20PSG%20Player%20-%20Script%20refernce_EN.md#multichmmlstring) variable of MultiChannelController, then use [SplitMML()](./Unity%20PSG%20Player%20-%20Script%20refernce_EN.md#splitmml) to distribute the MML to each channel, and then play it using [PlayAllChannels()](./Unity%20PSG%20Player%20-%20Script%20refernce_EN.md#playallchannels).  
 ![fig06](./img/fig06.png)
 
 ## Planned update (maybe)
 
 * Synchronizing channels during multi-channel playback
 
-> Currently, there is no mechanism to synchronize the channels, so repeating the loop may cause them to become out of sync.
+> ~~Currently, there is no mechanism to synchronize the channels, so repeating the loop may cause them to become out of sync.~~  
+> Supported in v0.9.8beta.
 
 * Improving rendering performance
 
@@ -89,6 +92,9 @@ For details on MML, refer to the [MML Reference](./Unity%20PSG%20Player%20-%20MM
 
 ## Change log
 
+* `v0.9.8 beta`
+  * The class name no longer matched its functionality, so MMLSplitter has been renamed to MultiChannelController.
+  * Added ChannelSyncMaaker
 * `v0.9.7 beta`
   * Added NoteSyncMute
 * `v0.9.6 beta`
@@ -103,7 +109,7 @@ For details on MML, refer to the [MML Reference](./Unity%20PSG%20Player%20-%20MM
 * `v0.9.2 beta`
   * Modify the high-frequency behavior of the triangle wave
 * `v0.9.1 beta`
-  * Change the access modifier of the tickPerNote variable in PSG Player.cs to public
+  * Change the access modifier of the tickPerNote variable in PSG Player class to public
 * `v0.9 beta`
   * A version I expect to work for now.  
 

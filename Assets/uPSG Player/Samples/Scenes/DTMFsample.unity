@@ -38,7 +38,6 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -4438,7 +4437,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1232070819}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a4945ab2d5324584d9afd061205b5fa4, type: 3}
+  m_Script: {fileID: 11500000, guid: 52aa7fc8e109a6849ba8a288b545d15c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   psgPlayers:
@@ -7121,7 +7120,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc1606bfc8df7e849a7be7f8a09f3dd9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mmlSplitter: {fileID: 1232070821}
+  multiChannelController: {fileID: 1232070821}
   inputField: {fileID: 500790344}
   audioMixer: {fileID: 24100000, guid: 182b9682526c2164e87ee0f36baf01ed, type: 2}
   volumeSlider: {fileID: 1823436668}

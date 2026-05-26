@@ -2,7 +2,7 @@
 
 ## Format Basics
 
-MML is fundamentally composed of a sequence of command blocks consisting of “command symbol + parameter,” processed sequentially from the first character.  
+MML is fundamentally composed of a sequence of command blocks consisting of **“command symbol + parameter,”** processed sequentially from the first character.  
 Spaces, line breaks, or characters not defined as commands, as well as numbers not recognized as parameters, are ignored between blocks. (*Excluding [Single-line comments](#-or--single-line-comment) and the [Tie command “&”](#tie).)  
 However, if spaces or other characters appear between the command symbol and its parameters, the parameter value will not be recognized, and the command's default value will be applied.  
 You can use this limitation to improve readability by inserting spaces between each beat or adding symbols like “|” between measures.
@@ -57,11 +57,11 @@ Multiple dots can be specified.
   * [**\[ ～ \]\<num\>** Repeat](#--num-repeat)
 * [**Data Definition**](#data-definition)
   * [**V\<num\>{\<vol\>,～ ,\<|\>, ～,\<vol\>}** Envelope Definition](#vnumvol--vol-envelope-definition)
-  * [**M\<num\>{\<delay\>,\<deapth\>,\<speed\>}** LFO Definition](#mnumdelaydeapthspeed-lfo-difinition)
+  * [**M\<num\>{\<delay\>,\<deapth\>,\<speed\>}** LFO Definition](#mnumdelaydepthspeed-lfo-difinition)
 * [**Comment**](#comment)
   * [**/\* ～ \*/** Block Comment](#---block-comment)
   * [**; or //** Single-line comment](#-or--single-line-comment)
-* [**Truck Header**](#truck-header)
+* [**Track Header**](#track-header)
   * [**\<ch\> \<string\>** Channel MML](#ch-string-channel-mml)
 
 ## Command Details
@@ -401,7 +401,7 @@ The text from the character “;” or "//" onward until the end of the line is 
 
 ----
 
-### Truck Header
+### Track Header
 
 ----
 
@@ -411,14 +411,31 @@ The text from the character “;” or "//" onward until the end of the line is 
   * \<ch\> *Transmit Channel [A, B, C...]*
   * \<string\> *MML string*
 
-**Only for MMLSplitter*  
+**Only for MultiChannelController*  
 Specify the channel to send to with \<ch\>, and \<string\> is the MML to send to each channel.  
 To distinguish between the channel and the MML, please insert a space between them.  
 
 Since the header is processed line by line, \<ch\> must be written at the beginning of each line.  
 
-The channel number is determined by the number of channels set in MMLSplitter, and channels are assigned in ascending order using uppercase letters starting with “A”.  
+The channel number is determined by the number of channels set in MultiChannelController, and channels are assigned in ascending order using uppercase letters starting with “A”.  
 Additionally, \<ch\> can be used to specify multiple channels consecutively, such as “ABC”.  
 In this case, the same MML is sent to each of the “A”, ‘B’, and “C” channels.  
 
 Lines without headers will be sent to the destination specified immediately before them.  
+
+----
+
+### Channel Synchronization
+
+----
+
+#### **! (Exclamation mark)**　Channel Sync Marker
+
+* Parameters
+  * None
+
+`v0.9.8beta`
+
+Specify the synchronization timing for multi-channel performances.  
+This must be written at the same time across all channels you want to synchronize.  
+There are a few points to note when using this, so please refer to the [Manual](Unity%20PSG%20Player%20-%20manual_EN.md).  

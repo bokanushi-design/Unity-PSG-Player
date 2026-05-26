@@ -3884,7 +3884,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1232070819}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a4945ab2d5324584d9afd061205b5fa4, type: 3}
+  m_Script: {fileID: 11500000, guid: 52aa7fc8e109a6849ba8a288b545d15c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   psgPlayers:
@@ -6253,12 +6253,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   inputField: {fileID: 500790344}
-  mmlSplitter: {fileID: 1232070821}
+  multiChannelController: {fileID: 1232070821}
   psgPlayerSE: {fileID: 34071384}
   audioMixer: {fileID: 24100000, guid: 182b9682526c2164e87ee0f36baf01ed, type: 2}
   volumeBgmSlider: {fileID: 821465427}
   volumeSeSlider: {fileID: 1200156615}
-  audioSource: {fileID: 1201034933}
+  SEAudioSource: {fileID: 1201034933}
   mmlString: 
 --- !u!1 &2057470239
 GameObject:

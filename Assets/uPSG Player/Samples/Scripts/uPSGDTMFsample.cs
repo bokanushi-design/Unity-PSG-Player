@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class uPSGDTMFsample : MonoBehaviour
 {
-    /**** v0.9.6beta ****/
+    /**** v0.9.8beta ****/
 
     /// <summary>
     /// This is a sample that generates DTMF tones using two PSG players.
@@ -16,7 +16,7 @@ public class uPSGDTMFsample : MonoBehaviour
     /// Each time you press the button, it rewrites the MML and synthesizes the specified frequency.
     /// </summary>
 
-    [SerializeField] MMLSplitter mmlSplitter;
+    [SerializeField] MultiChannelController multiChannelController;
     [SerializeField] TMP_InputField inputField;
     [SerializeField] private AudioMixer audioMixer;
     [SerializeField] private Slider volumeSlider;
@@ -40,16 +40,16 @@ public class uPSGDTMFsample : MonoBehaviour
         string ht = dtmfHighTones[_buttonId % 4].ToString();
         string mml = "AB @4l16\nA Lz" + lt + "&\nB Lz" + ht + "&";  // Sustain the sound by looping with a tie (&).
         inputField.text = mml;
-        mmlSplitter.multiChMMLString = mml;
-        mmlSplitter.SplitMML();
-        mmlSplitter.PlayAllChannels();
+        multiChannelController.multiChMMLString = mml;
+        multiChannelController.SplitMML();
+        multiChannelController.PlayAllChannels();
     }
 
     public void OnNumButtonUp()
     {
         if (buttonDownFlag)
         {
-            mmlSplitter.StopAllChannels();
+            multiChannelController.StopAllChannels();
             buttonDownFlag = false;
         }
     }

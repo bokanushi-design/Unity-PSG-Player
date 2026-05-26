@@ -5,7 +5,7 @@ using System;
 
 public class MMLDecoder : MonoBehaviour
 {
-    /**** v0.9.6beta ****/
+    /**** v0.9.8beta ****/
 
     private List<SeqEvent> seqList;
     private readonly int[] noteOffsetTable = { 9, 11, 0, 2, 4, 5, 7 }; // a,b,c,d,e,f,g
@@ -539,6 +539,14 @@ public class MMLDecoder : MonoBehaviour
                         seqList.Add(new SeqEvent(SEQ_CMD.LFO_SET, -1, 0));
                     }
                 }
+                continue;
+            }
+
+            if (chr == '!')
+            {
+                /* channel sync */
+                seqList.Add(new SeqEvent(SEQ_CMD.CH_SYNC, 0, 0));
+                mmlCount++;
                 continue;
             }
 

@@ -7,7 +7,7 @@ using uPSG;
 
 public class PSGPlayer : MonoBehaviour
 {
-    /**** v0.9.7beta ****/
+    /**** v0.9.8beta ****/
 
     /// <summary>
     /// Specify the MML Decoder component
@@ -130,6 +130,10 @@ public class PSGPlayer : MonoBehaviour
     private int audioSourcePosition = 0;
     private int audioSourceLoopCount = 0;
     private int seqLoopCount = 0;
+
+    public MultiChannelController multiChannelController;
+    public int channelId = 0;
+    private List<int> chSyncIndexList = new();
 
     /// <summary>
     /// True when asynchronous rendering completes
@@ -613,6 +617,20 @@ public class PSGPlayer : MonoBehaviour
         seqLoopCount = 0;
         audioSourcePosition = 0;
         audioSourceLoopCount = 0;
+        ScanChannelSyncIndex();
+    }
+
+    private void ScanChannelSyncIndex()
+    {
+        chSyncIndexList.Clear();
+        for (int i=0; i<seqList.Count; i++)
+        {
+            SeqEvent seqEvent = seqList[i];
+            if (seqEvent.seqCmd == SEQ_CMD.CH_SYNC)
+            {
+                chSyncIndexList.Add(i);
+            }
+        }
     }
 
     private void OnAudioRead(float[] data)
@@ -1044,6 +1062,16 @@ public class PSGPlayer : MonoBehaviour
                     break;
                 case SEQ_CMD.TUNE:
                     a4Freq = seqList[seqListIndex].seqParam;
+                    break;
+                case SEQ_CMD.CH_SYNC:
+                    if (multiChannelController != null)
+                    {
+                        int syncIndex = chSyncIndexList.IndexOf(seqListIndex);
+                        if (syncIndex >= 0)
+                        {
+                            seqNextEventPosition = multiChannelController.ChannelSyncManager(channelId, syncIndex, seqPosition);
+                        }
+                    }
                     break;
                 case SEQ_CMD.END_OF_SEQ:
                     eos = true;

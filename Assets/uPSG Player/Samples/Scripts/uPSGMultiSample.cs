@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class uPSGMultiSample : MonoBehaviour
 {
-    /**** v0.9.7beta ****/
+    /**** v0.9.8beta ****/
 
     /// <summary>
     /// This is a sample that synthesizes polyphonic sound using four PSG Players and an MMLSplitter.
@@ -23,7 +23,7 @@ public class uPSGMultiSample : MonoBehaviour
     /// </summary>
 
     [SerializeField] private TMP_InputField inputField;
-    [SerializeField] private MMLSplitter mmlSplitter;   // Register the placed MML Splitter component.
+    [SerializeField] private MultiChannelController multiChannelController;   // Register the placed MultiChannelController component.
     [SerializeField] private AudioMixer audioMixer; // Use AudioMixer to easily adjust the volume.
     [SerializeField] private Slider volumeSlider;
     [SerializeField] private AudioSource audioSource;   // AudioSource for playing rendered clip.
@@ -47,7 +47,7 @@ public class uPSGMultiSample : MonoBehaviour
 
     void Start()
     {
-        mmlSplitter.SetAllChannelsSampleRate(32000);    // Set the sample rate for all PSG Players.
+        multiChannelController.SetAllChannelsSampleRate(32000);    // Set the sample rate for all PSG Players.
         mmlString = Resources.Load<TextAsset>("sample-multi_channel_MML").text; // Load sample MML from the Resources folder.
         Resources.UnloadUnusedAssets();
         inputField.text = mmlString;
@@ -65,11 +65,11 @@ public class uPSGMultiSample : MonoBehaviour
     {
         if (isAsyncRendering)
         {
-            progressBar.localScale = new Vector3(mmlSplitter.asyncMultiRenderProgress, 1, 1);
-            if (mmlSplitter.asyncMultiRenderIsDone) // Check if asynchronic rendering is done.
+            progressBar.localScale = new Vector3(multiChannelController.asyncMultiRenderProgress, 1, 1);
+            if (multiChannelController.asyncMultiRenderIsDone) // Check if asynchronic rendering is done.
             {
                 //mmlSplitter.PlayAllChannelsRenderedClipData();    // Play rendered clip at each channels.
-                AudioClip audioClip = mmlSplitter.ExportMixedAudioClip(32000, true);  // Convert mixed rendered data to AudioClip.
+                AudioClip audioClip = multiChannelController.ExportMixedAudioClip(32000, true);  // Convert mixed rendered data to AudioClip.
                 audioSource.PlayOneShot(audioClip);
 
                 isAsyncRendering = false;
@@ -80,32 +80,32 @@ public class uPSGMultiSample : MonoBehaviour
 
     public void OnPlayButton()
     {
-        if (mmlSplitter.IsAnyChannelPlaying())  // Either a PSG Player is currently playing.
+        if (multiChannelController.IsAnyChannelPlaying())  // Either a PSG Player is currently playing.
         {
-            mmlSplitter.StopAllChannels();  // Stop playing all PSG Players.
+            multiChannelController.StopAllChannels();  // Stop playing all PSG Players.
         }
         else
         {
-            mmlSplitter.SplitMML(mmlString);    // Distribute the multi-channel MML to each PSG Player.
-            mmlSplitter.PlayAllChannels();  // Decode and play on all PSG Players.
+            multiChannelController.SplitMML(mmlString);    // Distribute the multi-channel MML to each PSG Player.
+            multiChannelController.PlayAllChannels();  // Decode and play on all PSG Players.
         }
     }
 
     public void OnPlayRendered()
     {
         if (audioSource.isPlaying) { audioSource.Stop(); return; }
-        mmlSplitter.SplitMML(mmlString);    // Distribute the multi-channel MML to each PSG Player.
-        mmlSplitter.DecodeAllChannels();    // Decode on all PSG Players.
-        AudioClip audioClip = mmlSplitter.ExportMixedAudioClip(audioSampleRate);  // Render sequence to AudioClip.
+        multiChannelController.SplitMML(mmlString);    // Distribute the multi-channel MML to each PSG Player.
+        multiChannelController.DecodeAllChannels();    // Decode on all PSG Players.
+        AudioClip audioClip = multiChannelController.ExportMixedAudioClip(audioSampleRate);  // Render sequence to AudioClip.
         audioSource.PlayOneShot(audioClip);
     }
 
     public void OnPlayRenderedAsync()
     {
         if (audioSource.isPlaying) { audioSource.Stop(); return; }
-        mmlSplitter.SplitMML(mmlString);    // Distribute the multi-channel MML to each PSG Player.
-        mmlSplitter.DecodeAllChannels();    // Decode on all PSG Players.
-        isAsyncRendering = mmlSplitter.RenderMultiSeqToClipDataAsync(audioSampleRate, interruptSample);  // Start rendering asynchronous.
+        multiChannelController.SplitMML(mmlString);    // Distribute the multi-channel MML to each PSG Player.
+        multiChannelController.DecodeAllChannels();    // Decode on all PSG Players.
+        isAsyncRendering = multiChannelController.RenderMultiSeqToClipDataAsync(audioSampleRate, interruptSample);  // Start rendering asynchronous.
         if (isAsyncRendering) { renderingPanel.SetActive(true); }
     }
 
@@ -162,8 +162,8 @@ public class uPSGMultiSample : MonoBehaviour
 
     private void OnMute(int _ch, bool _isMute)
     {
-        //mmlSplitter.MuteChannel(_ch, _isMute); // Mute the channel.
-        mmlSplitter.NoteSyncMuteChannel(_ch, _isMute);
+        multiChannelController.NoteSyncMuteChannel(_ch, _isMute);   // Mute the channel with note sync.
+        //multiChannelController.MuteChannel(_ch, _isMute);   // Mute the channel.
     }
 
     public void OnNextButton()
@@ -180,20 +180,27 @@ public class uPSGMultiSample : MonoBehaviour
     public void OnExportJson()
     {
         jsonPanel.SetActive(true);
-        mmlSplitter.SplitMML(mmlString);
-        multiSeqJsonField.text = mmlSplitter.DecodeAndExportMultiSeqJson(false);    // Serialize the sequence into JSON.
+        multiChannelController.SplitMML(mmlString);
+        multiSeqJsonField.text = multiChannelController.DecodeAndExportMultiSeqJson(false);    // Serialize the sequence into JSON.
     }
 
     public void OnCopyJson()
     {
-        GUIUtility.systemCopyBuffer = mmlSplitter.DecodeAndExportMultiSeqJson(true);
+        GUIUtility.systemCopyBuffer = multiChannelController.DecodeAndExportMultiSeqJson(true);
     }
 
     public void OnImportJson()
     {
-        string multiSeqJson = Resources.Load<TextAsset>("sample-multi-sequence_json").text; // Load the sample JSON file.
-        mmlSplitter.ImportMultiSeqJson(multiSeqJson);   // Deserialize JSON into a sequence.
-        mmlSplitter.PlayAllChannelsDecoded();   // Play the sequence.
+        if (multiChannelController.IsAnyChannelPlaying())  // Either a PSG Player is currently playing.
+        {
+            multiChannelController.StopAllChannels();  // Stop playing all PSG Players.
+        }
+        else
+        {
+            string multiSeqJson = Resources.Load<TextAsset>("sample-multi-sequence_json").text; // Load the sample JSON file.
+            multiChannelController.ImportMultiSeqJson(multiSeqJson);   // Deserialize JSON into a sequence.
+            multiChannelController.PlayAllChannelsDecoded();   // Play the sequence.
+        }
     }
 
     public void OnJsonClose()

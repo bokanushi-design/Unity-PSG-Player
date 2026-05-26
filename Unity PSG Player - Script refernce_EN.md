@@ -2,7 +2,7 @@
 
 * [Class]
   * [PSG Player](#class-psg-player)
-  * [MML Spltter](#class-mml-splitter)
+  * [MultiChannelController](#class-multichannelcontroller)
 
 ## [Class] PSG Player
 
@@ -383,7 +383,7 @@ public SeqJson GetSeqJson()
 
 Outputs the decoded MML sequence data as a SeqJson class object.  
 This is the data before being converted to JSON by [ExportSeqJson()](#exportseqjsonbool-_prettyprint).  
-It is primarily used when exporting multi-channel JSON with the MML Splitter.
+It is primarily used when exporting multi-channel JSON with the MultiChannelController.
 
 ----
 
@@ -415,7 +415,7 @@ public bool SetSeqJson(SeqJson _seqJson)
 * Return value: `True` if import succeeds
 
 Directly reads the [tickPerNote](#tickpernote) value and sequence data from a SeqJson class object.  
-Primarily used when importing multi-channel JSON with MML Splitter.
+Primarily used when importing multi-channel JSON with MultiChannelController.
 
 ----
 
@@ -513,16 +513,16 @@ Use [renderedDatas](#rendereddatas) to generate an AudioClip and play it using t
 
 ----
 
-## [Class] MML Splitter
+## [Class] MultiChannelController
 
-### [MML Splitter] Properties, Public Methods index
+### [MultiChannelController] Properties, Public Methods index
 
-* [Properties](#mml-splitter-properties)
+* [Properties](#multichannelcontroller-properties)
   * [psgPlayers](#psgplayers)
   * [multiChMMLString](#multichmmlstring)
   * [asyncMultiRenderIsDone](#asyncmultirenderisdone)
   * [asyncMultiRenderProgress](#asyncmultirenderprogress)
-* [Public Methods](#mml-splitter-public-methods)
+* [Public Methods](#multichannelcontroller-public-methods)
   * [SplitMML()](#splitmml)
   * [SplitMML(string \_multiChMMLString)](#splitmmlstring-_multichmmlstring)
   * [SetAllChannelsSampleRate(int \_rate)](#setallchannelssamplerateint-_rate)
@@ -544,13 +544,13 @@ Use [renderedDatas](#rendereddatas) to generate an AudioClip and play it using t
 
 ----
 
-### [MML Splitter] Properties
+### [MultiChannelController] Properties
 
 ----
 
 #### psgPlayers
 
-``` C# MMLSplitter.cs
+``` C# MultiChannelController.cs
 [SerializeField] private PSGPlayer[] psgPlayers;
 ```
 
@@ -560,7 +560,7 @@ Register a PSG Player component for each channel to send the MML in segments.
 
 #### multiChMMLString
 
-``` C# MMLSplitter.cs
+``` C# MultiChannelController.cs
 public string multiChMMLString;
 ```
 
@@ -570,7 +570,7 @@ Register the original MML string to be sent in segments.
 
 #### asyncMultiRenderIsDone
 
-``` c# MMLSplitter.cs
+``` c# MultiChannelController.cs
 public bool asyncMultiRenderIsDone { get; private set; } = false;
 ```
 
@@ -583,7 +583,7 @@ Use after calling [RenderMultiSeqToClipDataAsync()](#rendermultiseqtoclipdataasy
 
 #### asyncMultiRenderProgress
 
-``` c# MMLSplitter.cs
+``` c# MultiChannelController.cs
 public float asyncMultiRenderProgress { get; private set; } = 0f;
 ```
 
@@ -594,13 +594,13 @@ Use after calling [RenderMultiSeqToClipDataAsync()](#rendermultiseqtoclipdataasy
 
 ----
 
-### [MML Splitter] Public Methods
+### [MultiChannelController] Public Methods
 
 ----
 
 #### SplitMML()
 
-``` C# MMLSplitter.cs
+``` C# MultiChannelController.cs
 public void SplitMML();
 ```
 
@@ -613,7 +613,7 @@ For channel assignment details, refer to “[MML Reference](Unity%20PSG%20Player
 
 #### SplitMML(string _multiChMMLString)
 
-``` C# MMLSplitter.cs
+``` C# MultiChannelController.cs
 public void SplitMML(string _multiChMMLString);
 ```
 
@@ -625,7 +625,7 @@ Pass the parameter arguments to the multiChMMLString variable to send the MML to
 
 #### SetAllChannelsSampleRate(int _rate)
 
-``` C# MMLSplitter.cs
+``` C# MultiChannelController.cs
 public void SetAllChannelsSampleRate(int _rate);
 ```
 
@@ -637,7 +637,7 @@ Set the sample rate for all PSG players (in Hz).
 
 #### SetAllChannelClipSize(int _msec)
 
-``` C# MMLSplitter.cs
+``` C# MultiChannelController.cs
 public void SetAllChannelClipSize(int _msec);
 ```
 
@@ -649,7 +649,7 @@ Sets the AudioClip length for all PSG Players (in milliseconds).
 
 #### PlayAllChannels()
 
-``` C# MMLSplitter.cs
+``` C# MultiChannelController.cs
 public void PlayAllChannels();
 ```
 
@@ -661,7 +661,7 @@ All PSG Players decode MML and play simultaneously.
 
 #### PlayAllChannelsDecoded()
 
-``` C# MMLSplitter.cs
+``` C# MultiChannelController.cs
 public void PlayAllChannelsDecoded();
 ```
 
@@ -673,7 +673,7 @@ Play back the decoded sequence data simultaneously on all PSG Players.
 
 #### PlayAllChannelsSequence()
 
-``` C# MMLSplitter.cs
+``` C# MultiChannelController.cs
 public void PlayAllChannelsSequence()
 ```
 
@@ -686,7 +686,7 @@ Same as [PlayAllChannelsDecoded()](#playallchannelsdecoded).
 
 #### DecodeAllChannels()
 
-``` C# MMLSplitter.cs
+``` C# MultiChannelController.cs
 public void DecodeAllChannels()
 ```
 
@@ -699,7 +699,7 @@ Since multi-channel MML is not transmitted in split segments, please execute [Sp
 
 #### StopAllChannels()
 
-``` C# MMLSplitter.cs
+``` C# MultiChannelController.cs
 public void StopAllChannels();
 ```
 
@@ -711,7 +711,7 @@ Stop playing all PSG players.
 
 #### IsAnyChannelPlaying()
 
-``` C# MMLSplitter.cs
+``` C# MultiChannelController.cs
 public bool IsAnyChannelPlaying();
 ```
 
@@ -724,7 +724,7 @@ Returns `True` if any of the AudioSources for each PSG Player is currently playi
 
 #### MuteChannel(int channel, bool isOn)
 
-``` C# MMLSplitter.cs
+``` C# MultiChannelController.cs
 public void MuteChannel(int channel, bool isOn);
 ```
 
@@ -737,7 +737,7 @@ Mutes the specified channel.
 
 #### NoteSyncMuteChannel(int channel, bool isOn)
 
-``` C# MMLSplitter.cs
+``` C# MultiChannelController.cs
 public void NoteSyncMuteChannel(int channel, bool isOn);
 ```
 
@@ -752,7 +752,7 @@ Sets [NoteSyncMute](#notesyncmutebool-ison) on the specified channel.
 
 #### ExportMultiSeqJson(bool _prettyPrint)
 
-``` C# MMLSplitter.cs
+``` C# MultiChannelController.cs
 public string ExportMultiSeqJson(bool _prettyPrint)
 ```
 
@@ -768,7 +768,7 @@ The JSON contents consist of a list of [SeqJson class objects](#getseqjson) outp
 
 #### DecodeAndExportMultiSeqJson(bool _prettyPrint)
 
-``` C# MMLSplitter.cs
+``` C# MultiChannelController.cs
 public string DecodeAndExportMultiSeqJson(bool _prettyPrint)
 ```
 
@@ -784,7 +784,7 @@ Since multi-channel MML is not transmitted in split segments, please execute [Sp
 
 #### ImportMultiSeqJson(string _jsonString)
 
-``` C# MMLSplitter.cs
+``` C# MultiChannelController.cs
 public void ImportMultiSeqJson(string _jsonString)
 ```
 
@@ -798,7 +798,7 @@ Import JSON-formatted strings as multi-channel sequence data.
 
 #### ExportMixedAudioClip(int _sampleRate, bool isAsyncRendered)
 
-``` C# MMLSplitter.cs
+``` C# MultiChannelController.cs
 public AudioClip ExportMixedAudioClip(int _sampleRate, bool isAsyncRendered)
 ```
 
@@ -826,7 +826,7 @@ In this case, rendering is not performed, so after calling [RenderMultiSeqToClip
 
 #### RenderMultiSeqToClipDataAsync(int _sampleRate, int interruptSample)
 
-``` c# MMLSplitter.cs
+``` c# MultiChannelController.cs
 public bool RenderMultiSeqToClipDataAsync(int _sampleRate, int interruptSample)
 ```
 
@@ -848,7 +848,7 @@ Note that the sequence loop command ([MML Loop “L”](Unity%20PSG%20Player%20-
 
 #### PlayAllChannelsRenderedClipData(bool isLoop)
 
-``` c# MMLSplitter.cs
+``` c# MultiChannelController.cs
 public void PlayAllChannelsRenderedClipData(bool isLoop)
 ```
 

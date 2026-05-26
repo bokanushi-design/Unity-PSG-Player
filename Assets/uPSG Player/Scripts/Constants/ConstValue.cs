@@ -1,6 +1,6 @@
 namespace uPSG
 {
-    /**** v0.9.7beta ****/
+    /**** v0.9.8beta ****/
 
     public static class ConstValue
     {
@@ -41,5 +41,6 @@ namespace uPSG
         public const int GATE_MAX = 100;
         public const int LFO_MAX = 255;
         public const int DEFAULT_ASYNC_INTERRUPT = 1000;
+        public const float DEFAULT_TOLERANCE_TIME = 0.5f;
     }
 }

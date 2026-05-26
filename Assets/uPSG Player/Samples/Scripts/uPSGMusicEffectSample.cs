@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class uPSGMusicEffectSample : MonoBehaviour
 {
-    /**** v0.9.7beta ****/
+    /**** v0.9.8beta ****/
 
     /// <summary>
     /// This is a sample that synthesizes background music using four PSG Players and an MMLSplitter, and synthesizes sound effects using an additional PSG Player.
@@ -19,12 +19,12 @@ public class uPSGMusicEffectSample : MonoBehaviour
     /// </summary>
 
     [SerializeField] private TMP_InputField inputField;
-    [SerializeField] private MMLSplitter mmlSplitter;   // MML Splitter for BGM
+    [SerializeField] private MultiChannelController multiChannelController;   // MultiChannelController for BGM
     [SerializeField] private PSGPlayer psgPlayerSE; // PSG Player for Sound Effects
     [SerializeField] private AudioMixer audioMixer;
     [SerializeField] private Slider volumeBgmSlider;
     [SerializeField] private Slider volumeSeSlider;
-    [SerializeField] private AudioSource audioSource;   // AudioSource for playing rendered clip.
+    [SerializeField] private AudioSource SEAudioSource;   // AudioSource for playing rendered clip.
 
     public string mmlString;
     private string bgmMML;
@@ -48,8 +48,8 @@ public class uPSGMusicEffectSample : MonoBehaviour
         Resources.UnloadUnusedAssets();
         inputField.text = bgmMML;
         mmlString = bgmMML;
-        mmlSplitter.SetAllChannelsSampleRate(32000);    // Set the BGM sample rate
-        mmlSplitter.SetAllChannelClipSize(200); // Set the length of the BGM AudioClip
+        multiChannelController.SetAllChannelsSampleRate(32000);    // Set the BGM sample rate
+        multiChannelController.SetAllChannelClipSize(200); // Set the length of the BGM AudioClip
 
         audioMixer.GetFloat("PSG-Mix", out float _volBgm);
         _volBgm = Mathf.Clamp(_volBgm, -80f, 20f);
@@ -75,22 +75,21 @@ public class uPSGMusicEffectSample : MonoBehaviour
         // Mute BGM channel A while sound effects are playing
         if (isMute && !psgPlayerSE.IsPlaying())
         {
-            //mmlSplitter.MuteChannel(0, false);
-            mmlSplitter.NoteSyncMuteChannel(0, false);
+            multiChannelController.NoteSyncMuteChannel(0, false);
             isMute = false;
         }
     }
 
     public void OnPlayButton()
     {
-        if (mmlSplitter.IsAnyChannelPlaying())  // Is any of the BGM PSG Players currently playing?
+        if (multiChannelController.IsAnyChannelPlaying())  // Is any of the BGM PSG Players currently playing?
         {
-            mmlSplitter.StopAllChannels();  // Stop all PSG Player background music playback
+            multiChannelController.StopAllChannels();  // Stop all PSG Player background music playback
         }
         else
         {
-            mmlSplitter.SplitMML(mmlString);    // Distribute the BGM MML to each PSG Player
-            mmlSplitter.PlayAllChannels();  // Decode and play BGM MML
+            multiChannelController.SplitMML(mmlString);    // Distribute the BGM MML to each PSG Player
+            multiChannelController.PlayAllChannels();  // Decode and play BGM MML
         }
     }
 
@@ -110,23 +109,21 @@ public class uPSGMusicEffectSample : MonoBehaviour
             psgPlayerSE.Play(); // Decode and play sound effects
         }
         seMMLIndex = _id;
-        //mmlSplitter.MuteChannel(0, true);   // Mute BGM Channel A
-        mmlSplitter.NoteSyncMuteChannel(0, true);
+        multiChannelController.NoteSyncMuteChannel(0, true);    // Mute BGM Channel A
         isMute = true;
     }
 
     public void OnRenderedSeButton(int _id)
     {
         // Play pre-rendered sound effects
-        if (audioSource.isPlaying)
+        if (SEAudioSource.isPlaying)
         {
-            audioSource.Stop();
+            SEAudioSource.Stop();
         }
-        audioSource.clip = seClips[_id];
-        audioSource.loop = false;
-        audioSource.Play();
-        //mmlSplitter.MuteChannel(0, true);   // Mute BGM Channel A
-        mmlSplitter.NoteSyncMuteChannel(0, true);
+        SEAudioSource.clip = seClips[_id];
+        SEAudioSource.loop = false;
+        SEAudioSource.Play();
+        multiChannelController.NoteSyncMuteChannel(0, true);    // Mute BGM Channel A
         isMute = true;
     }
 
