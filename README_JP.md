@@ -51,7 +51,7 @@ Unity上でレトロゲーム機などのPSG（Programmable Sound Generator）�
 1. PSG Playerプレハブをヒエラルキーに置きます。  
 ![fig01](./img/fig01.png)
 
-2. 操作するスクリプトでPSGPlayerクラス変数を用意し、設置したPSG Playerオブジェクトをアタッチします。  
+2. 操作するスクリプトでPSGPlayerクラスのインスタンスを用意し、設置したPSG Playerオブジェクトをアタッチします。  
 ![fig02](./img/fig02.png)
 
 3. PSGPlayerの[mmlString](./Unity%20PSG%20Player%20-%20Script%20refernce_JP.md#mmlstring)変数に記述したMMLが、[Play()](./Unity%20PSG%20Player%20-%20Script%20refernce_JP.md#play)で再生されます。  

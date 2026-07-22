@@ -50,7 +50,7 @@ For details, refer to the [Manual](./Unity%20PSG%20Player%20-%20manual_EN.md), [
 1. Place the PSG Player prefab in the hierarchy.  
 ![fig01](./img/fig01.png)
 
-2. Prepare a PSGPlayer class variable in the script you are operating, and attach the PSG Player object you have placed.  
+2. Prepare a PSGPlayer Class Instance in the script you are operating, and attach the PSG Player object you have placed.  
 ![fig02](./img/fig02.png)
 
 3. The MML written in the [mmlString](./Unity%20PSG%20Player%20-%20Script%20refernce_EN.md#mmlstring) variable of the PSGPlayer is played by [Play()](./Unity%20PSG%20Player%20-%20Script%20refernce_EN.md#play).  
