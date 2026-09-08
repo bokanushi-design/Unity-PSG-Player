@@ -5,7 +5,15 @@
 This library synthesizes PSG (Programmable Sound Generator) sound sources—commonly known as 8-bit sound—for retro game consoles like the NES within Unity.  
 Performance data is specified using MML (Music Macro Language) text, allowing you to easily synthesis sound  in using only scripts by describing the music score with text.  
 It is designed to achieve sound characteristics similar to the NES sound source (excluding DPCM).
-Since the library does not contain any waveform files, you can reduce the size of the build.
+Since the library does not contain any waveform files, you can reduce the size of the build.  
+Also minimized CPU load as much as possible so that you can stream PSG while playing the game.  
+Since it is a Unity C# script built entirely using standard classes, it is easy to customize.  
+> The documents included in this library have been translated into English using [DeepL](https://www.deepl.com/). Although I have reviewed the content, there may be some incorrect translations. If you find anything that seems off, please let me know.  
+
+## Why I made this
+
+In Unity, whenever I wanted to play a sound effect when a button was pressed, I found it a hassle to create or search for a sound file that was just 0.1 seconds long.  
+So, I thought it would be great if I could create sound effects and background music using only scripts, and that's why I started working on it.
 
 ## What This Library Can Do
 
@@ -112,6 +120,10 @@ For details on MML, refer to the [MML Reference](./Unity%20PSG%20Player%20-%20MM
   * Change the access modifier of the tickPerNote variable in PSG Player class to public
 * `v0.9 beta`
   * A version I expect to work for now.  
+
+## References
+
+NESSOUND.TXT <https://www.nesdev.org/NESSOUND.txt>
 
 ## License
 
