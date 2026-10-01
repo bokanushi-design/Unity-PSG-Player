@@ -96,7 +96,11 @@ For details on MML, refer to the [MML Reference](./Unity%20PSG%20Player%20-%20MM
 * DPCM support
 
 > Once the library can play sampled sounds, it will be able to reproduce the NES sound more accurately.  
-> However, since it’s not PSG, it deviates from the original concept, so the priority for addressing this upgrade is relatively low.
+
+* Supports Wavetable Synthesize
+
+> Actually, since the generation of triangular waves uses the same logic as a wavetable synthesizer, we expect to be able to implement it quickly once the specifications are finalized.  
+> This makes it possible to reproduce the sounds of the Famicom Disk System, the PC Engine, and other systems.
 
 ## Change log
 
