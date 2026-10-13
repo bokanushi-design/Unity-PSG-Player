@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,7 +7,7 @@ using uPSG;
 
 public class PSGPlayer : MonoBehaviour
 {
-    /**** v0.9.8beta ****/
+    /**** v0.9.9beta ****/
 
     /// <summary>
     /// Specify the MML Decoder component
@@ -70,7 +70,7 @@ public class PSGPlayer : MonoBehaviour
         0x002, 0x004, 0x008, 0x010, 0x020, 0x030, 0x040, 0x050, 
         0x065, 0x07f, 0x0be, 0x0fe, 0x17d, 0x1fc, 0x39f, 0x7f2 
     };
-    private int noiseIndex = 0;
+    private int hexKey = 0;
     private bool noiseShort = false;
 
     private uint seqPosition = 0;
@@ -130,6 +130,17 @@ public class PSGPlayer : MonoBehaviour
     private int audioSourcePosition = 0;
     private int audioSourceLoopCount = 0;
     private int seqLoopCount = 0;
+
+    /// <summary>
+    /// List of DPCM datas
+    /// </summary>
+    [Tooltip("List of DPCM datas")]
+    public List<byte[]> dpcmDataList = new();
+    private int dpcmProgram = 0;
+    private float dpcmRate = DpcmValue.DPCM_FREQ_TABLE[(int)DPCM_RATE_INDEX.Rate_33_14kHz];
+    private int dpcmDataIndex = 0;
+    private int currentBitIndex = 0;
+    private int currentDpcmLevel = 64;
 
     public MultiChannelController multiChannelController;
     public int channelId = 0;
@@ -367,16 +378,11 @@ public class PSGPlayer : MonoBehaviour
     /// </summary>
     /// <param name="_prettyPrint">If True, format the output for readability</param>
     /// <returns>JSON formatted string</returns>
-    public string ExportSeqJson(bool _prettyPrint)
+    public string ExportSeqJson(bool _prettyPrint = false)
     {
         if (seqList.Count < 1) { return null; }
         string jsonString = JsonUtility.ToJson(GetSeqJson(), _prettyPrint);
         return jsonString;
-    }
-
-    public string ExportSeqJson()
-    {
-        return ExportSeqJson(false);
     }
 
     /// <summary>
@@ -397,15 +403,10 @@ public class PSGPlayer : MonoBehaviour
     /// </summary>
     /// <param name="_prettyPrint">If True, format the output for readability</param>
     /// <returns>JSON formatted string</returns>
-    public string DecodeAndExportSeqJson(bool _prettyPrint)
+    public string DecodeAndExportSeqJson(bool _prettyPrint = false)
     {
         if (!DecodeMML()) { return null; }
         return ExportSeqJson(_prettyPrint);
-    }
-
-    public string DecodeAndExportSeqJson()
-    {
-        return DecodeAndExportSeqJson(false);
     }
 
     /// <summary>
@@ -465,9 +466,9 @@ public class PSGPlayer : MonoBehaviour
     /// <summary>
     /// Render the sequence and export an AudioClip.
     /// </summary>
-    /// <param name="isAsync">If true, export audiio clip after asynchronous processing</param>
+    /// <param name="isAsyncRendered">If true, export audiio clip after asynchronous processing</param>
     /// <returns>Rendered AudioClip</returns>
-    public AudioClip ExportRenderedAudioClip(bool isAsyncRendered)
+    public AudioClip ExportRenderedAudioClip(bool isAsyncRendered = false)
     {
         float[] clipData;
         if (isAsyncRendered)
@@ -485,20 +486,11 @@ public class PSGPlayer : MonoBehaviour
     }
 
     /// <summary>
-    /// Render the sequence and export an AudioClip.
-    /// </summary>
-    /// <returns>Rendered AudioClip</returns>
-    public AudioClip ExportRenderedAudioClip()
-    {
-        return ExportRenderedAudioClip(false);
-    }
-
-    /// <summary>
     /// Renders the sequence for AudioClip data asynchronic.
     /// </summary>
     /// <param name="interruptSample">Number of samples at which processing is interrupted</param>
     /// <returns>True if succeess to start rendering</returns>
-    public bool RenderSeqToClipDataAsync(int interruptSample)
+    public bool RenderSeqToClipDataAsync(int interruptSample = ConstValue.DEFAULT_ASYNC_INTERRUPT)
     {
         if (seqList.Count == 0) { return false; }
         renderedDatas = null;
@@ -513,11 +505,6 @@ public class PSGPlayer : MonoBehaviour
             asyncRenderProgress = 1f;
         }));
         return true;
-    }
-
-    public bool RenderSeqToClipDataAsync()
-    {
-        return RenderSeqToClipDataAsync(ConstValue.DEFAULT_ASYNC_INTERRUPT);
     }
 
     IEnumerator RenderSeqCoroutine(int _interruptSample, int _seqSampleLength, UnityAction<List<float>> callback)
@@ -565,7 +552,7 @@ public class PSGPlayer : MonoBehaviour
     /// </summary>
     /// <param name="isLoop">If true, loop playback</param>
     /// <returns>True if succeed</returns>
-    public bool PlayRenderedClipData(bool isLoop)
+    public bool PlayRenderedClipData(bool isLoop = false)
     {
         if (renderedDatas == null) { return false; }
         AudioClip audioClip = AudioClip.Create("Rendered Sound", renderedDatas.Length, 1, sampleRate, false);
@@ -611,6 +598,7 @@ public class PSGPlayer : MonoBehaviour
         lfoSpeed = 1;
         lfoCount = 0;
         lfoDulation = sampleRate / ConstValue.PERFORM_DIVISOR;
+        dpcmProgram = 0;
         noteOnEventPositionQueue.Clear();
         nextNoteOnEventPosition = 0;
         isNextNoteOnEventPositionUpdated = true;
@@ -782,17 +770,21 @@ public class PSGPlayer : MonoBehaviour
             else
             {
                 // Generate samples from frequency and volume
-                if (programChange < 4)
+                if (programChange <= (int)VOICE_NUM.PULSE_075)
                 {
                     GenerateSquareSound();
                 }
-                if (programChange == 4)
+                if (programChange == (int)VOICE_NUM.TRIANGLE)
                 {
                     GenerateTriangleSound();
                 }
-                if (programChange == 5 || programChange == 6)
+                if (programChange == (int)VOICE_NUM.NOISE || programChange == (int)VOICE_NUM.HI_NOISE)
                 {
                     GenerateNoiseSound();
+                }
+                if (programChange == (int)VOICE_NUM.DPCM)
+                {
+                    GenerateDPCM();
                 }
                 _sample = waveSample * waveVolume;
             }
@@ -831,7 +823,7 @@ public class PSGPlayer : MonoBehaviour
                         tieGate = true;
                         noteNumber = -noteNumber;
                     }
-                    if (programChange < 5)
+                    if (programChange <= (int)VOICE_NUM.TRIANGLE)
                     {
                         // When the swept frequency reaches the lower or upper limit, mute the sound.
                         int x = (Mathf.Clamp(noteNumber, ConstValue.NOTE_NUM_MIN, ConstValue.NOTE_NUM_MAX) - ConstValue.A4_NOTE_NUM) * 100 + sweepPitch;   // Noten umber 69 is A4
@@ -848,9 +840,9 @@ public class PSGPlayer : MonoBehaviour
                     }
                     else
                     {
-                        // The pitch of noise ranges from 0 to 15, so set the note number to the remainder when divided by 16.
+                        // The pitch of noise and DPCM ranges from 0 to 15, so set the note number to the remainder when divided by 16.
                         waveFreq = a4Freq;
-                        noiseIndex = noteNumber % noiseTable.Length;
+                        hexKey = noteNumber % noiseTable.Length;
                     }
                     PrepareSound();
                     break;
@@ -862,7 +854,7 @@ public class PSGPlayer : MonoBehaviour
                         tieGate = true;
                         directFreq = -directFreq;
                     }
-                    if (programChange < 5)
+                    if (programChange < (int)VOICE_NUM.NOISE)
                     {
                         waveFreq = directFreq;
                         waveLength = sampleRate / waveFreq;
@@ -887,6 +879,10 @@ public class PSGPlayer : MonoBehaviour
                 case SEQ_CMD.PROGRAM_CHANGE:
                     programChange = seqList[seqListIndex].seqParam;
                     break;
+                case SEQ_CMD.DPCM:
+                    programChange = (int)VOICE_NUM.DPCM;
+                    dpcmProgram = seqList[seqListIndex].seqParam;
+                    break;
                 case SEQ_CMD.VOLUME:
                     seqVolume = Mathf.Clamp01(seqList[seqListIndex].seqParam / (float)ConstValue.SEQ_VOL_MAX);
                     waveVolume = seqVolume;
@@ -899,7 +895,7 @@ public class PSGPlayer : MonoBehaviour
                     seqRepeatCountList.Add(-1);
                     break;
                 case SEQ_CMD.REPEAT_END:
-                    if ((seqRepeatCountList[seqRepeatCountList.Count - 1] > -1))
+                    if (seqRepeatCountList[seqRepeatCountList.Count - 1] > -1)
                     {
                         // If the counter is 0 or greater, subtract 1.
                         seqRepeatCountList[seqRepeatCountList.Count - 1]--;
@@ -1107,18 +1103,22 @@ public class PSGPlayer : MonoBehaviour
         // Preprocessing for sound generation
         //if (!audioMute && seqMute) { seqMute = false; }
 
-        if (programChange < 4)
+        if (programChange <= (int)VOICE_NUM.PULSE_075)
         {
             PrepareSquareSound();
         }
-        if (programChange == 4)
+        if (programChange == (int)VOICE_NUM.TRIANGLE)
         {
             PrepareTriangleSound();
         }
-        if (programChange == 5 || programChange == 6)
+        if (programChange == (int)VOICE_NUM.NOISE || programChange == (int)VOICE_NUM.HI_NOISE)
         {
-            noiseShort = (programChange == 5) ? false : true;
-            PrepareNoiseSound(noiseIndex, noiseShort);
+            noiseShort = (programChange == (int)VOICE_NUM.NOISE) ? false : true;
+            PrepareNoiseSound(hexKey, noiseShort);
+        }
+        if (programChange == (int)VOICE_NUM.DPCM)
+        {
+            PrepareDPCM(hexKey);
         }
         if (!waveTie) {
             wavePositon = 0;
@@ -1218,6 +1218,62 @@ public class PSGPlayer : MonoBehaviour
             } while (dummyPos < 1);
             waveSample = ((float)sSum / (float)sNum * 2f - 1f);
             waveNextEventPosition += dummyPos;
+        }
+    }
+
+    private void PrepareDPCM(int _hexKey)
+    {
+        DPCM_RATE_INDEX rateIndex = (DPCM_RATE_INDEX)_hexKey;
+        dpcmRate = DpcmValue.DPCM_FREQ_TABLE[(int)rateIndex];
+        if (!waveTie)
+        {
+            waveNextEventPosition = 0;
+            dpcmDataIndex = 0;
+            currentBitIndex = 0;
+            currentDpcmLevel = 64;
+        }
+    }
+
+    private void GenerateDPCM()
+    {
+        if (dpcmDataList.Count == 0 || dpcmProgram >= dpcmDataList.Count)
+        {
+            waveSample = 0;
+            return;
+        }
+        if (wavePositon >= waveNextEventPosition)
+        {
+            if (dpcmDataIndex >= dpcmDataList[dpcmProgram].Length)
+            {
+                waveSample = 0;
+                return;
+            }
+
+            int direction = (dpcmDataList[dpcmProgram][dpcmDataIndex] & (1 << currentBitIndex)) != 0 ? 1 : 0;
+            if (direction == 1)
+            {
+                currentDpcmLevel = Mathf.Min(127, currentDpcmLevel + 2);
+            }
+            else
+            {
+                currentDpcmLevel = Mathf.Max(0, currentDpcmLevel - 2);
+            }
+
+            // Inverse mapping of a 7-bit counter value (0–127) to the Unity audio range (-1.0–1.0)
+            waveSample = (currentDpcmLevel / 63.5f) - 1.0f;
+
+            currentBitIndex++;
+            if (currentBitIndex >= 8)
+            {
+                currentBitIndex = 0;
+                dpcmDataIndex++;
+            }
+
+            waveNextEventPosition += (double)sampleRate / dpcmRate;
+        }
+        else
+        {
+            waveDevide = (currentDpcmLevel / 63.5f) - 1.0f;
         }
     }
 

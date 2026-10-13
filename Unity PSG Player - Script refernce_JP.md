@@ -3,6 +3,7 @@
 * [class]
   * [PSG Player](#class-psg-player)
   * [MultiChannelController](#class-multichannelcontroller)
+  * [DpcmConverter](#class-dpcmconverter)
 
 ## [class] PSG Player
 
@@ -207,6 +208,18 @@ public float[] renderedDatas { get; private set; }
 `v0.9.6beta`
 
 [RenderSequenceTodClipData()](#rendersequencetodclipdata)または[RenderSeqToClipDataAsync()](#renderseqtoclipdataasyncint-interruptsample)で生成されたクリップデータが入ります。  
+
+----
+
+#### dpcmDataList
+
+``` C# PSGPlayer.cs
+public List<byte[]> dpcmDataList = new();
+```
+
+`v0.9.9beta`
+
+DPCMデータを登録します。
 
 ----
 
@@ -864,5 +877,39 @@ public void PlayAllChannelsRenderedClipData(bool isLoop)
 
 各チャンネルで[renderedDatas](#rendereddatas)を使ってAudioClipを生成し、それぞれのPSG Playerに指定されているAudioSourceで再生します。  
 ミックスされずに鳴らすので、各チャネルの音量変更やミュートをすることができます。
+
+----
+
+## [class] DpcmConverter
+
+### [DpcmConverter] 変数・Public関数一覧
+
+* [Public関数](#dpcmconverter-public関数)
+  * [ConvertToNesDpcm()](#converttonesdpcm)
+
+----
+
+### [DpcmConverter] Public関数
+
+----
+
+#### ConvertToNesDpcm()
+
+``` C# DpcmConverter.cs
+public static byte[] ConvertToNesDpcm(AudioClip clip, DPCM_RATE_INDEX rateIndex, bool enableLowPass = true, bool enableNormalize = true)
+```
+
+`v0.9.9beta`
+
+* パラメーター： **clip**　変換元のオーディオクリップ
+* パラメーター： **rateIndex**　DPCMのサンプルレートの種別
+* パラメーター： **enableLowPass**　変換時にローパスフィルターを使用する
+* パラメーター： **enableNormalize**　変換時にノーマライズを使用する
+* 戻り値：**byte[]** DPCMデータ
+
+AudioClipをDPCMデータに変換します。  
+rateIndexで指定したサンプルレートでDPCMデータを出力します。  
+enableLowPassを`True`にすると、リサンプリング時の折り返しノイズ（エイリアシング）を防ぐ デジタル・ローパスフィルタ（IIR低域通過フィルタ） を有効にします。  
+enableNormalizeを`True`にすると、リサンプリング後にサンプルデータの最大値を自動で検出し、音割れしない限界（1.0 または -1.0）まで全体の音量を一括で引き上げるノーマライズを有効にします。  
 
 ----

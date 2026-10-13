@@ -5,7 +5,7 @@ using uPSG;
 
 public class MultiChannelController : MonoBehaviour
 {
-    /**** v0.9.8beta ****/
+    /**** v0.9.9beta ****/
 
     /// <summary>
     /// PSG Player component for each channel
@@ -310,7 +310,7 @@ public class MultiChannelController : MonoBehaviour
     /// </summary>
     /// <param name="_prettyPrint">If True, format the output for readability</param>
     /// <returns>JSON formatted string</returns>
-    public string ExportMultiSeqJson(bool _prettyPrint)
+    public string ExportMultiSeqJson(bool _prettyPrint = false)
     {
         MultiSeqJson multiSeqJson = new();
         foreach (var pPlayer in psgPlayers)
@@ -322,25 +322,15 @@ public class MultiChannelController : MonoBehaviour
         return multiSeqJsonString;
     }
 
-    public string ExportMultiSeqJson()
-    {
-        return ExportMultiSeqJson(false);
-    }
-
     /// <summary>
     /// Decode multi-channel MML into sequences and export JSON
     /// </summary>
     /// <param name="_prettyPrint">If True, format the output for readability</param>
     /// <returns>JSON formatted string</returns>
-    public string DecodeAndExportMultiSeqJson(bool _prettyPrint)
+    public string DecodeAndExportMultiSeqJson(bool _prettyPrint = false)
     {
         DecodeAllChannels();
         return ExportMultiSeqJson(_prettyPrint);
-    }
-
-    public string DecodeAndExportMultiSeqJson()
-    {
-        return DecodeAndExportMultiSeqJson(false);
     }
 
     /// <summary>
@@ -376,7 +366,7 @@ public class MultiChannelController : MonoBehaviour
     /// <param name="_sampleRate">Sample rate</param>
     /// <param name="isAsyncRendered">If true, use asynchronously rendered data.</param>
     /// <returns>Rendered AudioClip</returns>
-    public AudioClip ExportMixedAudioClip(int _sampleRate, bool isAsyncRendered)
+    public AudioClip ExportMixedAudioClip(int _sampleRate, bool isAsyncRendered = false)
     {
         chSyncPositionList.Clear();
         List<float[]> channelClipData = new();
@@ -408,18 +398,13 @@ public class MultiChannelController : MonoBehaviour
         return audioClip;
     }
 
-    public AudioClip ExportMixedAudioClip(int _sampleRate)
-    {
-        return ExportMixedAudioClip(_sampleRate, false);
-    }
-
     /// <summary>
     /// Start asynchronous rendering on all channels.
     /// </summary>
     /// <param name="_sampleRate">Sample rate</param>
     /// <param name="interruptSample">Number of samples at which processing is interrupted</param>
     /// <returns>True if rendering has started on any channel</returns>
-    public bool RenderMultiSeqToClipDataAsync(int _sampleRate, int interruptSample)
+    public bool RenderMultiSeqToClipDataAsync(int _sampleRate, int interruptSample = ConstValue.DEFAULT_ASYNC_INTERRUPT)
     {
         chSyncPositionList.Clear();
         SetAllChannelsSampleRate(_sampleRate);
@@ -438,7 +423,7 @@ public class MultiChannelController : MonoBehaviour
     /// Play the rendered clip on each channels.
     /// </summary>
     /// <param name="isLoop">If true, loop playback</param>
-    public void PlayAllChannelsRenderedClipData(bool isLoop)
+    public void PlayAllChannelsRenderedClipData(bool isLoop = false)
     {
         foreach (var pPlayer in psgPlayers)
         {
@@ -480,7 +465,7 @@ public class MultiChannelController : MonoBehaviour
                 logText = "update:" + eventPosition.ToString();
             }
         }
-        Debug.Log("channelId:" + channelId.ToString() + " / index:" + syncIndex.ToString() + " / " + logText);
+        Debug.Log("[Ch Sync] channelId:" + channelId.ToString() + " / index:" + syncIndex.ToString() + " / " + logText);
         return result;
     }
 }

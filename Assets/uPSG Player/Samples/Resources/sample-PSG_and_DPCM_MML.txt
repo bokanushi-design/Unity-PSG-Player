@@ -1,0 +1,48 @@
+ABCDE t145
+AB V1{10,9,8,7,6,5,4,3,2,1,0}
+V2{10,,9,,8,,7,,6,,5,,4,,3,,2,,1,,0}
+
+A @2V1l12o3gr@1o4g>grV2f6.<V1aa+rV2b& b4r6>V1g>V2g4r4 L
+B @1V1l12o4r6    d>drV2c6.<V1ff+rV2g& g4r2. L
+C @4v15G90l12o3grg>drc6.<ff+rg& g4r2g4 L
+D @5v10o4l12G20 r4errr4errr4errr4ere L
+E p0v15l4o4drdrdr6p1l24ddl4dd L
+
+A @1V1o5l12r6er6d+V2e4&e6V1d+ V2e4<V1ar>V2c&c4r4
+V1r6er6d+l6eec V2d1
+V1l12r6er6d+V2e4&e6V1d+ V2e4<V1ar>V2c&c4r4
+V1r6er6el6e<ga >V2c1!
+
+B @1V1o4l12r6gr6gV2g4&g6V1g V2g4V1frV2e&e4r4
+V1r6gr6gl6ggg V2f1
+V1l12r6gr6gV2g4&g6V1g V2g4V1frV2e&e4r4
+V1r6gr6gl6gdd V2e1!
+
+C @4o3ll4rr6c12eg rr6f12<l12ara>l4c
+rr6c12eg rr6<g12l12brb>l4d
+rr6c12eg rr6f12<l12ara>l4c
+rr6c12e<g >cr2.!
+
+D @5v10l12G20 [errerer4ere]8!
+
+E l4[p0rd6d12rp1d]7
+p0rd6d12p1c+12c+24c+8l4d!
+
+
+A o5l12V1<a6a>c6cr6>f<V2a4 V1<g6g>c6cr6>e<V2g4
+V1<f6fa6a>r6>d<V2f4 <V1e6eg6g>r6>c<V2e4
+V1<a6a>c6cr6>f<V2a4 V1<a6a>c6cr6>f+<V2a4
+V1<b6b>c6cc+6c+d6d r6gr4V2g2
+
+B o4l12V1f6fa6ar6f<V2a4 V1>e6eg6gr6e<V2g4
+V1>d6df6fr6d<V2f4 >V1c6ce6er6c<V2e4
+V1>f6fa6ar6f<V2a4 V1>f+6f+a6ar6f+<V2a4
+V1>g6ga6aa+6a+b6b r6>dr4V2d2
+
+C @4o3G90ll4ffr2eer2ddr2ccr2
+ffr2f+f+r2 gaa+bgr<b2
+
+D @5v10l12G20 [errerer4ere]8
+
+E l4[p0rd6d12rp1d]7
+r4r6p1l24ddl4dd

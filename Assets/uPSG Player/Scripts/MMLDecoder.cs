@@ -5,7 +5,7 @@ using System;
 
 public class MMLDecoder : MonoBehaviour
 {
-    /**** v0.9.8beta ****/
+    /**** v0.9.9beta ****/
 
     private List<SeqEvent> seqList;
     private readonly int[] noteOffsetTable = { 9, 11, 0, 2, 4, 5, 7 }; // a,b,c,d,e,f,g
@@ -28,28 +28,28 @@ public class MMLDecoder : MonoBehaviour
         while (mmlCount < mmlString.Length)
         {
             char chr = mmlString[mmlCount];
-            if (chr == ';' || chr == '/')
+            if (chr == MMLCommand.MML_COMMENT_LINE || chr == MMLCommand.MML_COMMENT_BLOCK_1)
             {
                 /* comment out */
-                if (chr == ';')
+                if (chr == MMLCommand.MML_COMMENT_LINE)
                 {
                     isCommentLine = true;
                 }
                 else
                 {
                     char subChr = mmlString[mmlCount + 1];
-                    if (subChr == '/') { isCommentLine = true; mmlCount++; }
-                    if (subChr == '*') { isCommentBlock = true; mmlCount++; }
+                    if (subChr == MMLCommand.MML_COMMENT_BLOCK_1) { isCommentLine = true; mmlCount++; }
+                    if (subChr == MMLCommand.MML_COMMENT_BLOCK_2) { isCommentBlock = true; mmlCount++; }
                 }
                 mmlCount++;
                 continue;
             }
             if (isCommentBlock)
             {
-                if (chr == '*')
+                if (chr == MMLCommand.MML_COMMENT_BLOCK_2)
                 {
                     char subChr = mmlString[mmlCount + 1];
-                    if (subChr == '/') { isCommentBlock = false; mmlCount++; }
+                    if (subChr == MMLCommand.MML_COMMENT_BLOCK_1) { isCommentBlock = false; mmlCount++; }
                 }
                 mmlCount++;
                 continue;
@@ -61,7 +61,7 @@ public class MMLDecoder : MonoBehaviour
                 continue;
             }
 
-            if (chr == 't')
+            if (chr == MMLCommand.MML_TEMPO)
             {
                 /* tempo */
                 int mmlTempo;
@@ -79,7 +79,7 @@ public class MMLDecoder : MonoBehaviour
                 continue;
             }
 
-            if (chr == '@')
+            if (chr == MMLCommand.MML_VOICE)
             {
                 /* program change */
                 int mmlPc;
@@ -97,7 +97,25 @@ public class MMLDecoder : MonoBehaviour
                 continue;
             }
 
-            if (chr == 'v')
+            if (chr == MMLCommand.MML_DPCM)
+            {
+                /* DPCM select */
+                int mmlDp;
+                var result = MMLGetNum(mmlString, mmlCount + 1);
+                if (result[0] > 0)
+                {
+                    mmlDp = result[1];
+                }
+                else
+                {
+                    mmlDp = 0;
+                }
+                mmlCount += result[0] + 1;
+                seqList.Add(new SeqEvent(SEQ_CMD.DPCM, mmlDp, 0));
+                continue;
+            }
+
+            if (chr == MMLCommand.MML_VOLUME)
             {
                 /* volume */
                 int mmlVolume;
@@ -115,7 +133,7 @@ public class MMLDecoder : MonoBehaviour
                 continue;
             }
 
-            if (chr == 'o')
+            if (chr == MMLCommand.MML_OCTAVE)
             {
                 /* octave */
                 var result = MMLGetNum(mmlString, mmlCount + 1);
@@ -131,7 +149,7 @@ public class MMLDecoder : MonoBehaviour
                 continue;
             }
 
-            if (chr == '>')
+            if (chr == MMLCommand.MML_OCTAVE_UP)
             {
                 /* octave up */
                 mmlOctave++;
@@ -140,7 +158,7 @@ public class MMLDecoder : MonoBehaviour
                 continue;
             }
 
-            if (chr == '<')
+            if (chr == MMLCommand.MML_OCTAVE_DOWN)
             {
                 /* octave down */
                 mmlOctave--;
@@ -149,7 +167,7 @@ public class MMLDecoder : MonoBehaviour
                 continue;
             }
 
-            if (chr == 'l')
+            if (chr == MMLCommand.MML_LENGTH)
             {
                 /* length */
                 int mmlLength = ConstValue.DEFAULT_LENGTH;
@@ -169,7 +187,7 @@ public class MMLDecoder : MonoBehaviour
                 continue;
             }
 
-            if (chr == 'n')
+            if (chr == MMLCommand.MML_NOTE_NUM)
             {
                 /* note number */
                 int tmpNoteNum = ConstValue.DEFAULT_NOTE_NUM;
@@ -184,7 +202,7 @@ public class MMLDecoder : MonoBehaviour
                 if (mmlCount + 1 < mmlString.Length)
                 {
                     char subChr = mmlString[mmlCount + 1];
-                    if (subChr == ',')
+                    if (subChr == MMLCommand.CHR_COMMA)
                     {
                         mmlCount++;
                         var resultL = MMLGetLength(mmlString, mmlCount + 1);
@@ -197,7 +215,7 @@ public class MMLDecoder : MonoBehaviour
                         if (mmlCount < mmlString.Length)
                         {
                             subChr = mmlString[mmlCount];
-                            if (subChr == '&')
+                            if (subChr == MMLCommand.MML_TIE)
                             {
                                 tmpNoteNum = -tmpNoteNum;
                             }
@@ -223,7 +241,7 @@ public class MMLDecoder : MonoBehaviour
                 continue;
             }
 
-            if (chr == 'z')
+            if (chr == MMLCommand.MML_FREQ)
             {
                 /* direct frequency */
                 int tmpFreq = ConstValue.DEFAULT_A4_FREQ;
@@ -251,7 +269,7 @@ public class MMLDecoder : MonoBehaviour
                         if (mmlCount < mmlString.Length)
                         {
                             subChr = mmlString[mmlCount];
-                            if (subChr == '&')
+                            if (subChr == MMLCommand.MML_TIE)
                             {
                                 tmpFreq = -tmpFreq;
                             }
@@ -277,10 +295,10 @@ public class MMLDecoder : MonoBehaviour
                 continue;
             }
 
-            if (chr >='a' && chr <= 'g')
+            if (chr >=MMLCommand.MML_NOTE_A && chr <= MMLCommand.MML_NOTE_G)
             {
                 /* note */
-                int tmpNoteNum = noteOffsetTable[chr - 'a'] + (mmlOctave + 1) * ConstValue.SEMITONES_IN_OCTAVE;
+                int tmpNoteNum = noteOffsetTable[chr - MMLCommand.MML_NOTE_A] + (mmlOctave + 1) * ConstValue.SEMITONES_IN_OCTAVE;
                 int tmpLength = 0;
                 int subCount = 0;
                 char subChr;
@@ -288,10 +306,10 @@ public class MMLDecoder : MonoBehaviour
                 {
                     if (mmlCount + subCount + 1 >= mmlString.Length) { break; }
                     subChr = mmlString[mmlCount + subCount + 1];
-                    if (subChr == '+' || subChr == '-')
+                    if (subChr == MMLCommand.MML_NOTE_SHARP || subChr == MMLCommand.MML_NOTE_FLAT)
                     {
-                        if (subChr == '+') { tmpNoteNum++; subCount++; continue; }
-                        if (subChr == '-') { tmpNoteNum--; subCount++; continue; }
+                        if (subChr == MMLCommand.MML_NOTE_SHARP) { tmpNoteNum++; subCount++; continue; }
+                        if (subChr == MMLCommand.MML_NOTE_FLAT) { tmpNoteNum--; subCount++; continue; }
                     }
                     break;
                 }
@@ -305,7 +323,7 @@ public class MMLDecoder : MonoBehaviour
                 if (mmlCount < mmlString.Length)
                 {
                     subChr = mmlString[mmlCount];
-                    if (subChr == '&')
+                    if (subChr == MMLCommand.MML_TIE)
                     {
                         tmpNoteNum = -tmpNoteNum;
                     }
@@ -330,7 +348,7 @@ public class MMLDecoder : MonoBehaviour
                 continue;
             }
 
-            if (chr == 'r')
+            if (chr == MMLCommand.MML_REST)
             {
                 /* rest */
                 var result = MMLGetLength(mmlString, mmlCount + 1);
@@ -354,7 +372,7 @@ public class MMLDecoder : MonoBehaviour
                 continue;
             }
 
-            if (chr == '&')
+            if (chr == MMLCommand.MML_TIE)
             {
                 /* tie */
                 seqList.Add(new SeqEvent(SEQ_CMD.NOTE_TIE, 0, 0));
@@ -362,7 +380,7 @@ public class MMLDecoder : MonoBehaviour
                 continue;
             }
 
-            if (chr == '[')
+            if (chr == MMLCommand.MML_REPEAT_START)
             {
                 /* repeat start */
                 seqList.Add(new SeqEvent(SEQ_CMD.REPEAT_START, 0, 0));
@@ -370,7 +388,7 @@ public class MMLDecoder : MonoBehaviour
                 continue;
             }
 
-            if (chr == ']')
+            if (chr == MMLCommand.MML_REPEAT_END)
             {
                 /* repeat end */
                 int repeatNum = 1;
@@ -384,7 +402,7 @@ public class MMLDecoder : MonoBehaviour
                 continue;
             }
 
-            if (chr == 'L')
+            if (chr == MMLCommand.MML_LOOP)
             {
                 /* loop point */
                 seqList.Add(new SeqEvent(SEQ_CMD.LOOP_POINT, 0, 0));
@@ -392,7 +410,7 @@ public class MMLDecoder : MonoBehaviour
                 continue;
             }
 
-            if (chr == 'T')
+            if (chr == MMLCommand.MML_TUNE)
             {
                 /* tune (Hz) */
                 int mmlTune;
@@ -410,7 +428,7 @@ public class MMLDecoder : MonoBehaviour
                 continue;
             }
 
-            if (chr == 'G')
+            if (chr == MMLCommand.MML_GATE)
             {
                 /* gate step rate (percent) */
                 int mmlGate;
@@ -421,14 +439,14 @@ public class MMLDecoder : MonoBehaviour
                 }
                 else
                 {
-                    mmlGate = 100;
+                    mmlGate = ConstValue.GATE_MAX;
                 }
                 mmlCount += result[0] + 1;
                 seqList.Add(new SeqEvent(SEQ_CMD.GATE_STEP_RATE, mmlGate, 0));
                 continue;
             }
 
-            if (chr == 'S')
+            if (chr == MMLCommand.MML_SWEEP)
             {
                 /* sweep (cent) */
                 int tmpRate = 0;
@@ -443,7 +461,7 @@ public class MMLDecoder : MonoBehaviour
                 continue;
             }
 
-            if (chr == 'V')
+            if (chr == MMLCommand.MML_ENVELOPE)
             {
                 /* envelope */
                 int tmpId = 0;
@@ -454,7 +472,7 @@ public class MMLDecoder : MonoBehaviour
                 }
                 mmlCount += result[0] + 1;
 
-                if (mmlString[mmlCount] == '{')
+                if (mmlString[mmlCount] == MMLCommand.PARAM_START)
                 {
                     /* set envelope params */
                     envParamsList.Clear();
@@ -465,7 +483,7 @@ public class MMLDecoder : MonoBehaviour
                     {
                         envParamsList.RemoveAt(0);
                         mmlCount += subCount + 1;
-                        if (mmlString[mmlCount] == '}')
+                        if (mmlString[mmlCount] == MMLCommand.PARAM_END)
                         {
                             seqList.Add(new SeqEvent(SEQ_CMD.ENV_PARAM_START, tmpId, 0));
                             int envDefaultVol = ConstValue.SEQ_VOL_MAX;
@@ -473,7 +491,7 @@ public class MMLDecoder : MonoBehaviour
                             {
                                 int envVal = param;
                                 if (envVal == PARAM_OMIT)
-                                { // The parameter was omitted.
+                                { // if parameter omitted.
                                     envVal = envDefaultVol;
                                 } else
                                 {
@@ -493,7 +511,7 @@ public class MMLDecoder : MonoBehaviour
                 continue;
             }
 
-            if (chr == 'M')
+            if (chr == MMLCommand.MML_LFO)
             {
                 /* LFO */
                 int tmpId = 0;
@@ -504,7 +522,7 @@ public class MMLDecoder : MonoBehaviour
                 }
                 mmlCount += result[0] + 1;
 
-                if (mmlString[mmlCount] == '{')
+                if (mmlString[mmlCount] == MMLCommand.PARAM_START)
                 {
                     /* set LFO params */
                     var pResult = MMLGetParamNum(mmlString, mmlCount + 1);
@@ -512,7 +530,7 @@ public class MMLDecoder : MonoBehaviour
                     if (subCount > 0 && pResult.Count > 3)
                     {
                         mmlCount += subCount + 1;
-                        if (mmlString[mmlCount] == '}')
+                        if (mmlString[mmlCount] == MMLCommand.PARAM_END)
                         {
                             if (tmpId > 0)
                             {
@@ -542,7 +560,7 @@ public class MMLDecoder : MonoBehaviour
                 continue;
             }
 
-            if (chr == '!')
+            if (chr == MMLCommand.MML_CH_SYNC)
             {
                 /* channel sync */
                 seqList.Add(new SeqEvent(SEQ_CMD.CH_SYNC, 0, 0));
@@ -585,10 +603,10 @@ public class MMLDecoder : MonoBehaviour
                 break;
             }
             char subChr = _mmlString[offset + subCount];
-            if (subChr >= '0' && subChr <= '9')
+            if (subChr >= MMLCommand.NUM_ZERO && subChr <= MMLCommand.NUM_NINE)
             {
                 if (val < 0) { val = 0; }
-                val = val * 10 + (subChr - '0');
+                val = val * 10 + (subChr - MMLCommand.NUM_ZERO);
             }
             else
             {
@@ -610,13 +628,13 @@ public class MMLDecoder : MonoBehaviour
             if (offset + subCount >= _mmlString.Length) { break; }
 
             char subChr = _mmlString[offset + subCount];
-            if ((subChr >= '0' && subChr <= '9') || subChr == '+' || subChr == '-')
+            if ((subChr >= MMLCommand.NUM_ZERO && subChr <= MMLCommand.NUM_NINE) || subChr == MMLCommand.NUM_PLUS || subChr == MMLCommand.NUM_MINUS)
             {
-                if (subChr == '+') { isPlus = true; subCount++; continue; }
-                if (subChr == '-') { isPlus = false; subCount++; continue; }
+                if (subChr == MMLCommand.NUM_PLUS) { isPlus = true; subCount++; continue; }
+                if (subChr == MMLCommand.NUM_MINUS) { isPlus = false; subCount++; continue; }
 
                 if (val < 0) { val = 0; }
-                val = val * 10 + (subChr - '0');
+                val = val * 10 + (subChr - MMLCommand.NUM_ZERO);
             }
             else
             {
@@ -639,9 +657,9 @@ public class MMLDecoder : MonoBehaviour
             if (offset + subCount >= _mmlString.Length) { break; }
 
             char subChr = _mmlString[offset + subCount];
-            if ((subChr >='0' && subChr <= '9') || subChr == ',' || subChr == '|')
+            if ((subChr >= MMLCommand.NUM_ZERO && subChr <= MMLCommand.NUM_NINE) || subChr == MMLCommand.CHR_COMMA || subChr == MMLCommand.CHR_PIPE)
             {
-                if (subChr == ',')
+                if (subChr == MMLCommand.CHR_COMMA)
                 {
                     if (loop)
                     {
@@ -657,14 +675,14 @@ public class MMLDecoder : MonoBehaviour
                     subCount++;
                     continue;
                 }
-                if (subChr == '|')
+                if (subChr == MMLCommand.CHR_PIPE)
                 {
                     loop = true;
                     subCount++;
                     continue;
                 }
                 if (val < 0) { val = 0; }
-                val = val * 10 + (subChr - '0');
+                val = val * 10 + (subChr - MMLCommand.NUM_ZERO);
             }
             else
             {
@@ -692,15 +710,15 @@ public class MMLDecoder : MonoBehaviour
                 break;
             }
             char subChr = _mmlString[offset + subCount];
-            if (subChr >= '0' && subChr <= '9' || subChr == '.')
+            if (subChr >= MMLCommand.NUM_ZERO && subChr <= MMLCommand.NUM_NINE || subChr == MMLCommand.MML_LENGTH_DOT)
             {
-                if (subChr == '.')
+                if (subChr == MMLCommand.MML_LENGTH_DOT)
                 {
                     _dots++;
                 }
                 else
                 {
-                    _length = _length * 10 + (subChr - '0');
+                    _length = _length * 10 + (subChr - MMLCommand.NUM_ZERO);
                 }
             }
             else

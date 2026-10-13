@@ -17,7 +17,7 @@ So, I thought it would be great if I could create sound effects and background m
 
 ## What This Library Can Do
 
-* Four types of square waves, a triangle wave, and two types of noise can be synthesized. The triangle wave is a 4-bit waveform.
+* Four types of square waves, a triangle wave, two types of noise, and DPCM can be synthesized. The triangle wave is a 4-bit waveform.
 * Performance expressions include sweep, LFO (vibrato), and volume envelope.
 
 >I'm not aiming for a perfect recreation of the NES sound source. (It's too much trouble.)  I'm developing this solely to play sounds within Unity, without creating or searching for sound clips.  
@@ -95,7 +95,8 @@ For details on MML, refer to the [MML Reference](./Unity%20PSG%20Player%20-%20MM
 
 * DPCM support
 
-> Once the library can play sampled sounds, it will be able to reproduce the NES sound more accurately.  
+> ~~Once the library can play sampled sounds, it will be able to reproduce the NES sound more accurately.~~  
+> Supported in v0.9.9beta.
 
 * Supports Wavetable Synthesize
 
@@ -104,6 +105,8 @@ For details on MML, refer to the [MML Reference](./Unity%20PSG%20Player%20-%20MM
 
 ## Change log
 
+* `v0.9.9 beta`
+  * Supports DPCM
 * `v0.9.8 beta`
   * The class name no longer matched its functionality, so MMLSplitter has been renamed to MultiChannelController.
   * Added ChannelSyncMaaker

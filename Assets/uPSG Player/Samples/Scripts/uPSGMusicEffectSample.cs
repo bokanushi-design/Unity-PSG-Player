@@ -134,7 +134,7 @@ public class uPSGMusicEffectSample : MonoBehaviour
 
     public void OnNextButton()
     {
-        SceneManager.LoadScene("DTMFsample");
+        SceneManager.LoadScene("PsgAndDpcmSample");
     }
 
     public void OnBgmVolumeChange(float val)

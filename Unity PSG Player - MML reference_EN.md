@@ -52,6 +52,7 @@ Multiple dots can be specified.
   * [**V\<num\>** Volume Envelope](#vnum-volume-envelope)
 * [**Tone**](#tone)
   * [**@\<num\>** Tone](#num-tone)
+  * [**p\<num\>** DPCM](#pnumdpcm)
 * [**Control**](#control)
   * [**L** Loop](#l-loop)
   * [**\[ ～ \]\<num\>** Repeat](#--num-repeat)
@@ -314,6 +315,20 @@ Set the sound tone.
 | 4 | Triangle wave |
 | 5 | Noise |
 | 6 | Short-cycle noise |
+
+----
+
+#### **p\<num\>**　DPCM
+
+* Parameters
+  * \<num\> *DPCM list number (Omitted: 0)*
+
+`v0.9.9 beta`
+
+Play the DPCM waveform.  
+The list number selects the DPCM data registered in the `DpcmDataList` of the `PSGPlayer` class.  
+If you specify a list number that is not registered, there will be no sound.  
+Since the DPCM playback rate has 16 levels, the note is converted to a note number where the C in octave 4 (o4c) is set to 60, and the pitch is determined by the remainder (0–15) when that number is divided by 16.  
 
 ----
 
