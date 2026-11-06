@@ -13,6 +13,28 @@ Unity上でレトロゲーム機などのPSG（Programmable Sound Generator）�
 PSG Playerはモノフォニック（単音）で発音します。  
 ファミコンの4音（DPCMを除く）などを再現するには、PSG Playerを複数設置して同時に再生することで対応します。  
 
+---
+
+* [Unity PSG Player](#unity-psg-player)
+  * [クイックガイド](#クイックガイド)
+    * [基本的な使い方](#基本的な使い方)
+    * [マルチチャンネルの使い方](#マルチチャンネルの使い方)
+  * [MML](#mml)
+  * [構成](#構成)
+  * [サンプルレートについて](#サンプルレートについて)
+  * [演奏表現](#演奏表現)
+  * [レンダリング](#レンダリング)
+  * [シーケンスデータ](#シーケンスデータ)
+    * [シーケンスコマンド](#シーケンスコマンド)
+  * [マルチチャンネル時のチャンネル間同期について](#マルチチャンネル時のチャンネル間同期について)
+    * [Channel Sync の原理](#channel-sync-の原理)
+    * [注意点](#注意点)
+  * [DPCM](#dpcm)
+  * [波形メモリ音色](#波形メモリ音色)
+  * [WebGLでのAudioClip](#webglでのaudioclip)
+
+---
+
 ## クイックガイド
 
 ### 基本的な使い方
@@ -39,12 +61,33 @@ MMLについては「[MMLリファレンス](./Unity%20PSG%20Player%20-%20MML%20
 4. MultiChannelControllerの[multiChMMLString](./Unity%20PSG%20Player%20-%20Script%20refernce_JP.md#multichmmlstring)変数にMMLを入れて、[SplitMML()](./Unity%20PSG%20Player%20-%20Script%20refernce_JP.md#splitmml)で各チャンネルにMMLを分配し、[PlayAllChannels()](./Unity%20PSG%20Player%20-%20Script%20refernce_JP.md#playallchannels)で再生されます。  
 ![fig06](./img/fig06.png)
 
-## MMLについて
+## MML
 
 **MML（Music Macro Language）** は、音符、音の長さ、オクターブなどをアルファベット（例：cdefgab）と数字で記述し、コンピュータで音楽を自動演奏させるテキストベースのデータ記述言語です。  
 Unity PSG Playerで扱えるMMLについては「[MMLリファレンス](./Unity%20PSG%20Player%20-%20MML%20reference_JP.md)」を参照してください。  
 
 ## 構成
+
+### ファイル構成
+
+` 主要な一部を抜粋 `
+
+```text
+
+uPSG Player
+├─ PSG Player (Prefab)
+├─ Scripts/
+│  ├─ PSGPlayer.cs (メイン)
+│  ├─ MMLDecoder.cs (サブ)
+│  ├─ MultiChannelController.cs (サブ)
+│  ├─ DpcmConverter.cs
+│  ├─ Classes/
+│  └─ Constants/
+└─ Samples/
+   ├─ Scenes/ (各種サンプルシーン)
+   └─ Scripts/ (サンプルシーンで利用するスクリプト)
+
+```
 
 Unity PSG Playerは、
 
@@ -62,7 +105,7 @@ Unity PSG Playerは、
 **PSG Player**は、楽譜情報を文字列で記載したMMLを[mmlString変数](./Unity%20PSG%20Player%20-%20Script%20refernce_JP.md#mmlstring)に保持しますが、実際に音を生成するためにはList配列のシーケンスデータ[seqList変数](./Unity%20PSG%20Player%20-%20Script%20refernce_JP.md#seqlist)にする必要があります。  
 
 MMLからシーケンスデータへの変換は、**MML Decoder**で行います。  
-MML Decoderは、MMLを1文字ずつ解析し、「コマンド・パラメータ・長さ」の[イベントデータに変換して、[シーケンスデータ](#シーケンスデータについて)にまとめて返します。  
+MML Decoderは、MMLを1文字ずつ解析し、「[コマンド](#シーケンスコマンド)・パラメータ・長さ」のイベントデータに変換して、[シーケンスデータ](#シーケンスデータ)にまとめて返します。  
 再生時やレンダリング時には、シーケンスデータを順次処理して、音程や音量を計算し、矩形波（パルス波）・三角波・ノイズを単音（モノフォニック）で生成します。  
 
 音の生成方法は、大分して「**ストリーム再生**」と「**レンダリング**」の二通りあります。  
@@ -110,12 +153,12 @@ PSG Playerでは生成するAudioClipのサンプルレートを設定できま�
  デフォルトのサンプリングレートでは、ちゃんとした音が出るのはおおよそ7オクターブ目(o7)ぐらいまでです。  
 ※ノイズは独特な処理をしているので、サンプルレートが低いと高音で音量が下がります。  
 
-## 演奏表現について
+## 演奏表現
 
 PSG Playerでは、演奏表現として**ボリュームエンベロープ・スイープ・LFO**が使えます。  
 ただし、ノイズ音色および周波数指定で出した音は、ピッチ変化の効果があるスイープとLFOは無効になります。  
 
-## レンダリングについて
+## レンダリング
 
 `v0.9.6beta`
 
@@ -136,7 +179,7 @@ PSG PlayerはAudioClip.Create()のStreamを使うことを前提に開発して�
 
 ちなみにWebGLではAudioClip.Create()のStreamが非対応（鳴るけどバッファが更新されない）ですが、レンダリングしたAudioClipは再生することができます。
 
-## シーケンスデータについて
+## シーケンスデータ
 
 PSG Playerのシーケンスデータ[seqList](./Unity%20PSG%20Player%20-%20Script%20refernce_JP.md#seqlist)は、SeqEventクラスのList\<T\>で構成されています。  
 再生時やレンダリング時には、このListを順に処理していき、ループやリピートではインデックスを戻す制御をします。  
@@ -182,9 +225,7 @@ SeqEventクラスは、コマンド(seqCmd)・パラメータ(seqParam)・長さ
 | CH_SYNC | 0 |
 | END_OF_SEQ | 0 |
 
-[^1]: ノートナンバーが負の値（ノートナンバー*-1）の場合は、タイで繋がる音としてゲートを100%にします。
-
-----
+[^1]: ノートナンバーが負の値（ノートナンバー*-1）の場合は、タイで繋がる音としてゲートを100%にします。  
 
 ## マルチチャンネル時のチャンネル間同期について
 
@@ -228,9 +269,7 @@ Markerはシーケンス内に複数置くことができますが、各チャ�
 例えば、Aチャンネルで1,2,3小節の頭、Bチャンネルで1,3小節の頭にMarkerを置いた場合、1小節目では同期しますが、Aチャンネルの2小節目はBチャンネルの3小節目に対応するので、大抵は前述の0.5秒の許容範囲から外れるため、ちゃんと動作しません。
 基本的には、全チャンネルで同じタイミングにMarkerを置くようにしてください。  
 
-----
-
-## DPCMについて
+## DPCM
 
 `v0.9.9beta`
 
@@ -281,4 +320,40 @@ DPCMよりノートの音長が長い場合は、再生後は無音になりま�
 尚、ファミコンDPCMのロジックの仕様により、特に高い音で再生される音量が小さくなります。  
 必要であれば、AudioSourceのボリュームを上げたりして対処してください。
 
-----
+## 波形メモリ音色
+
+`v0.9.10beta`
+
+波形メモリ音源とは、自由に作成（またはサンプリング）した1サイクル分（1周期分）の短い波形データを小さなメモリに記憶させ、それを高速でループ再生して音を作る音源方式です。  
+音の波形の1周期分（時間軸を4〜64分割程度、音の高さを16〜256段階程度で表現）をメモリに書き込み、そのデータをグルグルと連続でループさせて音階を作ります。  
+これにより矩形波以外の音を出すことができます。  
+**但し、現状ではディスクシステム(FDS)のような周波数変調には対応していません。**  
+
+Unity PSG Playerでは、波形データをMMLで記述して利用することができます。  
+MMLの書き方は、MMLリファレンスの[波形メモリ定義](./Unity%20PSG%20Player%20-%20MML%20reference_JP.md#wnumlengthresolutionparam1param2paramlength波形メモリ定義)および[波形メモリ音色](./Unity%20PSG%20Player%20-%20MML%20reference_JP.md#wnum-波形メモリ音色)を参照してください。  
+
+Sampleフォルダ内にある「WavetableEditor」シーンを使用すると、波形データを視覚的に生成することができます。  
+使い方はScriptフォルダ内の「WavetableEditor.cs」を参照してください。  
+
+## WebGLでのAudioClip
+
+UnityのWebGLビルドにおける AudioClip.Create は部分的にのみサポートされています。  
+ストリーミングをサポートしていないので、レンダリングして再生する必要があります。  
+また、WebGLプラットフォームでは、オーディオデータの読み込みやサンプルデータの処理が非同期的に行われる場合があります。  
+そのため、レンダリング直後に再生すると、曲の途中までしか再生されない症状が発生します。  
+再生する前に **audioSource.clip.loadState == AudioDataLoadState.Loaded** であるかをコルーチン等で待機・確認する必要があります。  
+
+``` C# sample.cs
+    AudioClip audioClip = psgPlayer.ExportRenderedAudioClip(false);
+    audioSource.clip = audioClip;
+    StartCoroutine("WaitForClipLoadedThenPlay");
+
+    private IEnumerator WaitForClipLoadedThenPlay()
+    {
+        while (audioSource.clip.loadState != AudioDataLoadState.Loaded)
+        {
+            yield return null;
+        }
+        audioSource.Play();
+    }
+```

@@ -41,12 +41,12 @@ For details, refer to the [Manual](./Unity%20PSG%20Player%20-%20manual_EN.md), [
 * Operation verified
   * Windows
   * Android
-* Not supported (currently)
-  * Web GL (Rendering is supported)
+* Partially supported
+  * Web GL (Streaming is not supported)
 * Unverified
   * Other than the above
 
-> WebGL is currently unsupported because the browser does not support dynamic streaming.  
+> Since browsers do not support dynamic streaming, WebGL only supports rendering.    
 > For other platforms, since I don't have the means to verify them myself, I'd appreciate it if you could report them to me.
 
 ## Quick Guide
@@ -100,11 +100,16 @@ For details on MML, refer to the [MML Reference](./Unity%20PSG%20Player%20-%20MM
 
 * Supports Wavetable Synthesize
 
-> Actually, since the generation of triangular waves uses the same logic as a wavetable synthesizer, we expect to be able to implement it quickly once the specifications are finalized.  
-> This makes it possible to reproduce the sounds of the Famicom Disk System, the PC Engine, and other systems.
+> ~~Actually, since the generation of triangular waves uses the same logic as a wavetable synthesizer, we expect to be able to implement it quickly once the specifications are finalized.~~  
+> ~~This makes it possible to reproduce the sounds of the Famicom Disk System, the PC Engine, and other systems.~~  
+> Supported in v0.9.10beta.
 
 ## Change log
 
+* `v0.9.10 beta`
+  * Supports wavetable synthesize
+  * Fixed an issue with playback in WebGL
+  * Fixed a bug that prevented the build due to AudioClipToDPCM
 * `v0.9.9 beta`
   * Supports DPCM
 * `v0.9.8 beta`

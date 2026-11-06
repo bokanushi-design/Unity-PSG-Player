@@ -1,6 +1,6 @@
 namespace uPSG
 {
-    /**** v0.9.9beta ****/
+    /**** v0.9.10beta ****/
     public static class MMLCommand
     {
         public const char MML_COMMENT_LINE = ';';
@@ -9,6 +9,7 @@ namespace uPSG
         public const char MML_TEMPO = 't';
         public const char MML_VOICE = '@';
         public const char MML_DPCM = 'p';
+        public const char MML_WAVETABLE = 'w';
         public const char MML_VOLUME = 'v';
         public const char MML_OCTAVE = 'o';
         public const char MML_OCTAVE_UP = '>';

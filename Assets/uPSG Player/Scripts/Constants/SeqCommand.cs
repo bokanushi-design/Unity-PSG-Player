@@ -1,6 +1,6 @@
 namespace uPSG
 {
-    /**** v0.9.9beta ****/
+    /**** v0.9.10beta ****/
 
     [System.Serializable]
     public enum SEQ_CMD
@@ -29,6 +29,10 @@ namespace uPSG
         REPEAT_END = 42,
         CH_SYNC = 50,
         DPCM = 60,
+        WAVE_TABLE = 70,
+        WAVE_PARAM_START = 71,
+        WAVE_PARAM = 72,
+        WAVE_PARAM_END = 73,
         END_OF_SEQ = 99,
     }
 }

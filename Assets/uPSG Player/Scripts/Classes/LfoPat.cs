@@ -1,5 +1,7 @@
 namespace uPSG
 {
+    /**** v0.9.1beta ****/
+
     public class LfoPat
     {
         public int lfoId;

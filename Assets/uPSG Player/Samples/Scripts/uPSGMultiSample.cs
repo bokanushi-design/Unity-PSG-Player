@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class uPSGMultiSample : MonoBehaviour
 {
-    /**** v0.9.8beta ****/
+    /**** v0.9.10beta ****/
 
     /// <summary>
     /// This is a sample that synthesizes polyphonic sound using four PSG Players and an MMLSplitter.
@@ -45,10 +45,16 @@ public class uPSGMultiSample : MonoBehaviour
     // The higher the value, the shorter the rendering time, but since the number of operations increases, this leads to a drop in frame rate.
     private int interruptSample = 10000;
 
+    private string[] sampleMml = {
+        "sample-multi_channel_MML",
+        "sample-wavetable_MML"
+    };
+    private int sampleMmlIndex = 0;
+
     void Start()
     {
         multiChannelController.SetAllChannelsSampleRate(32000);    // Set the sample rate for all PSG Players.
-        mmlString = Resources.Load<TextAsset>("sample-multi_channel_MML").text; // Load sample MML from the Resources folder.
+        mmlString = Resources.Load<TextAsset>(sampleMml[sampleMmlIndex]).text; // Load sample MML from the Resources folder.
         Resources.UnloadUnusedAssets();
         inputField.text = mmlString;
         interruptSampleInputField.text = interruptSample.ToString();
@@ -127,9 +133,19 @@ public class uPSGMultiSample : MonoBehaviour
 
     public void OnReloadMml()
     {
-        mmlString = Resources.Load<TextAsset>("sample-multi_channel_MML").text;
+        mmlString = Resources.Load<TextAsset>(sampleMml[sampleMmlIndex]).text;
         Resources.UnloadUnusedAssets();
         inputField.text = mmlString;
+    }
+
+    public void OnChangeMml()
+    {
+        sampleMmlIndex++;
+        if (sampleMmlIndex > sampleMml.Length - 1)
+        {
+            sampleMmlIndex = 0;
+        }
+        OnReloadMml();
     }
 
     public void OnInterruptSampleInputEdited(string inputText)

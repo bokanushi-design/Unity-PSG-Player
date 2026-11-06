@@ -1,0 +1,37 @@
+ABCDE t112
+AB V1{2,3,4,5,6,7,8,9,10,,,,4}
+V2{10,8,5,4,3,2,7,6,5,4,3,2,6,5,4,3,2,1,5,4,3,2,1}
+M1{32,80,100}
+
+A @2V2G100M1 o5l8 gb>dc+4d4d d<a4b2r gb>dc+4d4d& d2..r
+B @2v4M0 o4l8 dgbe4f+4f+ f+f+4d2r dgbe4f+4f+& f+2..r
+C @4v15 o3l4 g.a2r8 d.g2r8 g.aad8& d2..r8
+D @5v10G20 o4l8 eeeerere eeeerere eeeerere reererer
+E v15p2 o4l4 d.d.r d.d.r d.ddd8& d2p3l16ddp2l8dp3dp2d
+
+ABCDE L
+A @2V1G95 o4l8 [f+f+aa>e4c+d& d2.r4 <bb>ddf+4d<a& a4.gg2]2
+B @2V2M1 o4l8 [rf+a>d<rea>c+ <rdf+brdf+a gb>d<g f+a>d<f+ fa>c<a eac+a]2
+C @4v15G95 [o3l8 dr4dc+r4c+ <br4bar4a gr4gf+r4f+ fr4far4a]2
+D @5v10G20 [o4l8 [G20rerererG40e16e16]4]2
+E v15 o4l8 [[p2d4p3d.p2d16ddp3d4]4]2
+
+A @2V1G95 o4l8 f+edel4f+b >df+b2 l8dc+<b>c+dc+<b>c+ d1
+B @2V2 o4l8 r<b>df+r<b->d-f+ r<a>df+r<a-b>d V1bagaaaga f+1
+C @4G48 o2l8 bbbbb-b-b-b- aaaaa-a-a-a- ggggaaaa G100d1
+D @5G20 o4l8 [eeeeeeee]3 eeeer2
+E o4l4 [p2dp3d8p2d8dp3d]3 p2dp3d8p2d8 l16p3ddl8ddd
+
+A @2V1G95 o4l8 aaaraf+ed& d2..r aaar>edc+d& d2&dr<b>c+
+B @3V2 o4l8 d-<d-f+>d-&d-4<d-4> d<dg>d&d4<d4> d-<d-f+a> d-<<a>ea f+<a>df+ adf+a
+C @4G96 o2l8 f+r4f+r2 gr4gr2 f+r4f+ar4a >dr4ddr4d
+D @5G20 o4l8 eeeereer eeeereer eeeeeeee eeeeer4e
+E o4l8 p2d4p3dp2d4p3dd4 p2d4p3dp2d4p3dd4 p2d4p3dp2dd4p3d4 p2d4p3dp2ddp3dd4
+
+ABCDE !
+A @2V1G95 o5l8 dc+<b>c+dc+<b>c+ dc+<b>c+dr<aa >dc+<b>c+dc+<b>c+ ddddf+d4d& d2..r
+B @3V2 o4l8 bgdgaf+d4 gd<b>daf+d4 bgdgaf+d4 @2V1bbbb>d<g4f+& f+2..r
+C @4G48 o2l8 ggggf+f+f+f+ eeeef+f+f+f+ ggggf+f+f+f+ eeeeaaaa G100d1
+D @5G20 o4l8 [eeeeeeee]4 eeeeeer4
+E o4l4 [p2dp3d8p2d8dp3d]4 p2dp3d8p2d8dl16p3ddd8
+

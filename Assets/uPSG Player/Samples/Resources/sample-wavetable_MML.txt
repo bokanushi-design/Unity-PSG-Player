@@ -1,0 +1,86 @@
+/* Wabetable Sample */
+
+ABCD t158
+AB V1{10,9,8,7,6,5,4,3,2,1,0}
+ V2{10,,9,,8,,7,,6,,5,,4,,3,,2,,1,,0}
+ V3{10,9,,8,7,,6,5,,4,3,,2,1,,0}
+ V4{10,,,,,9,,,,,8,,,,,7,,,,,6,,,,,5,,,,,4,,,,,3,,,,,2,,,,,1,,,,,0}
+ M1{58,50,120}
+C w0{32,16,8,10,11,12,12,13,13,13,9,7,6,6,8,10,11,14,15,15,11,8,5,4,1,2,0,1,1,6,4,4,6,7}
+D V1{15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0}
+ V2{10,9,8,7,6,5,4,3,2,1,0}
+;-------
+A @2V1o2l8 [ggb-b>c<bb-a]2
+B @2V1o2l8 [ggb-b>c<bb-a]2
+C w0v10o2l8 [ggb-b>c<bb-a]2
+D @5V2o5l8 [G50ffG2aaaaaa]2 
+
+ABCD L
+;-------
+A V1o5l8 b-bb-bagga b-baggr o2l32 gg-fee-r r16
+ o5l8 b-bb-bagga o2l16 bbb8>ccc8d-d-d-8ddd8
+ o5l8 b-bb-bagga b-baggr4.
+ b-bb-bagga o7l16 d<a-ee-ra-dr<e-d-r<ar4
+B V1o4l8 dedeee-dc dedder <l32 gg-fee-r r16>
+ l8 dee-eee-de l16 <ggg8ggg8ggg8ggg8>
+ l8 dedeee-dc dedder4.
+ dedeeeee o6v4l32 ra-rdrr<brrcra<drrro7d<a-eo4arg-o6dr<e-d-<bab-gr16
+C w0v10G35o4l8ggb-bcce-e ggb-bcr4.
+ ggb-bcce-e l16G50<<ggg8aaa8b-b-b-8bbb8
+ G35o4l8ggb-bcce-e ggb-bcr4.
+ ggb-bcce-e r1
+D V1@5o5l8 G25aaaaaaaa aaaar4G50fr
+ G25aaaaaaaa G50a4f4a4f4
+ G25aaaaaaaa aaaafr4.
+ aaaaaaaa frr2@6G50e4
+;-------
+A V1o5l8 e-ee-edcc<a> e-edccr4.
+ e-ee-edcc<a g-a>cdcr<br>
+ o5l8 e-edccr V2o2@1f4@2V1 o5e-edccr V2o2@1g-4@2V1
+ o5 e-ee-edcc<a> crdrcr V2o2@1c4
+B V1o4l8 g16g16gggfb-af g16g16gggar4.
+ g16g16gggfb-af <a>r4g-grfr
+ <g16g16>c<bb-arV2@0f4 @2V1g16g16>c<bb-arV2@0g-4@2V1
+ g16g16gggffff frfrerV2@3c4
+C w0v10l8o3G50 cce-e<f16f16fab-> cce-e<f16f16a-a>d-
+ cce-e<f16f16fa-a> ddg-ag16g16ggg
+ c16c16ce-efr<G100f4> G50c16c16ce-efr<G100g-4>
+ G50e16e16eeedddd g16g16gg16g16gcrG98c4
+D V1@5o5l8G25 [fa@6G50e@5G25f]8
+ [fa@6G50e@5G25f@6G50er@5G25fr]2
+ [fa@6G50e@5G25f]2 fr@6G50e4@5G25ff16f16@6G50e4
+;-------
+A @3V4l4o3 e2dgc1 a2g>c<f1
+ e2dgc1 a2gb>c1
+ B @3V3l8o4 [c<g>cdc<g>g<g>]3 f<f>cdc<fbf>
+ [c<g>cdc<g>g<g>]3 f<f>cdc<fbf>
+C w0v10l8G98o3 [ccgc<bb>g<baa>g<agg>g<g
+ ff>f<fee>f<e>dddd<gggg>]2
+D @5o5l16G5 [V2aaG50a8V1a8V2G5aa]16
+;-------
+A @2V1o5l8 e-edccrV2o2 @1f.r16@2V1 o5e-edccr V2o2 @1g-.r16@2V1
+ o5 e-ee-edcc<a> crdrcr V2o2 @1c.r16
+B V1o4l8 <g16g16>c<bb-arV2 @0f.r16 @2V1g16g16>c<bb-arV2 @0g-.r16@2V1
+ g16g16gggffff frfrerV2 @3c.r16
+C w0v10l8o3G50 c16c16ce-efr<G100f4> G50c16c16ce-efr<G100g-4>
+ G50e16e16eeedddd g16g16gg16g16gcrG98c4
+D V1@5o5l8G25 [fa@6G50e@5G25f@6G50er@5G25fr]2
+ [fa@6G50e@5G25f]2 fr@6G50e4@5G25ff16f16@6G50e4
+;-------
+A @1V1o2l8 [[cce-effg-g]3 >e-dd-c<bb-aa-]2
+B @1V1o2l8 [[cce-effg-g]3 >e-<d>d-c<bb-aa-]2
+C w0v10o2l8G98 [[cce-effg-g]3 >e-dd-c<bb-aa-]2
+D @5V1o5l8 [G25ffG2aaaaaa G25fG2aG50@6ee@5G2aaaG50a]2
+ [G25fG2aG50@6eeG25@5ffG50@6e@5G50a G25fG2aG50@6eeG25@5fG2aG50@6e@5G50a]2
+
+A gg-r2. gg-r2. gg-r2. a-r2..
+B gg-r2. gg-r2. gg-r2. a-r2..
+C gg-r2. gg-r2. gg-r2. a-r2..
+D G25ffr2. ffr2. ffr2. frr2fr
+;-------
+A !@2v10M1o4l2 b>d<ga gd>d.r4M0
+B !@2V1o5l16 [ggdd<gg>dd]6 v10M1<g2.r4M0
+C !w0v10o4l2G100 gfee- c<bb-.r4
+D !@5V1o5l8 [G2aG50a@6e@5G25a G2aG25aG50@6eG25@5f]3
+ l12 G2aG25fG50@6e G25@5fG50@6eG25@5f G50@6eG25@5fG50@6e G25@5f8r8
+

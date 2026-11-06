@@ -5,7 +5,7 @@ using System;
 
 public class MMLDecoder : MonoBehaviour
 {
-    /**** v0.9.9beta ****/
+    /**** v0.9.10beta ****/
 
     private List<SeqEvent> seqList;
     private readonly int[] noteOffsetTable = { 9, 11, 0, 2, 4, 5, 7 }; // a,b,c,d,e,f,g
@@ -20,6 +20,7 @@ public class MMLDecoder : MonoBehaviour
         int mmlOctave = ConstValue.DEFAULT_OCTAVE;
         
         List<int> envParamsList = new();
+        List<int> waveParamsList = new();
         bool isCommentLine = false;
         bool isCommentBlock = false;
 
@@ -112,6 +113,74 @@ public class MMLDecoder : MonoBehaviour
                 }
                 mmlCount += result[0] + 1;
                 seqList.Add(new SeqEvent(SEQ_CMD.DPCM, mmlDp, 0));
+                continue;
+            }
+
+            if (chr == MMLCommand.MML_WAVETABLE)
+            {
+                /* wave table */
+                int tmpId = 0;
+                var result = MMLGetNum(mmlString, mmlCount + 1);
+                if (result[0] > 0)
+                {
+                    tmpId = result[1];
+                }
+                mmlCount += result[0] + 1;
+                if (mmlCount >= mmlString.Length) {
+                    seqList.Add(new SeqEvent(SEQ_CMD.WAVE_TABLE, tmpId, 0));
+                    continue;
+                }
+                if (mmlString[mmlCount] == MMLCommand.PARAM_START)
+                {
+                    /* set wavetable params */
+                    waveParamsList.Clear();
+                    var pResult = MMLGetParamNum(mmlString, mmlCount + 1);
+                    waveParamsList.AddRange(pResult);
+                    int subCount = waveParamsList[0];
+                    if (subCount > 0 && pResult.Count > 3)
+                    {
+                        waveParamsList.RemoveAt(0);
+                        mmlCount += subCount + 1;
+                        if (mmlString[mmlCount] == MMLCommand.PARAM_END)
+                        {
+                            seqList.Add(new SeqEvent(SEQ_CMD.WAVE_PARAM_START, tmpId, 0));
+                            int waveLength = Mathf.Clamp(waveParamsList[0], ConstValue.WAVETABLE_LENGTH_MIN, ConstValue.WAVETABLE_LENGTH_MAX);
+                            seqList.Add(new SeqEvent(SEQ_CMD.WAVE_PARAM, waveLength, 0));
+                            waveParamsList.RemoveAt(0);
+                            int waveResolution = Mathf.Clamp(waveParamsList[0], ConstValue.WAVETABLE_RESOLUTION_MIN, ConstValue.WAVETABLE_RESOLUTION_MAX);
+                            seqList.Add(new SeqEvent(SEQ_CMD.WAVE_PARAM, waveResolution, 0));
+                            waveParamsList.RemoveAt(0);
+                            int wavDefaultVal = waveResolution / 2;
+                            for (int i=0; i<waveLength; i++)
+                            { // Limit the number of parameters to waveLength.
+                                int wavVal;
+                                if (i >= waveParamsList.Count)
+                                { // If the number of parameters is less than waveLength, insert the median.
+                                    wavVal = waveResolution / 2;
+                                }
+                                else
+                                {
+                                    wavVal = waveParamsList[i];
+                                }
+                                if (wavVal == PARAM_OMIT)
+                                { // if parameter omitted.
+                                    wavVal = wavDefaultVal;
+                                }
+                                else
+                                {
+                                    if (wavVal >= 0) { wavDefaultVal = wavVal; }
+                                }
+                                seqList.Add(new SeqEvent(SEQ_CMD.WAVE_PARAM, Mathf.Clamp(wavVal, 0, waveResolution - 1), 0));
+                            }
+                            seqList.Add(new SeqEvent(SEQ_CMD.WAVE_PARAM_END, 0, 0));
+                        }
+                    }
+                    waveParamsList.Clear();
+                }
+                else
+                {
+                    seqList.Add(new SeqEvent(SEQ_CMD.WAVE_TABLE, tmpId, 0));
+                }
                 continue;
             }
 
@@ -463,6 +532,7 @@ public class MMLDecoder : MonoBehaviour
 
             if (chr == MMLCommand.MML_ENVELOPE)
             {
+
                 /* envelope */
                 int tmpId = 0;
                 var result = MMLGetNum(mmlString, mmlCount + 1);
@@ -513,6 +583,7 @@ public class MMLDecoder : MonoBehaviour
 
             if (chr == MMLCommand.MML_LFO)
             {
+
                 /* LFO */
                 int tmpId = 0;
                 var result = MMLGetNum(mmlString, mmlCount + 1);
@@ -648,6 +719,7 @@ public class MMLDecoder : MonoBehaviour
 
     private List<int> MMLGetParamNum(string _mmlString, int offset)
     {
+
         int val = -1;
         bool loop = false;
         int subCount = 0;

@@ -10,13 +10,13 @@ using uPSG;
 [RequireComponent(typeof(AudioSource))]
 public class AudioClipToDPCM : MonoBehaviour
 {
-    /**** v0.9.9beta ****/
+    /**** v0.9.10beta ****/
 
     /// <summary>
     /// This is a sample that converts any audio file into DPCM data that can be used with the Unity PSG Player.
     /// The file selection dialog works only within the Unity Editor.
     /// Only audio files in formats supported by Unity (wav, ogg, mp3) can be used.
-    /// *How to Use
+    /// * How to Use *
     /// Click the “Select Audioclip” button to select the audio file you want to convert.
     /// Click “Play Source” to preview the selected audio file.
     /// Select the DPCM sample rate from the drop-down list, then click “Convert” to convert the data to DPCM.
@@ -184,6 +184,7 @@ public class AudioClipToDPCM : MonoBehaviour
 
     public void OnSelectAudioClip()
     {
+#if UNITY_EDITOR
         audioClipPath = EditorUtility.OpenFilePanelWithFilters("Open Audio Clip", "", new string[] { "Audio Clip", "mp3,ogg,wav" });
         if (string.IsNullOrEmpty(audioClipPath))
         {
@@ -191,6 +192,7 @@ public class AudioClipToDPCM : MonoBehaviour
         }
         audioClipPathInputField.text = audioClipPath;
         StartCoroutine(LoadAudioClip());
+#endif
     }
 
     IEnumerator LoadAudioClip()
@@ -215,6 +217,7 @@ public class AudioClipToDPCM : MonoBehaviour
 
     public void OnSaveDpcm()
     {
+#if UNITY_EDITOR
         if (dpcmData == null)
         {
             return;
@@ -226,5 +229,6 @@ public class AudioClipToDPCM : MonoBehaviour
         }
         Debug.Log(savePath);
         File.WriteAllBytes(savePath, dpcmData);
+#endif
     }
 }

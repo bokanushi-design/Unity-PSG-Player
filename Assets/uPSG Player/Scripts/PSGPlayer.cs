@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
@@ -7,7 +6,7 @@ using uPSG;
 
 public class PSGPlayer : MonoBehaviour
 {
-    /**** v0.9.9beta ****/
+    /**** v0.9.10beta ****/
 
     /// <summary>
     /// Specify the MML Decoder component
@@ -43,7 +42,7 @@ public class PSGPlayer : MonoBehaviour
     /// Tone number
     /// </summary>
     [Tooltip("Tone number")]
-    public int programChange = ConstValue.DEFAULT_PROGRAM_CHANGE;
+    public VOICE_NUM programChange = (VOICE_NUM)ConstValue.DEFAULT_PROGRAM_CHANGE;
 
     private int audioPosition = 0;
     private int audioPositionSetCount = 0;
@@ -141,6 +140,14 @@ public class PSGPlayer : MonoBehaviour
     private int dpcmDataIndex = 0;
     private int currentBitIndex = 0;
     private int currentDpcmLevel = 64;
+
+    private List<WavetablePat> wavetablePatList = new();
+    private int wavetablePatIndex = 0;
+    private int wavetablePatId = 0;
+    private List<int> wavetableParamList = new();
+    private float[] wavetableDatas;
+    private int wavetableLength;
+    private int wavetableResolution;
 
     public MultiChannelController multiChannelController;
     public int channelId = 0;
@@ -559,9 +566,38 @@ public class PSGPlayer : MonoBehaviour
         audioClip.SetData(renderedDatas, 0);
         audioSource.clip = audioClip;
         audioSource.loop = isLoop;
+#if UNITY_WEBGL
+        StartCoroutine("WaitForClipLoadedThenPlay");
+#else
         audioSource.Play();
+#endif
         return true;
     }
+
+#if UNITY_WEBGL
+    /// <summary>
+    /// The sample data of audio clips is loaded asynchronously on the WebGL platform.
+    /// This means it is necessary to check the loadState of an AudioClip before reading the sample data.
+    /// </summary>
+    private IEnumerator WaitForClipLoadedThenPlay()
+    {
+        int timeOutCount = 0;
+        while ((audioSource.clip.loadState != AudioDataLoadState.Loaded) && (timeOutCount < 120))
+        {
+            timeOutCount++;
+            Debug.Log(audioSource.clip.loadState);
+            yield return null;
+        }
+        if (timeOutCount < 120)
+        {
+            audioSource.Play();
+        }
+        else
+        {
+            Debug.Log("WaitClipLoadedThenPlay() : Time out.");
+        }
+    }
+#endif
 
     /*********************************/
 
@@ -583,7 +619,7 @@ public class PSGPlayer : MonoBehaviour
         directFreq = 0;
         waveTie = false;
         noiseShort = false;
-        programChange = ConstValue.DEFAULT_PROGRAM_CHANGE;
+        programChange = (VOICE_NUM)ConstValue.DEFAULT_PROGRAM_CHANGE;
         envPatIndex = 0;
         envDulation = sampleRate / ConstValue.PERFORM_DIVISOR;
         envPatList.Clear();
@@ -770,21 +806,25 @@ public class PSGPlayer : MonoBehaviour
             else
             {
                 // Generate samples from frequency and volume
-                if (programChange <= (int)VOICE_NUM.PULSE_075)
+                if (programChange <= VOICE_NUM.PULSE_075)
                 {
                     GenerateSquareSound();
                 }
-                if (programChange == (int)VOICE_NUM.TRIANGLE)
+                if (programChange == VOICE_NUM.TRIANGLE)
                 {
                     GenerateTriangleSound();
                 }
-                if (programChange == (int)VOICE_NUM.NOISE || programChange == (int)VOICE_NUM.HI_NOISE)
+                if (programChange == VOICE_NUM.NOISE || programChange == VOICE_NUM.HI_NOISE)
                 {
                     GenerateNoiseSound();
                 }
-                if (programChange == (int)VOICE_NUM.DPCM)
+                if (programChange == VOICE_NUM.DPCM)
                 {
                     GenerateDPCM();
+                }
+                if (programChange == VOICE_NUM.WAVE_TABLE)
+                {
+                    GenerateWavetable();
                 }
                 _sample = waveSample * waveVolume;
             }
@@ -823,7 +863,7 @@ public class PSGPlayer : MonoBehaviour
                         tieGate = true;
                         noteNumber = -noteNumber;
                     }
-                    if (programChange <= (int)VOICE_NUM.TRIANGLE)
+                    if (programChange <= VOICE_NUM.TRIANGLE)
                     {
                         // When the swept frequency reaches the lower or upper limit, mute the sound.
                         int x = (Mathf.Clamp(noteNumber, ConstValue.NOTE_NUM_MIN, ConstValue.NOTE_NUM_MAX) - ConstValue.A4_NOTE_NUM) * 100 + sweepPitch;   // Noten umber 69 is A4
@@ -854,7 +894,7 @@ public class PSGPlayer : MonoBehaviour
                         tieGate = true;
                         directFreq = -directFreq;
                     }
-                    if (programChange < (int)VOICE_NUM.NOISE)
+                    if (programChange < VOICE_NUM.NOISE)
                     {
                         waveFreq = directFreq;
                         waveLength = sampleRate / waveFreq;
@@ -876,18 +916,76 @@ public class PSGPlayer : MonoBehaviour
                     sweepPitch = 0;
                     waveLength = sampleRate / a4Freq;
                     break;
+                    /*****************************************************************/
                 case SEQ_CMD.PROGRAM_CHANGE:
-                    programChange = seqList[seqListIndex].seqParam;
+                    programChange = (VOICE_NUM)seqList[seqListIndex].seqParam;
                     break;
                 case SEQ_CMD.DPCM:
-                    programChange = (int)VOICE_NUM.DPCM;
+                    programChange = VOICE_NUM.DPCM;
                     dpcmProgram = seqList[seqListIndex].seqParam;
                     break;
+                    /*****************************************************************/
+                case SEQ_CMD.WAVE_TABLE:
+                    wavetablePatId = seqList[seqListIndex].seqParam;
+                    wavetablePatIndex = -1;
+                    for (int i = 0; i < wavetablePatList.Count; i++)
+                    {
+                        // Is the wavetable number registered?
+                        if (wavetablePatList[i].wtId == wavetablePatId)
+                        {
+                            wavetablePatIndex = i;
+                            break;
+                        }
+                    }
+                    if (wavetablePatIndex < 0)
+                    {
+                        // OFF if not registered.
+                        programChange = VOICE_NUM.SQUARE;
+                    }
+                    else
+                    {
+                        programChange = VOICE_NUM.WAVE_TABLE;
+                        wavetableLength = wavetablePatList[wavetablePatIndex].wtParamList[0];
+                        wavetableResolution = wavetablePatList[wavetablePatIndex].wtParamList[1];
+                        List<float> wtParam = new();
+                        for (int i=0; i<wavetableLength; i++)
+                        {
+                            var val = wavetablePatList[wavetablePatIndex].wtParamList[2 + i] * 2f / (wavetableResolution -1) - 1f;
+                            wtParam.Add(val);
+                        }
+                        wavetableDatas = new float[wavetableLength];
+                        wavetableDatas = wtParam.ToArray();
+                    }
+
+                    break;
+                case SEQ_CMD.WAVE_PARAM_START:
+                    wavetablePatId = seqList[seqListIndex].seqParam;
+                    wavetableParamList.Clear();
+                    break;
+                case SEQ_CMD.WAVE_PARAM:
+                    wavetableParamList.Add(seqList[seqListIndex].seqParam);
+                    break;
+                case SEQ_CMD.WAVE_PARAM_END:
+                    for (int i = 0; i < wavetablePatList.Count; i++)
+                    {
+                        if (wavetablePatList[i].wtId == wavetablePatId)
+                        {
+                            // If an wavetable number is registered, delete it.
+                            wavetablePatList.RemoveAt(i);
+                            break;
+                        }
+                    }
+                    wavetablePatList.Add(new WavetablePat(wavetablePatId, wavetableParamList));
+                    wavetablePatId = wavetablePatList.Count;
+                    wavetableParamList.Clear();
+                    break;
+                    /*****************************************************************/
                 case SEQ_CMD.VOLUME:
                     seqVolume = Mathf.Clamp01(seqList[seqListIndex].seqParam / (float)ConstValue.SEQ_VOL_MAX);
                     waveVolume = seqVolume;
                     isEnvOn = false;
                     break;
+                    /*****************************************************************/
                 case SEQ_CMD.REPEAT_START:
                     // Remember the repeat start position.
                     seqRepeatIndexList.Add(seqListIndex);
@@ -918,9 +1016,11 @@ public class PSGPlayer : MonoBehaviour
                         seqRepeatIndexList.RemoveAt(seqRepeatIndexList.Count - 1);
                     }
                     break;
+                    /*****************************************************************/
                 case SEQ_CMD.SWEEP:
                     sweepPitchRate = seqList[seqListIndex].seqParam;
                     break;
+                    /*****************************************************************/
                 case SEQ_CMD.ENV_ON:
                     envPatId = seqList[seqListIndex].seqParam;
                     if (envPatId <= 0)
@@ -990,6 +1090,7 @@ public class PSGPlayer : MonoBehaviour
                     envPatIndex = envPatList.Count;
                     envParamList.Clear();
                     break;
+                    /*****************************************************************/
                 case SEQ_CMD.LFO_SET:
                     lfoPatId = seqList[seqListIndex].seqParam;
                     if (lfoPatId <= 0)
@@ -1052,6 +1153,7 @@ public class PSGPlayer : MonoBehaviour
                     lfoPatList.Add(new LfoPat(lfoPatId, lfoDelay, lfoDepth, lfoSpeed));
                     isLfoOn = true;
                     break;
+                    /*****************************************************************/
                 case SEQ_CMD.LOOP_POINT:
                     seqLoopIndex = seqListIndex;
                     seqLoop = true;
@@ -1069,6 +1171,7 @@ public class PSGPlayer : MonoBehaviour
                         }
                     }
                     break;
+                    /*****************************************************************/
                 case SEQ_CMD.END_OF_SEQ:
                     eos = true;
                     seqEndPosition = seqNextEventPosition + sampleRate * 60d / seqTempo * seqList[seqListIndex].seqStep / tickPerNote;
@@ -1103,22 +1206,26 @@ public class PSGPlayer : MonoBehaviour
         // Preprocessing for sound generation
         //if (!audioMute && seqMute) { seqMute = false; }
 
-        if (programChange <= (int)VOICE_NUM.PULSE_075)
+        if (programChange <= VOICE_NUM.PULSE_075)
         {
             PrepareSquareSound();
         }
-        if (programChange == (int)VOICE_NUM.TRIANGLE)
+        if (programChange == VOICE_NUM.TRIANGLE)
         {
             PrepareTriangleSound();
         }
-        if (programChange == (int)VOICE_NUM.NOISE || programChange == (int)VOICE_NUM.HI_NOISE)
+        if (programChange == VOICE_NUM.NOISE || programChange == VOICE_NUM.HI_NOISE)
         {
-            noiseShort = (programChange == (int)VOICE_NUM.NOISE) ? false : true;
+            noiseShort = (programChange == VOICE_NUM.NOISE) ? false : true;
             PrepareNoiseSound(hexKey, noiseShort);
         }
-        if (programChange == (int)VOICE_NUM.DPCM)
+        if (programChange == VOICE_NUM.DPCM)
         {
             PrepareDPCM(hexKey);
+        }
+        if (programChange == VOICE_NUM.WAVE_TABLE)
+        {
+            PrepareWavetable();
         }
         if (!waveTie) {
             wavePositon = 0;
@@ -1149,7 +1256,7 @@ public class PSGPlayer : MonoBehaviour
 
     private void GenerateSquareSound()
     {
-        waveDevide = waveLength * pulseWidth[Mathf.Clamp(programChange, 0, pulseWidth.Length)] / 100d;
+        waveDevide = waveLength * pulseWidth[Mathf.Clamp((int)programChange, 0, pulseWidth.Length)] / 100d;
         if (wavePositon >= System.Math.Round(waveNextEventPosition, 0, System.MidpointRounding.AwayFromZero))
         {
             waveHigh = !waveHigh;
@@ -1275,6 +1382,35 @@ public class PSGPlayer : MonoBehaviour
         {
             waveDevide = (currentDpcmLevel / 63.5f) - 1.0f;
         }
+    }
+
+    private void PrepareWavetable()
+    {
+        if (!waveTie)
+        {
+            waveNextEventPosition = waveDevide;
+            ttIndex = 0;
+            waveSample = wavetableDatas[ttIndex];
+        }
+    }
+
+    private void GenerateWavetable()
+    {
+        waveDevide = waveLength / wavetableLength;
+        if (wavePositon > System.Math.Round(waveNextEventPosition, 0, System.MidpointRounding.AwayFromZero))
+        {
+            do
+            {
+                ttIndex++;
+                if (ttIndex >= wavetableLength)
+                {
+                    ttIndex = 0;
+                }
+                waveNextEventPosition += waveDevide;
+
+            } while (wavePositon >= waveNextEventPosition);
+        }
+        waveSample = wavetableDatas[ttIndex];
     }
 
     private void GenerateTriangleTable()

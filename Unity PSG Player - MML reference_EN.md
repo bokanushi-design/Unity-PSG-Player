@@ -53,12 +53,14 @@ Multiple dots can be specified.
 * [**Tone**](#tone)
   * [**@\<num\>** Tone](#num-tone)
   * [**p\<num\>** DPCM](#pnumdpcm)
+  * [**w\<num\>** Wavetable Sound](#wnum-wavetable-sound)
 * [**Control**](#control)
   * [**L** Loop](#l-loop)
   * [**\[ ～ \]\<num\>** Repeat](#--num-repeat)
 * [**Data Definition**](#data-definition)
   * [**V\<num\>{\<vol\>,～ ,\<|\>, ～,\<vol\>}** Envelope Definition](#vnumvol--vol-envelope-definition)
   * [**M\<num\>{\<delay\>,\<deapth\>,\<speed\>}** LFO Definition](#mnumdelaydepthspeed-lfo-difinition)
+  * [**w\<num\>{\<length\>,\<resolution\>,\<param[1]\>,\<param[2]\>,～,\<param[L]\>}** Wavetable Definition](#wnumlengthresolutionparam1param2paramlength-wavetable-definition)
 * [**Comment**](#comment)
   * [**/\* ～ \*/** Block Comment](#---block-comment)
   * [**; or //** Single-line comment](#-or--single-line-comment)
@@ -264,7 +266,7 @@ To stop the sweep, set the change amount to 0 (“S0”; “S” alone is also a
 **Number 0 disables the LFO*  
 Set an LFO (vibrato) that modulates pitch up and down over time.  
 If an undefined LFO number is specified, it will not be enabled.  
-For details on LFO content, refer to the [LFO Definition](#mnumdelaydeapthspeed-lfo-difinition).  
+For details on LFO content, refer to the [LFO Definition](#mnumdelaydepthspeed-lfo-difinition).  
 To disable the LFO, set it to “M0” (or just “M”).  
 
 ----
@@ -307,7 +309,7 @@ To disable the envelope, set “V0” (or just ‘V’) or [“v” (volume)](#v
 Set the sound tone.  
 
 | Number | Wave form |
-|:----:|:----|
+| :----: | :---- |
 | 0 | Pulse wave (12.5%) |
 | 1 | Pulse wave (25%) |
 | 2 | Square wave (50%) |
@@ -329,6 +331,19 @@ Play the DPCM waveform.
 The list number selects the DPCM data registered in the `DpcmDataList` of the `PSGPlayer` class.  
 If you specify a list number that is not registered, there will be no sound.  
 Since the DPCM playback rate has 16 levels, the note is converted to a note number where the C in octave 4 (o4c) is set to 60, and the pitch is determined by the remainder (0–15) when that number is divided by 16.  
+
+----
+
+#### **w\<num\>** Wavetable Sound
+
+* Parameters
+  * \<num\>　*Wavetable number (Omitted: 0)*
+
+`v0.9.10 beta`
+
+Specify a defined wavetable sound.  
+For the definition of waveform memory, see [Wavetable Definition](#wnumlengthresolutionparam1param2paramlength-wavetable-definition).  
+Please note that simply defining the command does not specify the sound; you must use this command to specify it.
 
 ----
 
@@ -397,6 +412,27 @@ Set the LFO number to recall it with the [“M” (LFO) command](#mnum-lfovibrat
 \<delay\> sets the time from the start of the sound until the LFO begins to affect it, in units of 1/120th of a second.  
 \<depth\> is the pitch modulation range, measured in cents.  
 \<speed\> is the modulation rate, specifying the LFO frequency in units of 1/16th of a hertz.  
+
+----
+
+#### **w\<num\>{\<length\>,\<resolution\>,\<param[1]\>,\<param[2]\>,～,\<param[length]\>}** Wavetable Definition
+
+* Parameters
+  * \<num\> *Wavetable number [0-127] (Required)*
+  * \<length\> *Number of samples [4-128] (Required)*
+  * \<resolution\> *Sample resolution [2-256] (Required)*
+  * \<param\> *Sample values [0-(resolution-1)] (Required)*
+
+`v0.9.10 beta`
+
+Define the sound of the wavetable sound source.  
+Set the wavetable number to recall it using the “w” command.  
+\<length\> is the number of samples per wavelength.  
+\<resolution\> is the resolution (number of divisions) per sample.  
+\<param\> is the value for each sample, which must be specified within the range from 0 to \<resolution\> minus 1.  
+In addition, there must be the number of \<param\>s specified by \<length\>.
+
+> By using the “WavetableEditor” scene in the “Sample” folder, you can generate each parameter from a waveform.
 
 ----
 

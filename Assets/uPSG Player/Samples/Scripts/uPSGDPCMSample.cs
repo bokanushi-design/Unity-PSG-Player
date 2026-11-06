@@ -23,13 +23,17 @@ public class uPSGDPCMSample : MonoBehaviour
 
     public string mmlString;
     private int audioSampleRate = 44100;
-    private string sampleMML = "sample-PSG_and_DPCM_MML";
+    private string[] sampleMml = {
+        "sample-PSG_and_DPCM_MML",
+        "sample-PSG_and_DPCM_MML2"
+    };
+    private int sampleMmlIndex = 0;
     private bool[] isMute = new bool[5];
 
     private void Start()
     {
         multiChannelController.SetAllChannelsSampleRate(audioSampleRate);    // Set the sample rate for all PSG Players.
-        mmlString = Resources.Load<TextAsset>(sampleMML).text; // Load sample MML from the Resources folder.
+        mmlString = Resources.Load<TextAsset>(sampleMml[sampleMmlIndex]).text; // Load sample MML from the Resources folder.
         inputField.text = mmlString;
 
         // Load the DPCM datas from the Resources folder and register it in PSGPlayer's dpcmDataList.
@@ -38,6 +42,10 @@ public class uPSGDPCMSample : MonoBehaviour
         dpcmPlayer.dpcmDataList.Add(dpcmData1);
         byte[] dpcmData2 = Resources.Load<TextAsset>("dpcm_timbales-max_Rate_24_28kHz").bytes;
         dpcmPlayer.dpcmDataList.Add(dpcmData2);
+        byte[] dpcmData3 = Resources.Load<TextAsset>("dcpm_kick_Rate_24_28kHz").bytes;
+        dpcmPlayer.dpcmDataList.Add(dpcmData3);
+        byte[] dpcmData4 = Resources.Load<TextAsset>("dcpm_snare_Rate_24_28kHz").bytes;
+        dpcmPlayer.dpcmDataList.Add(dpcmData4);
         Resources.UnloadUnusedAssets();
 
         audioMixer.GetFloat("PSG-Mix", out float _vol);
@@ -88,9 +96,19 @@ public class uPSGDPCMSample : MonoBehaviour
 
     public void OnReloadMml()
     {
-        mmlString = Resources.Load<TextAsset>(sampleMML).text;
+        mmlString = Resources.Load<TextAsset>(sampleMml[sampleMmlIndex]).text;
         Resources.UnloadUnusedAssets();
         inputField.text = mmlString;
+    }
+
+    public void OnChangeMml()
+    {
+        sampleMmlIndex++;
+        if (sampleMmlIndex > sampleMml.Length - 1)
+        {
+            sampleMmlIndex = 0;
+        }
+        OnReloadMml();
     }
 
     public void OnMuteToggleA(bool _isMute)

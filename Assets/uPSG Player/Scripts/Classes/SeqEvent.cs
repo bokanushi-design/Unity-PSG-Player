@@ -1,5 +1,6 @@
 namespace uPSG
 {
+    /**** v0.9.1beta ****/
 
     [System.Serializable]
     public class SeqEvent

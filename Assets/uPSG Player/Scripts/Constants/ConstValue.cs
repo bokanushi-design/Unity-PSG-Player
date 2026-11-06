@@ -1,6 +1,6 @@
 namespace uPSG
 {
-    /**** v0.9.8beta ****/
+    /**** v0.9.10beta ****/
 
     public static class ConstValue
     {
@@ -42,5 +42,12 @@ namespace uPSG
         public const int LFO_MAX = 255;
         public const int DEFAULT_ASYNC_INTERRUPT = 1000;
         public const float DEFAULT_TOLERANCE_TIME = 0.5f;
+        public const int WAVETABLE_LENGTH_MIN = 4;
+        public const int WAVETABLE_LENGTH_MAX = 128;
+        public const int WAVETABLE_RESOLUTION_MIN = 2;
+        public const int WAVETABLE_RESOLUTION_MAX = 256;
+        public const int WAVETABLE_LEN_INDEX = 0;
+        public const int WAVETABLE_RES_INDEX = 1;
+        public const int WAVETABLE_PARAM_START_INDEX = 2;
     }
 }
