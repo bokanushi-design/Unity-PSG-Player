@@ -3,10 +3,11 @@ using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using uPSG;
 
 public class WavetableEditor : MonoBehaviour
 {
-    /**** v0.9.10beta ****/
+    /**** v0.9.11beta ****/
     /// <summary>
     /// This is a sample that demonstrates how to create MML files for use with the PSG Player's waveform memory sound source based on waveforms.
     /// When you create a waveform for one cycle in the Waveform Editor, MML code is generated.
@@ -15,12 +16,14 @@ public class WavetableEditor : MonoBehaviour
     /// When you draw a waveform in the Waveform Editor, the MML changes in real time.
     /// Use the "Saw Wave", "Sine Wave", and "Flat" buttons on the right to draw simple waveforms.
     /// Clicking the "Copy" button copies the MML to the clipboard.
+    /// When you enter a wavetable MML and click the ÅgRestore to EditorÅh button, it will be reflected in the waveform editing field.
     /// Enter some MML into the "Test MML" input field and click the "Play Test" button to hear how it sounds.
     /// + Additional Information +
     /// I've listed the specifications for each audio chip, which I looked up on Wikipedia, in the lower-left corner.
     /// </summary>
 
     [SerializeField] private PSGPlayer psgPlayer;
+    [SerializeField] private MMLDecoder mmlDecoder;
     [SerializeField] private GameObject waveEditorArea;
     [SerializeField] private GameObject paramBarPrefab;
     [SerializeField] private TMP_InputField samplesInputField;
@@ -45,6 +48,7 @@ public class WavetableEditor : MonoBehaviour
 
     private void CreateWaveEditor()
     {
+        DeleteWaveEditor();
         waveParams = new int[waveLength];
         paramBarList.Clear();
         var areaRect = waveEditorArea.GetComponent<RectTransform>().rect;
@@ -54,10 +58,10 @@ public class WavetableEditor : MonoBehaviour
         for (int i = 0; i < waveLength; i++)
         {
             waveParams[i] = waveResolution / 2;
-            Vector3 pos = new Vector3(barPitch * i - areaRect.width / 2 + barRect.width / 2, 0, 0);
+            Vector3 pos = new Vector3(barPitch * i - areaRect.width / 2 + barPitch / 2, 0, 0);
             var pb = Instantiate(paramBarPrefab, waveEditorArea.transform);
             pb.GetComponent<RectTransform>().anchoredPosition = pos;
-            pb.GetComponent<RectTransform>().localScale = barScale;
+            pb.GetComponent<RectTransform>().sizeDelta = new Vector2(barPitch, areaRect.height);
             pb.GetComponent<ParamBar>().wavetableEditor = this;
             pb.GetComponent<ParamBar>().SetId(i);
             pb.GetComponent<ParamBar>().SetParamBox(0, waveResolution - 1, waveParams[i]);
@@ -117,7 +121,6 @@ public class WavetableEditor : MonoBehaviour
 
     public void OnWaveEditorSet()
     {
-        DeleteWaveEditor();
         CreateWaveEditor();
     }
 
@@ -168,6 +171,41 @@ public class WavetableEditor : MonoBehaviour
             waveParams[i] = waveResolution / 2;
             paramBarList[i].GetComponent<ParamBar>().SetParamValue(waveParams[i]);
             OnParamBarChange(i, waveParams[i]);
+        }
+    }
+
+    public void OnRestoreToWaveEditor()
+    {
+        var seqList = mmlDecoder.Decode(wavetableMmlInputField.text, 960);
+        int wtOffset = -1;
+        for (int i=0; i<seqList.Count; i++)
+        {
+            if (seqList[i].seqCmd == SEQ_CMD.WAVE_PARAM_START)
+            {
+                wtOffset = i;
+            }
+            if (seqList[i].seqCmd == SEQ_CMD.WAVE_PARAM)
+            {
+                if (i == wtOffset + 1)
+                {
+                    waveLength = seqList[i].seqParam;
+                }
+                if (i == wtOffset + 2)
+                {
+                    waveResolution = seqList[i].seqParam;
+                    CreateWaveEditor();
+                }
+                if (i >= wtOffset + 3)
+                {
+                    int id = i - wtOffset - 3;
+                    if (id < waveParams.Length)
+                    {
+                        waveParams[id] = seqList[i].seqParam;
+                        paramBarList[id].GetComponent<ParamBar>().SetParamValue(waveParams[id]);
+                        OnParamBarChange(id, waveParams[id]);
+                    }
+                }
+            }
         }
     }
 

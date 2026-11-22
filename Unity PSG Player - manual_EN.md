@@ -29,6 +29,7 @@ The PSG Player produces monophonic (single-note) sound. To play NES 4-note polyp
   * [DPCM](#dpcm)
   * [Wavetable Sound](#wavetable-sound)
   * [AudioClip in WebGL](#audioclip-in-webgl)
+  * [About the Game Boy's noise sound](#about-the-game-boys-noise-sound)
 
 ---
 
@@ -192,6 +193,8 @@ Additionally, serialization allows you to export and import JSON-formatted strin
 
 ### Sequence commands
 
+`v0.9.10beta`
+
 | SEQ_CMD | seqParam |
 | :--- | :--- |
 | PROGRAM_CHANGE | Tone number |
@@ -213,6 +216,11 @@ Additionally, serialization allows you to export and import JSON-formatted strin
 | LFO_SPEED | LFO Speed |
 | LFO_DEPTH | LFO Depth |
 | LFO_PARAM_END | 0 |
+| DPCM | DPCM sound ID |
+| WAVE_TABLE | Wavetable sound ID |
+| WAVE_PARAM_START | Wavetable sound ID |
+| WAVE_PARAM | Wavetable parameters |
+| WAVE_PARAM_END | 0 |
 | LOOP_POINT | 0 |
 | REPEAT_START | 0 |
 | REPEAT_END | Number of repeats |
@@ -350,3 +358,19 @@ Before playing, you must wait and verify—using a coroutine or similar method�
         audioSource.Play();
     }
 ```
+
+## About the Game Boy’s Noise Sound
+
+`v0.9.11beta`
+
+I realized this while programming the Dr. Mario bgm for a demo of a wavetable sound source.  
+The Game Boy's noise sound is different from the NES's. (Which is obvious, of course.)  
+So, I decided to add a GB noise sound.  
+
+While the Game Boy’s noise generation logic differs from that of the NES, they share the ability to switch between two types of noise: long-period and short-period.  
+Additionally, while the NES offers only 16 frequency options, the Game Boy allows for 14 × 8 = 112 different settings. (However, since some settings result in the same frequency, there are not actually 112 distinct options.)  
+
+In the Unity PSG Player, @7 in MML specifies the Game Boy's long-period noise, and @8 specifies the short-period noise.  
+Frequencies are assigned to note numbers 0 through 111.  
+To make it easier to determine the pitch of the desired frequency, we've included a “GBNoiseFinder” scene in the “Tools” folder.  
+This tool allows you to identify the note numbers and pitches of the noise you need, so please use it when composing music.  

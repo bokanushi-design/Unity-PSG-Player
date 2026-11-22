@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class uPSGMusicEffectSample : MonoBehaviour
 {
-    /**** v0.9.8beta ****/
+    /**** v0.9.11beta ****/
 
     /// <summary>
     /// This is a sample that synthesizes background music using four PSG Players and an MMLSplitter, and synthesizes sound effects using an additional PSG Player.
@@ -129,7 +129,11 @@ public class uPSGMusicEffectSample : MonoBehaviour
 
     public void OnInputChange(string inputText)
     {
-        mmlString = inputText;
+        mmlString = inputText.Replace("\r", "");
+        if (mmlString != inputText)
+        {
+            inputField.text = mmlString;
+        }
     }
 
     public void OnNextButton()

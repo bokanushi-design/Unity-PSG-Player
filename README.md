@@ -17,7 +17,7 @@ So, I thought it would be great if I could create sound effects and background m
 
 ## What This Library Can Do
 
-* Four types of square waves, a triangle wave, two types of noise, and DPCM can be synthesized. The triangle wave is a 4-bit waveform.
+* 4 types of square waves, a triangle wave, 4 types of noise, wave table, and DPCM can be synthesized. The triangle wave is a 4-bit waveform.
 * Performance expressions include sweep, LFO (vibrato), and volume envelope.
 
 >I'm not aiming for a perfect recreation of the NES sound source. (It's too much trouble.)  I'm developing this solely to play sounds within Unity, without creating or searching for sound clips.  
@@ -106,6 +106,10 @@ For details on MML, refer to the [MML Reference](./Unity%20PSG%20Player%20-%20MM
 
 ## Change log
 
+* `v0.9.11 beta`
+  * Supports Game Boy noise sounds
+  * Revised some constants
+  * Move the tool-related files from the “Samples” folder to the “Tools” folder
 * `v0.9.10 beta`
   * Supports wavetable synthesize
   * Fixed an issue with playback in WebGL
@@ -135,7 +139,10 @@ For details on MML, refer to the [MML Reference](./Unity%20PSG%20Player%20-%20MM
 
 ## References
 
-NESSOUND.TXT <https://www.nesdev.org/NESSOUND.txt>
+NESSOUND.TXT <https://www.nesdev.org/NESSOUND.txt>  
+<https://www.chciken.com/tlmboy/2025/03/24/gameboy-apu-noise.html>  
+<https://dic.nicovideo.jp/a/fc%E9%9F%B3%E6%BA%90>  
+<https://dic.nicovideo.jp/a/gb%E9%9F%B3%E6%BA%90>
 
 ## License
 

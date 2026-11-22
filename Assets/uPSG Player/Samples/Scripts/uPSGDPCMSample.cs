@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class uPSGDPCMSample : MonoBehaviour
 {
-    /**** v0.9.9beta ****/
+    /**** v0.9.11beta ****/
 
     /// <summary>
     /// This is a sample that uses 5 PSG players to play 4 PSG sounds and 1 DPCM sound.
@@ -69,7 +69,11 @@ public class uPSGDPCMSample : MonoBehaviour
 
     public void OnInputChange(string inputText)
     {
-        mmlString = inputText;
+        mmlString = inputText.Replace("\r", "");
+        if (mmlString != inputText)
+        {
+            inputField.text = mmlString;
+        }
     }
 
     public void OnVolumeChange(float val)

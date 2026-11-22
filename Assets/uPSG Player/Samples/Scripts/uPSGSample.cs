@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class uPSGSample : MonoBehaviour
 {
-    /**** v0.9.7beta ****/
+    /**** v0.9.11beta ****/
 
     /// <summary>
     /// This is a sample that synthesizes a monophonic sound using one PSG Player.
@@ -111,7 +111,11 @@ public class uPSGSample : MonoBehaviour
 
     public void OnInputChange(string inputText)
     {
-        mmlString = inputText;
+        mmlString = inputText.Replace("\r", "");
+        if (mmlString != inputText)
+        {
+            inputField.text = mmlString;
+        }
         psgPlayer.mmlString = mmlString;
     }
 

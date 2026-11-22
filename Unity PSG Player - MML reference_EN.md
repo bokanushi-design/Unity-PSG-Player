@@ -87,6 +87,9 @@ Adding a “+” immediately after the command raises the note by a semitone, wh
 Note that noise timbres use a 16-step scale. To determine pitch, convert the note to the note number (where o4c is 60) and use the remainder when divided by 16 (0–15).  
 Additionally, note that noise frequencies are assigned in descending order from the highest frequency.  
 
+`v0.9.11 beta`  
+The Game Boy (GB) noise timbres has 112 different pitches in a 14×8 grid, which are assigned to note numbers 0 through 111.  
+
 \<len\> denotes note length, written as a number indicating the fraction of a whole note.  
 **(Example: f1 // whole note, c8 // eighth note)**
 
@@ -112,12 +115,16 @@ If \<len\> is omitted, the default note length set by the [“l” command](#lle
 #### **n\<num\>,\<len\>** Note number
 
 * Parameters
-  * \<num\> *Note number [1-127] (Omitted: 60)*
+  * \<num\> ~~*Note number [1-127] (Omitted: 60)*~~
+  * \<num\> *Note number [0-127] (Omitted: 60)*
   * \<len\> *Note length [1–128] (default length when omitted)*
 
 It plays the note specified by the note number.  
 The note number is the number assigned to each key on the keyboard, with C in the fourth octave (o4c) designated as 60.  
 For noise sounds, the pitch is determined by the remainder (0–15) when the note number is divided by 16.  
+
+`v0.9.11 beta`  
+The Game Boy (GB) noise timbres has 112 different pitches in a 14×8 grid, which are assigned to note numbers 0 through 111.  
 
 Note number and note length are separated by comma ",".  
 
@@ -153,7 +160,10 @@ When omitting \<len\>, you may also omit the comma ",".
 #### **t\<num\>** Tempo
 
 * Parameters
-  * \<num\> *Tempo [1-255] (Omitted: 120)*
+  * ~~\<num\> *Tempo [1-255] (Omitted: 120)*~~
+  * \<num\> *Tempo [1-512] (Omitted: 120)*
+
+`v0.9.11 beta`
 
 Specify the tempo (number of quarter notes per minute).  
 
@@ -211,7 +221,10 @@ Note that using “&” to connect sounds does not reset the [sweep](#ssignnum-s
 #### **o\<num\>** Octave
 
 * Parameters
-  * \<num\> *Octave [2-8] (Omitted: 4)*
+  * ~~\<num\> *Octave [2-8] (Omitted: 4)*~~
+  * \<num\> *Octave [-1-9] (Omitted: 4)*
+
+`v0.9.11 beta`
 
 Specify the octave directly.  
 
@@ -306,6 +319,8 @@ To disable the envelope, set “V0” (or just ‘V’) or [“v” (volume)](#v
 * Parameters
   * \<num\> *Tone number [0-6] (Omitted: 2)*
 
+`v0.9.11 beta`
+
 Set the sound tone.  
 
 | Number | Wave form |
@@ -317,6 +332,8 @@ Set the sound tone.
 | 4 | Triangle wave |
 | 5 | Noise |
 | 6 | Short-cycle noise |
+| 7 | GB Noise (15bit mode) |
+| 8 | GB Noise (7bit mode) |
 
 ----
 

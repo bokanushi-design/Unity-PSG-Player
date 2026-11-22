@@ -1,6 +1,6 @@
 namespace uPSG
 {
-    /**** v0.9.10beta ****/
+    /**** v0.9.11beta ****/
 
     [System.Serializable]
     public enum VOICE_NUM
@@ -12,7 +12,9 @@ namespace uPSG
         TRIANGLE   = 4,
         NOISE      = 5,
         HI_NOISE   = 6,
-        DPCM       = 7,
-        WAVE_TABLE = 8,
+        GBNOISE    = 7,
+        HI_GBNOISE = 8,
+        DPCM       = 9,
+        WAVE_TABLE = 10,
     }
 }

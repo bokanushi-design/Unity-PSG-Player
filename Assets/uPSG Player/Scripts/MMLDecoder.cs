@@ -5,7 +5,7 @@ using System;
 
 public class MMLDecoder : MonoBehaviour
 {
-    /**** v0.9.10beta ****/
+    /**** v0.9.11beta ****/
 
     private List<SeqEvent> seqList;
     private readonly int[] noteOffsetTable = { 9, 11, 0, 2, 4, 5, 7 }; // a,b,c,d,e,f,g
@@ -205,10 +205,10 @@ public class MMLDecoder : MonoBehaviour
             if (chr == MMLCommand.MML_OCTAVE)
             {
                 /* octave */
-                var result = MMLGetNum(mmlString, mmlCount + 1);
+                var result = MMLGetSignedNum(mmlString, mmlCount + 1);
                 if (result[0] > 0)
                 {
-                    mmlOctave = Mathf.Clamp(result[1], ConstValue.OCTAVE_MIN, ConstValue.OCTAVE_MAX);
+                    mmlOctave = Mathf.Clamp(result[1] * result[2], ConstValue.OCTAVE_MIN, ConstValue.OCTAVE_MAX);
                 }
                 else
                 {
@@ -222,7 +222,7 @@ public class MMLDecoder : MonoBehaviour
             {
                 /* octave up */
                 mmlOctave++;
-                mmlOctave = Mathf.Clamp(mmlOctave, 2, 8);
+                mmlOctave = Mathf.Clamp(mmlOctave, ConstValue.OCTAVE_MIN, ConstValue.OCTAVE_MAX);
                 mmlCount++;
                 continue;
             }
@@ -231,7 +231,7 @@ public class MMLDecoder : MonoBehaviour
             {
                 /* octave down */
                 mmlOctave--;
-                mmlOctave = Mathf.Clamp(mmlOctave, 2, 8);
+                mmlOctave = Mathf.Clamp(mmlOctave, ConstValue.OCTAVE_MIN, ConstValue.OCTAVE_MAX);
                 mmlCount++;
                 continue;
             }
@@ -265,7 +265,7 @@ public class MMLDecoder : MonoBehaviour
                 var resultN = MMLGetNum(mmlString, mmlCount + 1);
                 if (resultN[1] > 0)
                 {
-                    tmpNoteNum = Mathf.Clamp(resultN[1], 1, 127);
+                    tmpNoteNum = Mathf.Clamp(resultN[1], ConstValue.NOTE_NUM_MIN, ConstValue.NOTE_NUM_MAX);
                 }
                 mmlCount += resultN[0];
                 if (mmlCount + 1 < mmlString.Length)
@@ -319,7 +319,7 @@ public class MMLDecoder : MonoBehaviour
                 var resultZ = MMLGetNum(mmlString, mmlCount + 1);
                 if (resultZ[1] > 0)
                 {
-                    tmpFreq = Mathf.Clamp(resultZ[1], 1, 20000);
+                    tmpFreq = Mathf.Clamp(resultZ[1], 1, ConstValue.Z_FREQ_MAX);
                 }
                 mmlCount += resultZ[0];
                 if (mmlCount + 1 < mmlString.Length)

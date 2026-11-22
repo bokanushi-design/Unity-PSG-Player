@@ -2303,7 +2303,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Enter text...
+  m_text: Enter MML...
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: ddbbf811cc8cf4441ac65d5480758e7b, type: 2}
   m_sharedMaterial: {fileID: 2781366667397756169, guid: ddbbf811cc8cf4441ac65d5480758e7b, type: 2}
@@ -2560,7 +2560,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Enter text...
+  m_text: Wavetabe MML...
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: ddbbf811cc8cf4441ac65d5480758e7b, type: 2}
   m_sharedMaterial: {fileID: 2781366667397756169, guid: ddbbf811cc8cf4441ac65d5480758e7b, type: 2}
@@ -4301,6 +4301,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 111323901e07dc241ad52612ab2d7012, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1277736897 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1886756399021219227, guid: 3b0f11201b44bb149b4264e4972dbaff, type: 3}
+  m_PrefabInstance: {fileID: 8957742191483749720}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 064981f91ec10674eaff4b783b62321c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1317917058
 GameObject:
   m_ObjectHideFlags: 0
@@ -6020,6 +6031,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   psgPlayer: {fileID: 1277736896}
+  mmlDecoder: {fileID: 1277736897}
   waveEditorArea: {fileID: 2040792215}
   paramBarPrefab: {fileID: 4861297330758327961, guid: 53a6bc30b5a67d54db0ef2b1cd1bf9d8, type: 3}
   samplesInputField: {fileID: 75140031}
@@ -6084,7 +6096,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &2002141836
 RectTransform:
   m_ObjectHideFlags: 0
@@ -6149,9 +6161,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: uPSGSample, Assembly-CSharp
-        m_MethodName: OnClearMml
+      - m_Target: {fileID: 1973570266}
+        m_TargetAssemblyTypeName: WavetableEditor, Assembly-CSharp
+        m_MethodName: OnRestoreToWaveEditor
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

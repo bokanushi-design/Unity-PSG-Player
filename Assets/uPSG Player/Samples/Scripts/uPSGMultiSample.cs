@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class uPSGMultiSample : MonoBehaviour
 {
-    /**** v0.9.10beta ****/
+    /**** v0.9.11beta ****/
 
     /// <summary>
     /// This is a sample that synthesizes polyphonic sound using four PSG Players and an MMLSplitter.
@@ -117,7 +117,11 @@ public class uPSGMultiSample : MonoBehaviour
 
     public void OnInputChange(string inputText)
     {
-        mmlString = inputText;
+        mmlString = inputText.Replace("\r", "");
+        if (mmlString != inputText)
+        {
+            inputField.text = mmlString;
+        }
     }
 
     public void OnCopyMml()

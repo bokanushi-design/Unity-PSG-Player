@@ -16,7 +16,7 @@ Unityで、ボタンを押した際に効果音を鳴らしたいと思ったと
 
 ## できること
 
-* 音色は、矩形波4種類、三角波、ノイズ2種類、DPCMが鳴らせます。三角波は4bit波形です。
+* 音色は、矩形波4種類、三角波、ノイズ4種類、波形メモリ音源、DPCMが鳴らせます。三角波は4bit波形です。
 * 演奏表現として、スイープ、LFO（ビブラート）、音量エンベロープが使えます。
 
 > ファミコン音源の完全再現は目標にしていません。（めんどくさいので。）  
@@ -106,6 +106,10 @@ MMLについては「[MMLリファレンス](./Unity%20PSG%20Player%20-%20MML%20
 
 ## 更新履歴
 
+* `v0.9.11 beta`
+  * ゲームボーイのノイズ音色に対応
+  * 一部の定数を見直し
+  * ツール関連を「Samples」フォルダから「Tools」フォルダに移動
 * `v0.9.10 beta`
   * 波形メモリ音源に対応
   * WebGLでの再生時の不具合を修正
@@ -135,7 +139,10 @@ MMLについては「[MMLリファレンス](./Unity%20PSG%20Player%20-%20MML%20
 
 ## 参考資料
 
-NESSOUND.TXT <https://www.nesdev.org/NESSOUND.txt>
+NESSOUND.TXT <https://www.nesdev.org/NESSOUND.txt>  
+<https://www.chciken.com/tlmboy/2025/03/24/gameboy-apu-noise.html>  
+<https://dic.nicovideo.jp/a/fc%E9%9F%B3%E6%BA%90>  
+<https://dic.nicovideo.jp/a/gb%E9%9F%B3%E6%BA%90>
 
 ## ライセンス
 

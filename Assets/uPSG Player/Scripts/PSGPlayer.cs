@@ -6,7 +6,7 @@ using uPSG;
 
 public class PSGPlayer : MonoBehaviour
 {
-    /**** v0.9.10beta ****/
+    /**** v0.9.11beta ****/
 
     /// <summary>
     /// Specify the MML Decoder component
@@ -185,7 +185,6 @@ public class PSGPlayer : MonoBehaviour
         audioSource.playOnAwake = false;
 
         GenerateTriangleTable();
-
     }
 
     void Update()
@@ -818,6 +817,10 @@ public class PSGPlayer : MonoBehaviour
                 {
                     GenerateNoiseSound();
                 }
+                if (programChange == VOICE_NUM.GBNOISE || programChange == VOICE_NUM.HI_GBNOISE)
+                {
+                    GenerateGBNoiseSound();
+                }
                 if (programChange == VOICE_NUM.DPCM)
                 {
                     GenerateDPCM();
@@ -863,7 +866,7 @@ public class PSGPlayer : MonoBehaviour
                         tieGate = true;
                         noteNumber = -noteNumber;
                     }
-                    if (programChange <= VOICE_NUM.TRIANGLE)
+                    if (programChange <= VOICE_NUM.TRIANGLE || programChange == VOICE_NUM.WAVE_TABLE)
                     {
                         // When the swept frequency reaches the lower or upper limit, mute the sound.
                         int x = (Mathf.Clamp(noteNumber, ConstValue.NOTE_NUM_MIN, ConstValue.NOTE_NUM_MAX) - ConstValue.A4_NOTE_NUM) * 100 + sweepPitch;   // Noten umber 69 is A4
@@ -878,11 +881,16 @@ public class PSGPlayer : MonoBehaviour
                             waveLength = sampleRate / waveFreq;
                         }
                     }
-                    else
+                    else if (programChange == VOICE_NUM.NOISE || programChange == VOICE_NUM.HI_NOISE || programChange == VOICE_NUM.DPCM)
                     {
                         // The pitch of noise and DPCM ranges from 0 to 15, so set the note number to the remainder when divided by 16.
                         waveFreq = a4Freq;
                         hexKey = noteNumber % noiseTable.Length;
+                    }
+                    else
+                    {
+                        // programChange == VOICE_NUM.GBNOISE || VOICE_NUM.HI_GBNOISE
+                        waveFreq = a4Freq;
                     }
                     PrepareSound();
                     break;
@@ -894,7 +902,7 @@ public class PSGPlayer : MonoBehaviour
                         tieGate = true;
                         directFreq = -directFreq;
                     }
-                    if (programChange < VOICE_NUM.NOISE)
+                    if (programChange <= VOICE_NUM.TRIANGLE || programChange == VOICE_NUM.WAVE_TABLE)
                     {
                         waveFreq = directFreq;
                         waveLength = sampleRate / waveFreq;
@@ -1219,6 +1227,11 @@ public class PSGPlayer : MonoBehaviour
             noiseShort = (programChange == VOICE_NUM.NOISE) ? false : true;
             PrepareNoiseSound(hexKey, noiseShort);
         }
+        if (programChange == VOICE_NUM.GBNOISE || programChange == VOICE_NUM.HI_GBNOISE)
+        {
+            noiseShort = (programChange == VOICE_NUM.GBNOISE) ? false : true;
+            PrepareGBNoiseSound(noiseShort);
+        }
         if (programChange == VOICE_NUM.DPCM)
         {
             PrepareDPCM(hexKey);
@@ -1318,6 +1331,49 @@ public class PSGPlayer : MonoBehaviour
             {
                 noiseReg >>= 1;
                 noiseReg |= ((noiseReg ^ (noiseReg >> (noiseShortFreq ? 6 : 1))) & 1) << 15;
+                output = noiseReg & 1;
+                dummyPos += waveDevide;
+                sSum += output;
+                sNum++;
+            } while (dummyPos < 1);
+            waveSample = ((float)sSum / (float)sNum * 2f - 1f);
+            waveNextEventPosition += dummyPos;
+        }
+    }
+
+    private void PrepareGBNoiseSound(bool _noiseShort)
+    {
+        noiseShortFreq = _noiseShort;
+        if (!waveTie)
+        {
+            noiseReg = 0x7fff;
+            waveNextEventPosition = waveDevide;
+        }
+        int rId = Mathf.Clamp((noteNumber / 14), 0, 7);
+        int r = (rId == 0) ? 8 : 16 * rId;
+        int s = noteNumber % 14;
+        double noiseFreq = ConstValue.GB_FREQ / (r * (1 << s));
+        waveDevide = sampleRate / noiseFreq;
+    }
+
+    private void GenerateGBNoiseSound()
+    {
+        if (wavePositon >= System.Math.Round(waveNextEventPosition, 0, System.MidpointRounding.AwayFromZero))
+        {
+            int output = 0;
+            double dummyPos = 0;
+            int sSum = 0;
+            int sNum = 0;
+            do
+            {
+                int xnorResult = ((noiseReg & 1) ^ ((noiseReg >> 1) & 1));
+                noiseReg >>= 1;
+                noiseReg |= (ushort)(xnorResult << 14);
+                if (noiseShortFreq)
+                {
+                    noiseReg = (ushort)(noiseReg & ~(1 << 6));
+                    noiseReg |= (ushort)(xnorResult << 6);
+                }
                 output = noiseReg & 1;
                 dummyPos += waveDevide;
                 sSum += output;
